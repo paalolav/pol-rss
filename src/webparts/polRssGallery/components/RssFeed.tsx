@@ -3,10 +3,12 @@ import { Spinner, DefaultButton } from '@fluentui/react';
 import BannerCarousel from './BannerCarousel';
 import CardLayout from './CardLayout';
 import ListLayout from './ListLayout';
-import { cleanDescription, resolveImageUrl, findImage} from './rssUtils';
+import { cleanDescription, resolveImageUrl, findImage } from './rssUtils';
 import * as strings from 'RssFeedWebPartStrings';
 import styles from './RssFeed.module.scss';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import { RssErrorBoundary } from './ErrorBoundary';
+import { CacheService } from '../services/cacheService';
 
 export interface IRssFeedProps {
   webPartTitle: string;
@@ -32,85 +34,75 @@ interface IRssItem {
   description?: string;
 }
 
-const rssCache: { [url: string]: { timestamp: number; items: IRssItem[] } } = {};
-
 const RssFeed: React.FC<IRssFeedProps> = (props) => {
   const [items, setItems] = React.useState<IRssItem[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const cacheService = React.useMemo(() => CacheService.getInstance(), []);
 
-  const fetchFeed = (now: number) => {
+  const fetchFeed = async (): Promise<IRssItem[]> => {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    fetch(props.feedUrl, { signal: controller.signal })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-        }
-        return response.text();
-      })
-      .then(str => {
-        const parser = new DOMParser();
-        const xml = parser.parseFromString(str, 'application/xml');
+    try {
+      const response = await fetch(props.feedUrl, { signal: controller.signal });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+      }
 
-        if (xml.querySelector('parsererror')) {
-          throw new Error(strings.ErrorParsingFeed);
-        }
+      const str = await response.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(str, 'application/xml');
 
-        const rssItems: IRssItem[] = [];
+      if (xml.querySelector('parsererror')) {
+        throw new Error(strings.ErrorParsingFeed);
+      }
 
-        xml.querySelectorAll('item').forEach(itemNode => {
-          const titleNode = itemNode.querySelector('title');
-          const linkNode = itemNode.querySelector('link');
-          const dateNode = itemNode.querySelector('pubDate');
-          const descNode = itemNode.querySelector('description');
-          const rawImageUrl = findImage(itemNode);
-          const finalImageUrl = rawImageUrl ? resolveImageUrl(rawImageUrl) : props.fallbackImageUrl;
-          const cleanedDescription = cleanDescription(descNode?.textContent || '');
+      const rssItems: IRssItem[] = [];
 
-          rssItems.push({
-            title: titleNode?.textContent || '',
-            link: linkNode?.textContent || '',
-            pubDate: dateNode?.textContent || '',
-            description: cleanedDescription,
-            imageUrl: finalImageUrl,
-          });
+      xml.querySelectorAll('item').forEach(itemNode => {
+        const titleNode = itemNode.querySelector('title');
+        const linkNode = itemNode.querySelector('link');
+        const dateNode = itemNode.querySelector('pubDate');
+        const descNode = itemNode.querySelector('description');
+        const rawImageUrl = findImage(itemNode);
+        const finalImageUrl = rawImageUrl ? resolveImageUrl(rawImageUrl) : props.fallbackImageUrl;
+        const cleanedDescription = cleanDescription(descNode?.textContent || '');
+
+        rssItems.push({
+          title: titleNode?.textContent || '',
+          link: linkNode?.textContent || '',
+          pubDate: dateNode?.textContent || '',
+          description: cleanedDescription,
+          imageUrl: finalImageUrl,
         });
-
-        rssCache[props.feedUrl] = { timestamp: now, items: rssItems }; // Cache feed
-        setItems(rssItems);
-      })
-      .catch(err => {
-        console.error('RSS fetch error', err);
-        setError(err.message || strings.ErrorLoadingFeed);
-        setItems([]);
-      })
-      .finally(() => {
-        clearTimeout(timeoutId);
       });
+
+      return rssItems;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   };
 
-  const loadFeed = (forceReload: boolean = false) => {
+  const loadFeed = async (_forceReload: boolean = false): Promise<void> => {
     if (!props.feedUrl) {
       setItems([]);
+      setError(null);
       return;
     }
-  
-    setError(null);
-  
-    const cached = rssCache[props.feedUrl];
-    const now = Date.now();
-    const maxAge = props.refreshInterval * 60 * 1000;
-  
-    const isCacheFresh = cached && (now - cached.timestamp < maxAge);
-  
-    if (isCacheFresh && !forceReload) {
-      setItems(cached.items);
-      return;
+
+    try {
+      setError(null);
+      const cachedItems = await cacheService.get<IRssItem[]>(
+        props.feedUrl,
+        fetchFeed,
+        props.refreshInterval * 60 * 1000
+      );
+      setItems(cachedItems);
+    } catch (err) {
+      console.error('Failed to load RSS feed:', err);
+      setError(err instanceof Error ? err.message : strings.ErrorLoadingFeed);
+      setItems([]);
     }
-  
-    setItems(null);
-    fetchFeed(now);
   };
 
   React.useEffect(() => {
@@ -120,9 +112,8 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
 
     if (props.autoRefresh && props.refreshInterval > 0) {
       intervalId = setInterval(() => {
-      loadFeed(true);
-      },
-        props.refreshInterval * 60 * 1000);
+        loadFeed(true);
+      }, props.refreshInterval * 60 * 1000);
     }
 
     return () => {
@@ -132,15 +123,14 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     };
   }, [props.feedUrl, props.forceFallbackImage, props.fallbackImageUrl, props.autoRefresh, props.refreshInterval]);
 
-  const handleRetry = () => {
-    loadFeed();
-  };
-
   if (error) {
     return (
       <div className={styles.error}>
         <p>{error}</p>
-        <DefaultButton text={strings.RetryButtonText} onClick={handleRetry} />
+        <DefaultButton 
+          text={strings.RetryButtonText} 
+          onClick={() => loadFeed(true)}
+        />
       </div>
     );
   }
@@ -155,7 +145,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
 
   const limitedItems = items.slice(0, props.maxItems);
 
-  const renderLayout = () => {
+  const renderLayout = (): React.ReactNode => {
     switch (props.layout) {
       case 'banner':
         return (
@@ -193,7 +183,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     }
   };
 
-  return (
+  const content = (
     <div 
       className={styles.webpart}
       style={{ fontFamily: props.themeVariant?.fonts?.medium?.fontFamily ?? '"Segoe UI", sans-serif' }}
@@ -211,8 +201,13 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
       )}
       {renderLayout()}
     </div>
-  );  
-};
+  );
 
+  return (
+    <RssErrorBoundary>
+      {content}
+    </RssErrorBoundary>
+  );
+};
 
 export default RssFeed;

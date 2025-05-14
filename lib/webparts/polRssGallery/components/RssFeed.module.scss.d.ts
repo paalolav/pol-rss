@@ -25,6 +25,10 @@ declare const styles: {
     description: string;
     error: string;
     noItems: string;
+    errorContainer: string;
+    errorContent: string;
+    errorDetails: string;
+    retryButton: string;
     webPartHeader: string;
     ControlZone: string;
     CanvasSection: string;

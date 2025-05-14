@@ -23,6 +23,7 @@
       "layout": "card",
       "autoscroll": true,
       "interval": 5,
+      "maxItems": 6,
       "forceFallbackImage": false,
       "fallbackImageUrl": "https://picsum.photos/800/600"
     }  

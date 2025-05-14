@@ -12,6 +12,6 @@ interface ICardLayoutProps {
     showDescription?: boolean;
     showPubDate?: boolean;
 }
-declare const CardLayout: React.FC<ICardLayoutProps>;
-export default CardLayout;
+declare const _default: React.NamedExoticComponent<ICardLayoutProps>;
+export default _default;
 //# sourceMappingURL=CardLayout.d.ts.map

@@ -7,6 +7,6 @@ export interface IListLayoutProps {
     fallbackImageUrl: string;
     forceFallback: boolean;
 }
-declare const ListLayout: React.FC<IListLayoutProps>;
-export default ListLayout;
+declare const _default: React.NamedExoticComponent<IListLayoutProps>;
+export default _default;
 //# sourceMappingURL=ListLayout.d.ts.map

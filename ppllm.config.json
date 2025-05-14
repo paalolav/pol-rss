@@ -1,0 +1,8 @@
+{
+  "settings": {
+    "preset": [
+      "nodejs"
+    ]
+  },
+  "ignore": []
+}

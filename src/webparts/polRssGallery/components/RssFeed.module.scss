@@ -195,6 +195,78 @@
   margin: 10px 0;
 }
 
+/* Error boundary styles */
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  padding: 2rem;
+  background-color: var(--errorBackground);
+  border: 1px solid var(--errorText);
+  border-radius: 2px;
+  margin: 1rem 0;
+}
+
+.errorContent {
+  text-align: center;
+  color: var(--errorText);
+
+  i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+}
+
+.errorDetails {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--white);
+  border: 1px solid var(--neutralLight);
+  border-radius: 2px;
+
+  summary {
+    cursor: pointer;
+    color: var(--themePrimary);
+    font-weight: 600;
+  }
+
+  pre {
+    margin-top: 0.5rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 0.875rem;
+    color: var(--neutralPrimary);
+  }
+}
+
+.retryButton {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--themePrimary);
+  color: var(--white);
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--themeDarkAlt);
+  }
+
+  &:focus {
+    outline: 2px solid var(--themePrimary);
+    outline-offset: 2px;
+  }
+}
+
 /* Webpart header */
 .webPartHeader {
   font-weight: 600;
