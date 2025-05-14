@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "2b8f84b4-3b97-49d9-b352-9282b3ee05ae",
+  "alias": "PolRssGalleryWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "supportsFullBleed": true,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "POL RSS Gallery",  "nb-no": "POL RSS-Galleri"},
+    "description": { 
+      "default": "Displays content from an RSS feed in banner, card or list layout.",
+      "nb-no": "Viser innhold fra en RSS-feed i banner-, kort- eller listevisning."
+    },
+    "officeFabricIconFontName": "News",
+    "properties": {
+      "feedUrl": "https://www.nrk.no/toppsaker.rss",
+      "layout": "card",
+      "autoscroll": true,
+      "interval": 5,
+      "forceFallbackImage": false,
+      "fallbackImageUrl": "https://picsum.photos/800/600"
+    }  
+  }]
+}

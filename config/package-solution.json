@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "pol-rss-gallery",
+    "id": "d9f57c70-7933-4f2b-bd0b-2705e500feb8",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.20.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "pol-rss-gallery description"
+      },
+      "longDescription": {
+        "default": "pol-rss-gallery description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "pol-rss-gallery Feature",
+        "description": "The feature that activates elements of the pol-rss-gallery solution.",
+        "id": "a09bb392-f3a3-4ee5-a9c7-ad217f11ea5b",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/pol-rss-gallery.sppkg"
+  }
+}

@@ -1,0 +1,33 @@
+declare const styles: {
+    webpart: string;
+    bannerContainer: string;
+    bannerSlide: string;
+    bannerImage: string;
+    bannerImagePlaceholder: string;
+    bannerCaption: string;
+    bannerTitle: string;
+    bannerPubDate: string;
+    bannerDescription: string;
+    cardGrid: string;
+    card: string;
+    cardImage: string;
+    cardImagePlaceholder: string;
+    cardBody: string;
+    cardTitle: string;
+    pubDate: string;
+    cardDescription: string;
+    list: string;
+    listLayout: string;
+    listItem: string;
+    thumbnail: string;
+    content: string;
+    title: string;
+    description: string;
+    error: string;
+    noItems: string;
+    webPartHeader: string;
+    ControlZone: string;
+    CanvasSection: string;
+};
+export default styles;
+//# sourceMappingURL=RssFeed.module.scss.d.ts.map

@@ -1,0 +1,84 @@
+{
+  "id": "2b8f84b4-3b97-49d9-b352-9282b3ee05ae",
+  "alias": "PolRssGalleryWebPart",
+  "componentType": "WebPart",
+  "version": "0.0.1",
+  "manifestVersion": 2,
+  "supportsFullBleed": true,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "supportsThemeVariants": true,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "Advanced"
+      },
+      "title": {
+        "default": "POL RSS Gallery",
+        "nb-no": "POL RSS-Galleri"
+      },
+      "description": {
+        "default": "Displays content from an RSS feed in banner, card or list layout.",
+        "nb-no": "Viser innhold fra en RSS-feed i banner-, kort- eller listevisning."
+      },
+      "officeFabricIconFontName": "News",
+      "properties": {
+        "feedUrl": "https://www.nrk.no/toppsaker.rss",
+        "layout": "card",
+        "autoscroll": true,
+        "interval": 5,
+        "forceFallbackImage": false,
+        "fallbackImageUrl": "https://picsum.photos/800/600"
+      }
+    }
+  ],
+  "loaderConfig": {
+    "internalModuleBaseUrls": [
+      "<!-- PATH TO CDN -->"
+    ],
+    "entryModuleId": "pol-rss-gallery-web-part",
+    "scriptResources": {
+      "pol-rss-gallery-web-part": {
+        "type": "path",
+        "path": "pol-rss-gallery-web-part_5bd2e436d14f52f29ec8.js"
+      },
+      "react": {
+        "type": "component",
+        "id": "0d910c1c-13b9-4e1c-9aa4-b008c5e42d7d",
+        "version": "17.0.1"
+      },
+      "react-dom": {
+        "type": "component",
+        "id": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
+        "version": "17.0.1"
+      },
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db",
+        "version": "1.21.1"
+      },
+      "@microsoft/sp-webpart-base": {
+        "type": "component",
+        "id": "974a7777-0990-4136-8fa6-95d80114c2e0",
+        "version": "1.21.1"
+      },
+      "RssFeedWebPartStrings": {
+        "type": "localizedPath",
+        "paths": {
+          "en-US": "RssFeedWebPartStrings_en-us_97419eaacf1ea65e15a22b0ba325743e.js",
+          "nb-NO": "RssFeedWebPartStrings_nb-no_36e66afe1fc652bfc254ac4cea3704c5.js"
+        },
+        "defaultPath": "RssFeedWebPartStrings_en-us_97419eaacf1ea65e15a22b0ba325743e.js"
+      },
+      "@microsoft/sp-component-base": {
+        "type": "component",
+        "id": "467dc675-7cc5-4709-8aac-78e3b71bd2f6",
+        "version": "1.21.1"
+      }
+    }
+  }
+}

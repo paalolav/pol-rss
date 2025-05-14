@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "pol-rss-gallery-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/polRssGallery/RssFeedWebPart.js",
+          "manifest": "./src/webparts/polRssGallery/RssFeedWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "RssFeedWebPartStrings": "lib/webparts/polRssGallery/loc/{locale}.js"
+  }
+}
