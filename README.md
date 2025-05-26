@@ -14,6 +14,13 @@ Key features:
 
 ## Recent Improvements
 
+
+### Codebase Cleanup and TypeScript Strictness (v1.2.0)
+- Removed dead code, unused files, and unnecessary comments for a leaner codebase
+- Enforced TypeScript strictness for improved type safety and maintainability
+- Automated and documented cleaning of build artifacts
+- Improved maintainability and developer experience
+
 ### Enhanced RSS Feed Handling
 - Added support for authenticated feeds like Meltwater
 - Improved handling of non-standard RSS feeds like Nettavisen
@@ -29,7 +36,7 @@ See [RSS Feed Improvements](./docs/rss-feed-improvements.md) and [Parser Improve
 
 ## Used SharePoint Framework Version
 
-![version](https://img.shields.io/badge/version-1.20.0-green.svg)
+![version](https://img.shields.io/badge/version-1.2.0-green.svg)
 
 ## Applies to
 
@@ -52,6 +59,7 @@ See [RSS Feed Improvements](./docs/rss-feed-improvements.md) and [Parser Improve
 
 | Version | Date             | Comments        |
 | ------- | ---------------- | --------------- |
+| 1.2     | June 2024        | Codebase cleanup, TypeScript strictness, maintainability improvements |
 | 1.1     | March 10, 2021   | Update comment  |
 | 1.0     | January 29, 2021 | Initial release |
 
