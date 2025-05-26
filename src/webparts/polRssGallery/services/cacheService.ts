@@ -114,6 +114,14 @@ export class CacheService {
     this.cache.clear();
   }
 
+  /**
+   * Delete a specific key from the cache
+   * @param key The cache key to remove
+   */
+  public delete(key: string): boolean {
+    return this.cache.delete(key);
+  }
+
   public setConfig(config: Partial<CacheConfig>): void {
     this.config = { ...this.config, ...config };
   }

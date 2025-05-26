@@ -29,10 +29,20 @@ define([], function() {
     "AutoscrollOnLabel": "On",
     "AutoscrollOffLabel": "Off",
     "IntervalFieldLabel": "Scroll interval (seconds)",
+    "FilterSettingsGroupName": "Content Filter Settings",
+    "FilterByKeywordsFieldLabel": "Filter items by keywords",
+    "FilterByKeywordsOnLabel": "On",
+    "FilterByKeywordsOffLabel": "Off", 
+    "FilterKeywordsFieldLabel": "Filter keywords",
+    "FilterKeywordsDescription": "Comma-separated list of keywords",
+    "FilterModeFieldLabel": "Filter mode",
+    "FilterModeIncludeLabel": "Include items containing keywords",
+    "FilterModeExcludeLabel": "Exclude items containing keywords",
     "ErrorLoadingFeed": "Error loading RSS feed",
     "ErrorParsingFeed": "Error parsing RSS feed content",
     "RetryButtonText": "Try Again",
     "LoadingMessage": "Loading RSS feed...",
-    "NoItemsMessage": "No items to display"
+    "NoItemsMessage": "No items to display",
+    "NoMatchingItemsMessage": "No items match your filter criteria"
   }
 });

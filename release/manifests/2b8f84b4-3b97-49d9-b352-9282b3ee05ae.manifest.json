@@ -2,7 +2,7 @@
   "id": "2b8f84b4-3b97-49d9-b352-9282b3ee05ae",
   "alias": "PolRssGalleryWebPart",
   "componentType": "WebPart",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "manifestVersion": 2,
   "supportsFullBleed": true,
   "requiresCustomScript": false,
@@ -45,7 +45,7 @@
     "scriptResources": {
       "pol-rss-gallery-web-part": {
         "type": "path",
-        "path": "pol-rss-gallery-web-part_9a274d464d52c63dcd62.js"
+        "path": "pol-rss-gallery-web-part_fefd74de8b7d7d612306.js"
       },
       "react": {
         "type": "component",
@@ -70,14 +70,19 @@
       "RssFeedWebPartStrings": {
         "type": "localizedPath",
         "paths": {
-          "en-US": "RssFeedWebPartStrings_en-us_7ae5ae48569bc1e33e83412219bacd7b.js",
+          "en-US": "RssFeedWebPartStrings_en-us_561d9de99435cbc5e2c7d6edef8f0a50.js",
           "nb-NO": "RssFeedWebPartStrings_nb-no_9b814c4f0cbd822b1feb6a3c560bd686.js"
         },
-        "defaultPath": "RssFeedWebPartStrings_en-us_7ae5ae48569bc1e33e83412219bacd7b.js"
+        "defaultPath": "RssFeedWebPartStrings_en-us_561d9de99435cbc5e2c7d6edef8f0a50.js"
       },
       "@microsoft/sp-component-base": {
         "type": "component",
         "id": "467dc675-7cc5-4709-8aac-78e3b71bd2f6",
+        "version": "1.21.1"
+      },
+      "@microsoft/sp-loader": {
+        "type": "component",
+        "id": "1c6c9123-7aac-41f3-a376-3caea41ed83f",
         "version": "1.21.1"
       }
     }

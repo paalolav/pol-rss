@@ -14,6 +14,11 @@ export declare class CacheService {
     private fetchAndCache;
     private cleanup;
     clear(): void;
+    /**
+     * Delete a specific key from the cache
+     * @param key The cache key to remove
+     */
+    delete(key: string): boolean;
     setConfig(config: Partial<CacheConfig>): void;
 }
 export {};

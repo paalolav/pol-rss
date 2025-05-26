@@ -11,6 +11,7 @@ export interface IListLayoutProps {
   showDescription: boolean;
   fallbackImageUrl: string;
   forceFallback: boolean;
+  showCategories?: boolean;
 }
 
 const arePropsEqual = (prevProps: IListLayoutProps, nextProps: IListLayoutProps): boolean => {
@@ -19,6 +20,7 @@ const arePropsEqual = (prevProps: IListLayoutProps, nextProps: IListLayoutProps)
     prevProps.fallbackImageUrl === nextProps.fallbackImageUrl &&
     prevProps.showDescription === nextProps.showDescription &&
     prevProps.showPubDate === nextProps.showPubDate &&
+    prevProps.showCategories === nextProps.showCategories &&
     prevProps.items.length === nextProps.items.length &&
     prevProps.items.every((item, index) => 
       item.title === nextProps.items[index].title &&
@@ -33,7 +35,8 @@ const ListLayout: React.FC<IListLayoutProps> = ({
   fallbackImageUrl, 
   forceFallback, 
   showPubDate, 
-  showDescription 
+  showDescription,
+  showCategories
 }) => {
   const [layoutKey, setLayoutKey] = useState(0);
 
@@ -82,10 +85,19 @@ const ListLayout: React.FC<IListLayoutProps> = ({
               {parse(item.description)}
             </div>
           )}
+          {showCategories && item.categories && item.categories.length > 0 && (
+            <div className={styles.itemCategories}>
+              {item.categories.map((category, idx) => (
+                <span key={`${category}-${idx}`} className={styles.categoryBadge}>
+                  {category}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
-  }), [items, fallbackImageUrl, forceFallback, showPubDate, showDescription, handleImgError]);
+  }), [items, fallbackImageUrl, forceFallback, showPubDate, showDescription, showCategories, handleImgError]);
 
   return (
     <div key={layoutKey} className={styles.listLayout}>

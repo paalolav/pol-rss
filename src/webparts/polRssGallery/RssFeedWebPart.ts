@@ -4,8 +4,8 @@ import { IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneChoiceGr
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'RssFeedWebPartStrings';
 import RssFeed, { IRssFeedProps } from './components/RssFeed';
-import { ThemeProvider, ThemeChangedEventArgs } from '@microsoft/sp-component-base'; // <-- NYTT
-import { IReadonlyTheme } from '@microsoft/sp-component-base'; // <-- NYTT
+import { ThemeProvider, ThemeChangedEventArgs } from '@microsoft/sp-component-base';
+import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
 export interface IRssFeedWebPartProps {
   webPartTitle: string;
@@ -20,18 +20,31 @@ export interface IRssFeedWebPartProps {
   maxItems: number;
   showPubDate: boolean;
   showDescription: boolean;
+  filterByKeywords: boolean;
+  filterKeywords: string;
+  filterMode: 'include' | 'exclude';
+  showCategories: boolean;
+  filterByCategory: boolean;
+  categoryFilterMode: 'include' | 'exclude';
 }
 
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
 
-  private _themeProvider: ThemeProvider; // <-- NYTT
-  private _themeVariant: IReadonlyTheme | undefined; // <-- NYTT
+private _themeProvider!: ThemeProvider;
+  private _themeVariant: IReadonlyTheme | undefined;
 
-  public async onInit(): Promise<void> { // <-- NYTT
+  public async onInit(): Promise<void> {
+    // Initialize theme provider
     this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
     this._themeVariant = this._themeProvider.tryGetTheme();
-
     this._themeProvider.themeChangedEvent.add(this, this._handleThemeChanged.bind(this));
+    
+    // Initialize the proxy service with SharePoint HttpClient
+    import('./services/proxyService').then(module => {
+      const ProxyService = module.ProxyService;
+      ProxyService.init(this.context.httpClient);
+    });
+    
     return super.onInit();
   }
 
@@ -53,7 +66,13 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showPubDate,
       showDescription,
       autoRefresh,
-      refreshInterval
+      refreshInterval,
+      filterByKeywords,
+      filterKeywords,
+      filterMode,
+      showCategories,
+      filterByCategory,
+      categoryFilterMode
     } = this.properties;
   
     const element: React.ReactElement<IRssFeedProps> = React.createElement(RssFeed, {
@@ -69,6 +88,12 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showDescription,
       autoRefresh,
       refreshInterval: (refreshInterval || 5) * 60,
+      filterByKeywords: filterByKeywords || false,
+      filterKeywords: filterKeywords || '',
+      filterMode: filterMode || 'include',
+      showCategories: showCategories || false,
+      filterByCategory: filterByCategory || false,
+      categoryFilterMode: categoryFilterMode || 'include',
       themeVariant: this._themeVariant // <-- NY LINJE
     });
   
@@ -165,7 +190,54 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
                   disabled: !this.properties.autoscroll
                 })
               ]
-            }] : [])
+            }] : []),
+            {
+              groupName: "Content Filter Settings",
+              groupFields: [
+                PropertyPaneToggle('filterByKeywords', {
+                  label: "Filter items by keywords",
+                  onText: "On",
+                  offText: "Off"
+                }),
+                PropertyPaneTextField('filterKeywords', {
+                  label: "Filter keywords",
+                  description: "Comma-separated list of keywords",
+                  disabled: !this.properties.filterByKeywords
+                }),
+                PropertyPaneChoiceGroup('filterMode', {
+                  label: "Filter mode",
+                  options: [
+                    { key: 'include', text: "Include items containing keywords" },
+                    { key: 'exclude', text: "Exclude items containing keywords" }
+                  ]
+                }),
+                PropertyPaneToggle('showCategories', {
+                  label: "Show categories",
+                  onText: "Show",
+                  offText: "Hide"
+                }),
+                PropertyPaneToggle('filterByCategory', {
+                  label: "Enable category filtering",
+                  onText: "On",
+                  offText: "Off"
+                }),
+                PropertyPaneChoiceGroup('categoryFilterMode', {
+                  label: "Category filter mode",
+                  options: [
+                    { 
+                      key: 'include', 
+                      text: "Include selected categories",
+                      disabled: !this.properties.filterByCategory 
+                    },
+                    { 
+                      key: 'exclude', 
+                      text: "Exclude selected categories",
+                      disabled: !this.properties.filterByCategory 
+                    }
+                  ]
+                })
+              ]
+            }
           ]
         }
       ]

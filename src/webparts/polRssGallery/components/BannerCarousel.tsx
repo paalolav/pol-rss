@@ -9,16 +9,26 @@ import parse from 'html-react-parser';
 import { getImageSrc, imgError } from './rssUtils';
 
 interface IBannerCarouselProps {
-  items: Array<{ title: string; link: string; imageUrl?: string; pubDate?: string; description?: string; }>;
+  items: Array<{ 
+    title: string; 
+    link: string; 
+    imageUrl?: string; 
+    pubDate?: string; 
+    description?: string;
+    author?: string;
+    categories?: string[];
+    feedType?: 'rss' | 'atom';
+  }>;
   autoscroll: boolean;
   interval: number;
   fallbackImageUrl?: string;
   forceFallback?: boolean;
   showPubDate?: boolean;
   showDescription?: boolean;
+  showCategories?: boolean;
 }
 
-const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, interval, fallbackImageUrl, forceFallback, showPubDate, showDescription }) => {
+const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, interval, fallbackImageUrl, forceFallback, showPubDate, showDescription, showCategories }) => {
   const delayMs = interval * 1000;
 
   // Add a state to track a unique key for re-rendering
@@ -62,6 +72,15 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
               {showDescription && item.description && (
                 <div className={styles.bannerDescription}>
                   {parse(item.description)}
+                </div>
+              )}
+              {showCategories && item.categories && item.categories.length > 0 && (
+                <div className={styles.bannerCategories}>
+                  {item.categories.map((category, idx) => (
+                    <span key={`${category}-${idx}`} className={styles.bannerCategoryBadge}>
+                      {category}
+                    </span>
+                  ))}
                 </div>
               )}
             </div>

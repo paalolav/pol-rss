@@ -6,6 +6,7 @@ export interface IListLayoutProps {
     showDescription: boolean;
     fallbackImageUrl: string;
     forceFallback: boolean;
+    showCategories?: boolean;
 }
 declare const _default: React.NamedExoticComponent<IListLayoutProps>;
 export default _default;

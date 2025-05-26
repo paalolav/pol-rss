@@ -2,9 +2,30 @@
 
 ## Summary
 
-Short summary on functionality and used technologies.
+The pol-rss-gallery is a SharePoint Framework (SPFx) web part that displays RSS feeds in various layouts. It supports multiple display formats, filtering, and enhanced capabilities for handling a wide variety of RSS feed formats, including non-standard and authenticated feeds.
 
-[picture of the solution in action, if possible]
+Key features:
+- Multiple layout options: Banner carousel, card layout, and list layout
+- Support for authenticated feeds (including Meltwater)
+- Enhanced RSS parser that handles non-standard feeds (including Nettavisen)
+- Category-based and keyword-based filtering
+- Configurable auto-refresh
+- Debug mode for troubleshooting feed issues
+
+## Recent Improvements
+
+### Enhanced RSS Feed Handling
+- Added support for authenticated feeds like Meltwater
+- Improved handling of non-standard RSS feeds like Nettavisen
+- Implemented better image extraction from various feed formats
+- Added debugging tools for diagnosing problematic feeds
+
+### CORS Handling and Proxy Support
+- Improved proxy service for handling CORS restrictions
+- Added multiple fallback options for feed retrieval
+- Better error reporting for network-related issues
+
+See [RSS Feed Improvements](./docs/rss-feed-improvements.md) and [Parser Improvements](./docs/parser-improvements.md) for more details.
 
 ## Used SharePoint Framework Version
 

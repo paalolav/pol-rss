@@ -4,4 +4,7 @@ export interface IRssItem {
   pubDate?: string;
   description?: string;
   imageUrl?: string;
+  author?: string;
+  categories?: string[];
+  feedType?: 'rss' | 'atom';
 }

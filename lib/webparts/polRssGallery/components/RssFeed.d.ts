@@ -13,6 +13,12 @@ export interface IRssFeedProps {
     showPubDate: boolean;
     showDescription: boolean;
     maxItems: number;
+    filterByKeywords?: boolean;
+    filterKeywords?: string;
+    filterMode?: 'include' | 'exclude';
+    showCategories?: boolean;
+    filterByCategory?: boolean;
+    categoryFilterMode?: 'include' | 'exclude';
     themeVariant?: IReadonlyTheme;
 }
 declare const RssFeed: React.FC<IRssFeedProps>;

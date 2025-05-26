@@ -13,6 +13,12 @@ export interface IRssFeedWebPartProps {
     maxItems: number;
     showPubDate: boolean;
     showDescription: boolean;
+    filterByKeywords: boolean;
+    filterKeywords: string;
+    filterMode: 'include' | 'exclude';
+    showCategories: boolean;
+    filterByCategory: boolean;
+    categoryFilterMode: 'include' | 'exclude';
 }
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
     private _themeProvider;

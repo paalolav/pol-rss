@@ -8,6 +8,9 @@ interface IBannerCarouselProps {
         imageUrl?: string;
         pubDate?: string;
         description?: string;
+        author?: string;
+        categories?: string[];
+        feedType?: 'rss' | 'atom';
     }>;
     autoscroll: boolean;
     interval: number;
@@ -15,6 +18,7 @@ interface IBannerCarouselProps {
     forceFallback?: boolean;
     showPubDate?: boolean;
     showDescription?: boolean;
+    showCategories?: boolean;
 }
 declare const BannerCarousel: React.FC<IBannerCarouselProps>;
 export default BannerCarousel;

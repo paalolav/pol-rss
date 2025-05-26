@@ -172,6 +172,13 @@
   text-decoration: none;
 }
 
+.webPartTitle {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--neutralPrimary);
+  margin-bottom: 12px;
+}
+
 .title:hover {
   text-decoration: underline;
 }
@@ -315,6 +322,73 @@
 
 @supports(padding: max(0px)) {
   .bannerCaption { padding-left: max(8px, env(safe-area-inset-left)); }
+}
+
+/* Category filter styles */
+.categoryFilter {
+  margin-bottom: 16px;
+}
+
+.categoryFilterHeader {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.categoryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoryTag {
+  cursor: pointer;
+  padding: 4px 8px;
+  background-color: var(--neutralLight);
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--neutralTertiaryAlt);
+  }
+  
+  &.selected {
+    background-color: var(--themePrimary);
+    color: var(--white);
+  }
+}
+
+/* Item category display styles */
+.itemCategories {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.categoryBadge {
+  padding: 2px 6px;
+  background-color: var(--neutralLighter);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--neutralPrimary);
+}
+
+/* Banner category styles */
+.bannerCategories {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bannerCategoryBadge {
+  padding: 2px 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  color: white;
+  backdrop-filter: blur(2px);
 }
 
 

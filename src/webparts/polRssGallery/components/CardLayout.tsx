@@ -5,11 +5,21 @@ import parse from 'html-react-parser';
 import { getImageSrc, imgError } from './rssUtils';
 
 interface ICardLayoutProps {
-  items: Array<{ title: string; link: string; imageUrl?: string; description?: string; pubDate?: string }>;
+  items: Array<{ 
+    title: string; 
+    link: string; 
+    imageUrl?: string; 
+    description?: string; 
+    pubDate?: string;
+    author?: string;
+    categories?: string[];
+    feedType?: 'rss' | 'atom';
+  }>;
   fallbackImageUrl?: string;
   forceFallback?: boolean;
   showDescription?: boolean;
   showPubDate?: boolean;
+  showCategories?: boolean;
 }
 
 const arePropsEqual = (prevProps: ICardLayoutProps, nextProps: ICardLayoutProps): boolean => {
@@ -27,7 +37,7 @@ const arePropsEqual = (prevProps: ICardLayoutProps, nextProps: ICardLayoutProps)
   );
 };
 
-const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, forceFallback, showPubDate, showDescription }) => {
+const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, forceFallback, showPubDate, showDescription, showCategories }) => {
   const [layoutKey, setLayoutKey] = useState(0);
 
   useEffect(() => {
@@ -70,10 +80,19 @@ const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, force
               {parse(item.description)}
             </div>
           )}
+          {showCategories && item.categories && item.categories.length > 0 && (
+            <div className={styles.itemCategories}>
+              {item.categories.map((category, idx) => (
+                <span key={`${category}-${idx}`} className={styles.categoryBadge}>
+                  {category}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
-  }), [items, fallbackImageUrl, forceFallback, showPubDate, showDescription, handleImgError]);
+  }), [items, fallbackImageUrl, forceFallback, showPubDate, showDescription, showCategories, handleImgError]);
 
   return (
     <div key={layoutKey} className={styles.cardGrid}>

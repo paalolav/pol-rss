@@ -2,7 +2,8 @@
   "settings": {
     "preset": [
       "nodejs"
-    ]
+    ],
+    "emoji": true
   },
   "ignore": []
 }

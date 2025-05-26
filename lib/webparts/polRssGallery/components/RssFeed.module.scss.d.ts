@@ -22,6 +22,7 @@ declare const styles: {
     thumbnail: string;
     content: string;
     title: string;
+    webPartTitle: string;
     description: string;
     error: string;
     noItems: string;
@@ -32,6 +33,15 @@ declare const styles: {
     webPartHeader: string;
     ControlZone: string;
     CanvasSection: string;
+    categoryFilter: string;
+    categoryFilterHeader: string;
+    categoryList: string;
+    categoryTag: string;
+    selected: string;
+    itemCategories: string;
+    categoryBadge: string;
+    bannerCategories: string;
+    bannerCategoryBadge: string;
 };
 export default styles;
 //# sourceMappingURL=RssFeed.module.scss.d.ts.map

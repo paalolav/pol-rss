@@ -28,11 +28,21 @@ declare interface IRssFeedWebPartStrings {
   AutoscrollOnLabel: string;
   AutoscrollOffLabel: string;
   IntervalFieldLabel: string;
+  FilterSettingsGroupName: string;
+  FilterByKeywordsFieldLabel: string;
+  FilterByKeywordsOnLabel: string;
+  FilterByKeywordsOffLabel: string;
+  FilterKeywordsFieldLabel: string;
+  FilterKeywordsDescription: string;
+  FilterModeFieldLabel: string;
+  FilterModeIncludeLabel: string;
+  FilterModeExcludeLabel: string;
   ErrorLoadingFeed: string;
   ErrorParsingFeed: string;
   RetryButtonText: string;
   LoadingMessage: string;
   NoItemsMessage: string;
+  NoMatchingItemsMessage: string;
 }
 
 declare module 'RssFeedWebPartStrings' {
