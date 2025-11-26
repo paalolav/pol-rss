@@ -3,75 +3,148 @@ import { Log } from '@microsoft/sp-core-library';
 import { RssDebugUtils } from '../utils/rssDebugUtils';
 import { RssSpecialFeedsHandler } from './rssSpecialFeedsHandler';
 
-/**
- * Interface for authentication parameters extracted from URLs
- */
 interface IAuthParams {
   cleanUrl: string;
-  apiKey?: string; 
+  apiKey?: string;
   otherParams: Record<string, string>;
 }
 
-/**
- * Service to fetch RSS feeds through a proxy when direct access is restricted due to CORS
- */
+export interface ITenantProxyConfig {
+  /** The Azure Function proxy URL (e.g., https://fn-rss-proxy.azurewebsites.net/api/proxy) */
+  proxyUrl: string;
+  /** The function key for authentication */
+  functionKey: string;
+}
+
+export interface IProxyHealthResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  version: string;
+  timestamp: string;
+  configuration: {
+    allowlistEnabled: boolean;
+    allowlistPatterns: number;
+    rateLimitEnabled: boolean;
+    rateLimitRequests: string;
+    rateLimitWindowSeconds: string;
+  };
+  uptime: number;
+}
+
 export class ProxyService {
   private static readonly LOG_SOURCE = 'ProxyService';
   private static readonly DEFAULT_PROXIES = [
     'https://api.allorigins.win/raw?url=',
-    'https://cors-anywhere.herokuapp.com/',
-    'https://crossorigin.me/'
+    'https://corsproxy.io/?'
   ];
-  
+
   private static _proxyUrls: string[] = [...ProxyService.DEFAULT_PROXIES];
   private static _httpClient: HttpClient | null = null;
   private static _debugMode = false;
-  private static readonly MAX_REDIRECTS = 5; // Maximum number of redirects to follow
-  
-  // Keep track of URLs we've already tried to avoid redirect loops
+  private static readonly MAX_REDIRECTS = 5;
+
   private static _attemptedUrls = new Set<string>();
-  
-  /**
-   * Enable or disable debug mode for detailed logging
-   */
+
+  /** Tenant-specific Azure Function proxy configuration */
+  private static _tenantProxy: ITenantProxyConfig | null = null;
+
   public static setDebugMode(enable: boolean): void {
     ProxyService._debugMode = enable;
   }
 
-  /**
-   * Initialize the service with an HttpClient
-   */
   public static init(httpClient: HttpClient): void {
     ProxyService._httpClient = httpClient;
   }
-  
+
   /**
-   * Add a custom proxy URL
+   * Configure tenant-specific Azure Function proxy
+   * This proxy will be used as the primary proxy before falling back to public proxies
    */
-  public static addProxyUrl(url: string): void {
-    if (!ProxyService._proxyUrls.includes(url)) {
-      ProxyService._proxyUrls.unshift(url); // Add to beginning for priority
+  public static setTenantProxy(config: ITenantProxyConfig | null): void {
+    ProxyService._tenantProxy = config;
+    if (config && this._debugMode) {
+      RssDebugUtils.log(`Tenant proxy configured: ${config.proxyUrl}`);
     }
   }
-  
+
   /**
-   * Reset proxy URLs to default
+   * Get the currently configured tenant proxy
    */
+  public static getTenantProxy(): ITenantProxyConfig | null {
+    return ProxyService._tenantProxy;
+  }
+
+  /**
+   * Test the tenant proxy health endpoint
+   * Returns the health status or null if the proxy is not configured or unreachable
+   */
+  public static async testTenantProxy(): Promise<IProxyHealthResponse | null> {
+    if (!ProxyService._tenantProxy) {
+      return null;
+    }
+
+    try {
+      // Derive health endpoint from proxy URL (replace /proxy with /health)
+      const healthUrl = ProxyService._tenantProxy.proxyUrl.replace(/\/proxy\/?$/, '/health');
+
+      const response = await fetch(healthUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (this._debugMode) {
+          RssDebugUtils.warn(`Tenant proxy health check failed: ${response.status}`);
+        }
+        return null;
+      }
+
+      const health = await response.json() as IProxyHealthResponse;
+
+      if (this._debugMode) {
+        RssDebugUtils.log(`Tenant proxy health: ${health.status}, version: ${health.version}`);
+      }
+
+      return health;
+    } catch (error) {
+      if (this._debugMode) {
+        const msg = error instanceof Error ? error.message : String(error);
+        RssDebugUtils.warn(`Tenant proxy health check error: ${msg}`);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Build the full proxy URL for the tenant proxy
+   */
+  private static buildTenantProxyUrl(targetUrl: string): string | null {
+    if (!ProxyService._tenantProxy) {
+      return null;
+    }
+
+    const { proxyUrl, functionKey } = ProxyService._tenantProxy;
+    const separator = proxyUrl.includes('?') ? '&' : '?';
+    return `${proxyUrl}${separator}code=${functionKey}&url=${encodeURIComponent(targetUrl)}`;
+  }
+
+  public static addProxyUrl(url: string): void {
+    if (!ProxyService._proxyUrls.includes(url)) {
+      ProxyService._proxyUrls.unshift(url);
+    }
+  }
+
   public static resetProxyUrls(): void {
     ProxyService._proxyUrls = [...ProxyService.DEFAULT_PROXIES];
   }
   
-  /**
-   * Extract API key and other authentication parameters from URL for special handling
-   * This is useful for services like Meltwater that require specific authentication
-   */
   private static extractAuthParams(url: string): IAuthParams {
     try {
       const parsedUrl = new URL(url);
       const apiKey = parsedUrl.searchParams.get('apiKey') || undefined;
       const otherParams: Record<string, string> = {};
       
-      // Extract other potentially important authorization parameters
       parsedUrl.searchParams.forEach((value, key) => {
         if (key !== 'apiKey' && (
           key.toLowerCase().includes('auth') || 
@@ -84,15 +157,11 @@ export class ProxyService {
       
       return { cleanUrl: parsedUrl.toString(), apiKey, otherParams };
     } catch (error) {
-      // If URL parsing fails, return the original URL
       this.logError('extractAuthParams', error, url);
       return { cleanUrl: url, otherParams: {} };
     }
   }
   
-  /**
-   * Log errors in debug mode
-   */
   private static logError(method: string, error: unknown, url: string): void {
     if (this._debugMode) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -101,41 +170,29 @@ export class ProxyService {
     }
   }
   
-  /**
-   * Fetch content through available proxies, trying each one until successful
-   * Enhanced to handle authentication parameters better and prevent redirect loops
-   */
   public static async fetch(url: string, options: RequestInit = {}): Promise<Response> {
-    // Reset attempted URLs for this new fetch operation
     this._attemptedUrls = new Set<string>();
-    
-    // Add original URL to attempted URLs to prevent immediate loops
     this._attemptedUrls.add(url);
-    
-    // Special handling for Meltwater feeds with known 403 issues
+
     if (RssSpecialFeedsHandler.isMeltwaterFeed(url)) {
       return this.fetchWithRetry(url, 3, options);
     }
-    
-    // Handle special URLs with authentication parameters
+
     const authInfo = this.extractAuthParams(url);
     const headersWithAuth = new Headers(options.headers || {});
-    
-    // Add API key as Authorization header if present in URL
+
     if (authInfo.apiKey) {
       headersWithAuth.set('Authorization', `Bearer ${authInfo.apiKey}`);
-      headersWithAuth.set('X-API-Key', authInfo.apiKey);  // Common format for API key
+      headersWithAuth.set('X-API-Key', authInfo.apiKey);
     }
-    
-    // Merge options with auth headers
+
     const enhancedOptions = {
       ...options,
       headers: headersWithAuth,
-      // Add redirect: 'manual' to handle redirects ourselves
       redirect: 'manual' as RequestRedirect
     };
-    
-    // First try direct fetch with enhanced options
+
+    // 1. Try direct fetch first
     try {
       const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
       if (directResponse.ok) {
@@ -144,54 +201,82 @@ export class ProxyService {
         }
         return directResponse;
       }
-      
+
       if (this._debugMode) {
         Log.info(this.LOG_SOURCE, `Direct fetch returned ${directResponse.status}, trying proxies.`);
         RssDebugUtils.log(`Direct fetch returned ${directResponse.status}, trying proxies.`);
       }
     } catch (error) {
-      // Direct fetch failed, continue to proxies
       this.logError('directFetch', error, url);
     }
-    
-    // If direct fetch fails, try proxies
+
+    // 2. Try tenant proxy if configured (primary proxy)
+    if (ProxyService._tenantProxy) {
+      try {
+        const tenantProxyUrl = this.buildTenantProxyUrl(url);
+        if (tenantProxyUrl && !this._attemptedUrls.has(tenantProxyUrl)) {
+          this._attemptedUrls.add(tenantProxyUrl);
+
+          if (this._debugMode) {
+            RssDebugUtils.log(`Trying tenant proxy: ${ProxyService._tenantProxy.proxyUrl}`);
+          }
+
+          const response = await this._fetchWithRedirectHandling(tenantProxyUrl, {
+            ...options,
+            headers: headersWithAuth,
+            redirect: 'follow' as RequestRedirect
+          });
+
+          if (response.ok) {
+            if (this._debugMode) {
+              RssDebugUtils.log(`Tenant proxy fetch succeeded`);
+            }
+            return response;
+          }
+
+          if (this._debugMode) {
+            Log.info(this.LOG_SOURCE, `Tenant proxy returned ${response.status}.`);
+            RssDebugUtils.log(`Tenant proxy returned ${response.status}, trying fallback proxies.`);
+          }
+        }
+      } catch (error) {
+        this.logError('tenantProxyFetch', error, url);
+      }
+    }
+
+    // 3. Try fallback public proxies
     for (const proxyUrl of ProxyService._proxyUrls) {
       try {
-        // For proxies that support headers, we need to pass auth info differently
         const proxiedUrl = proxyUrl + encodeURIComponent(url);
-        
-        // Skip if we've already attempted this URL (to prevent loops)
+
         if (this._attemptedUrls.has(proxiedUrl)) {
           if (this._debugMode) {
             RssDebugUtils.warn(`Skipping already attempted proxy URL: ${proxiedUrl}`);
           }
           continue;
         }
-        
+
         this._attemptedUrls.add(proxiedUrl);
         const response = await this._fetchWithRedirectHandling(proxiedUrl, enhancedOptions);
-        
+
         if (response.ok) {
           if (this._debugMode) {
             RssDebugUtils.log(`Proxy fetch succeeded with ${proxyUrl}`);
           }
           return response;
         }
-        
+
         if (this._debugMode) {
           Log.info(this.LOG_SOURCE, `Proxy ${proxyUrl} returned ${response.status}.`);
           RssDebugUtils.log(`Proxy ${proxyUrl} returned ${response.status}.`);
         }
       } catch (error) {
-        // Proxy failed, continue to next proxy
         this.logError('proxyFetch', error, `${proxyUrl}${url}`);
       }
     }
     
-    // Try with SP HttpClient for authenticated SharePoint environments
     if (ProxyService._httpClient) {
       try {
-        // Use SP HttpClient with authentication
         const headers: HeadersInit = {};
         if (authInfo.apiKey) {
           headers['Authorization'] = `Bearer ${authInfo.apiKey}`;
@@ -235,20 +320,15 @@ export class ProxyService {
           RssDebugUtils.log(`SP HttpClient returned ${response.status}.`);
         }
       } catch (error) {
-        // SharePoint HttpClient failed, moving to the next option
         this.logError('spHttpClientFetch', error, url);
       }
     }
     
-    // If all methods fail, throw error
     const errorMsg = `Failed to fetch ${url} after trying direct access and all available proxies`;
     Log.error(this.LOG_SOURCE, new Error(errorMsg));
     throw new Error(errorMsg);
   }
   
-  /**
-   * Helper method to handle redirects manually to prevent redirect loops
-   */
   private static async _fetchWithRedirectHandling(url: string, options: RequestInit): Promise<Response> {
     let redirectCount = 0;
     let currentUrl = url;
@@ -256,19 +336,15 @@ export class ProxyService {
     while (redirectCount < this.MAX_REDIRECTS) {
       const response = await fetch(currentUrl, options);
       
-      // If it's not a redirect, return the response
       if (![301, 302, 303, 307, 308].includes(response.status)) {
         return response;
       }
       
-      // Handle redirect
       const location = response.headers.get('location');
       if (!location) {
-        // No redirect location header
         return response;
       }
       
-      // Resolve relative URLs
       let redirectUrl: string;
       try {
         redirectUrl = new URL(location, currentUrl).href;
@@ -276,16 +352,13 @@ export class ProxyService {
         redirectUrl = location;
       }
       
-      // Check if we're in a redirect loop
       if (this._attemptedUrls.has(redirectUrl)) {
         if (this._debugMode) {
           RssDebugUtils.warn(`Detected redirect loop to already attempted URL: ${redirectUrl}`);
         }
-        // Return the current response rather than going into an infinite loop
         return response;
       }
       
-      // Add to attempted URLs and update for next fetch
       this._attemptedUrls.add(redirectUrl);
       currentUrl = redirectUrl;
       redirectCount++;
@@ -295,14 +368,9 @@ export class ProxyService {
       }
     }
     
-    // If we've reached max redirects, throw an error
     throw new Error(`ERR_TOO_MANY_REDIRECTS: Maximum redirects (${this.MAX_REDIRECTS}) exceeded for ${url}`);
   }
   
-  /**
-   * Fetch with retry mechanism for handling intermittent failures like 403s
-   * Particularly useful for Meltwater feeds that sometimes return 403
-   */
   private static async fetchWithRetry(
     url: string, 
     maxRetries: number = 3, 
@@ -310,30 +378,21 @@ export class ProxyService {
   ): Promise<Response> {
     let lastError: Error | null = null;
     
-    // Try different User-Agent headers which can help with some feeds
     const userAgentVariations = [
       'Mozilla/5.0 SharePoint RSS Reader',
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'
     ];
     
-    // Reset attempted URLs for this new fetch operation
     this._attemptedUrls = new Set<string>();
     this._attemptedUrls.add(url);
     
-    // First attempt with various direct fetch options
     for (let i = 0; i < maxRetries; i++) {
       try {
-        // Create a new headers object for this attempt
         const headers = new Headers(options.headers || {});
-        
-        // Add a different User-Agent for each retry
         headers.set('User-Agent', userAgentVariations[i % userAgentVariations.length]);
-        
-        // Add common headers that might help
         headers.set('Accept', 'application/xml, text/xml, */*');
         
-        // For Meltwater specifically, try different auth approaches
         if (RssSpecialFeedsHandler.isMeltwaterFeed(url)) {
           try {
             const urlObj = new URL(url);
@@ -341,7 +400,6 @@ export class ProxyService {
                           urlObj.searchParams.get('api_key');
             
             if (apiKey) {
-              // Try different auth header formats
               if (i === 0) {
                 headers.set('Authorization', `Bearer ${apiKey}`);
               } else if (i === 1) {
@@ -355,11 +413,9 @@ export class ProxyService {
           }
         }
         
-        // Try direct fetch with enhanced options, using our redirect handler
         const response = await this._fetchWithRedirectHandling(url, { 
           ...options, 
           headers,
-          // Add cache busting for retries
           cache: 'no-store'
         });
         
@@ -382,18 +438,14 @@ export class ProxyService {
         }
       }
       
-      // Small delay before retry
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
-    
-    // If direct fetch with retries fails, try the main fetch method as fallback
+
     try {
       if (this._debugMode) {
         RssDebugUtils.log(`Falling back to proxy method after ${maxRetries} retries failed`);
       }
       
-      // Call the main fetch method with default options
-      // But don't recursively call fetchWithRetry
       const authInfo = this.extractAuthParams(url);
       const headersWithAuth = new Headers(options.headers || {});
       
@@ -401,12 +453,10 @@ export class ProxyService {
         headersWithAuth.set('Authorization', `Bearer ${authInfo.apiKey}`);
       }
       
-      // Try proxies as last resort
       for (const proxyUrl of ProxyService._proxyUrls) {
         try {
           const proxiedUrl = proxyUrl + encodeURIComponent(url);
           
-          // Skip if we've already tried this combination
           if (this._attemptedUrls.has(proxiedUrl)) {
             continue;
           }
@@ -421,7 +471,6 @@ export class ProxyService {
             return response;
           }
         } catch (proxyError) {
-          // Try next proxy
           lastError = proxyError instanceof Error ? proxyError : new Error(String(proxyError));
         }
       }
@@ -429,7 +478,45 @@ export class ProxyService {
       lastError = error instanceof Error ? error : new Error(String(error));
     }
     
-    // If all attempts fail, throw the last error
     throw lastError || new Error(`Failed to fetch ${url} after ${maxRetries} retries`);
+  }
+  
+  public static async fetchWithFirstProxy(url: string, options: RequestInit = {}): Promise<Response> {
+    if (ProxyService._proxyUrls.length === 0) {
+      throw new Error('No proxy URLs available');
+    }
+    
+    const firstProxy = ProxyService._proxyUrls[0];
+    const authInfo = this.extractAuthParams(url);
+    const headersWithAuth = new Headers(options.headers || {});
+    
+    if (authInfo.apiKey) {
+      headersWithAuth.set('Authorization', `Bearer ${authInfo.apiKey}`);
+      headersWithAuth.set('X-API-Key', authInfo.apiKey);
+    }
+    
+    const enhancedOptions = {
+      ...options,
+      headers: headersWithAuth,
+      redirect: 'manual' as RequestRedirect
+    };
+    
+    const proxiedUrl = firstProxy + encodeURIComponent(url);
+    
+    if (this._debugMode) {
+      RssDebugUtils.log(`Trying first proxy: ${firstProxy}`);
+    }
+    
+    const response = await this._fetchWithRedirectHandling(proxiedUrl, enhancedOptions);
+    
+    if (!response.ok) {
+      throw new Error(`Proxy fetch failed: HTTP ${response.status} - ${response.statusText || 'Error'}`);
+    }
+    
+    if (this._debugMode) {
+      RssDebugUtils.log(`First proxy fetch succeeded`);
+    }
+    
+    return response;
   }
 }

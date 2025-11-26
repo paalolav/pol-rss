@@ -1,0 +1,25 @@
+{
+  "name": "pol-rss-cors-proxy",
+  "version": "1.0.0",
+  "description": "Azure Function CORS proxy for POL RSS Gallery WebPart",
+  "main": "dist/HttpProxy/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prestart": "npm run build",
+    "start": "func start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@azure/functions": "^4.5.0",
+    "@types/node": "^20.11.0",
+    "@types/node-fetch": "^2.6.11",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
