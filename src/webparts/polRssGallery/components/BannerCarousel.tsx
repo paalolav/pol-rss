@@ -7,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/autoplay';
 import parse from 'html-react-parser';
 import { getImageSrc, imgError } from './rssUtils';
+import { sanitizer } from '../services/contentSanitizer';
 
 interface IBannerCarouselProps {
   items: Array<{ 
@@ -71,7 +72,7 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
               )}
               {showDescription && item.description && (
                 <div className={styles.bannerDescription}>
-                  {parse(item.description)}
+                  {parse(sanitizer.sanitize(item.description))}
                 </div>
               )}
               {showCategories && item.categories && item.categories.length > 0 && (

@@ -4,6 +4,7 @@ import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
 import { IRssItem } from './IRssItem';
 import { getImageSrc, imgError } from './rssUtils';
+import { sanitizer } from '../services/contentSanitizer';
 
 export interface IListLayoutProps {
   items: IRssItem[];
@@ -82,7 +83,7 @@ const ListLayout: React.FC<IListLayoutProps> = ({
           )}
           {showDescription && item.description && (
             <div className={styles.description}>
-              {parse(item.description)}
+              {parse(sanitizer.sanitize(item.description))}
             </div>
           )}
           {showCategories && item.categories && item.categories.length > 0 && (

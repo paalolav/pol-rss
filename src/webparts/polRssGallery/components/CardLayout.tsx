@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
 import { getImageSrc, imgError } from './rssUtils';
+import { sanitizer } from '../services/contentSanitizer';
 
 interface ICardLayoutProps {
   items: Array<{ 
@@ -77,7 +78,7 @@ const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, force
           )}
           {showDescription && item.description && (
             <div className={styles.cardDescription}>
-              {parse(item.description)}
+              {parse(sanitizer.sanitize(item.description))}
             </div>
           )}
           {showCategories && item.categories && item.categories.length > 0 && (

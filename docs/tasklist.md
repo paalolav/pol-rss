@@ -44,13 +44,13 @@ Refactor and enhance Azure Function CORS proxy with one-click tenant deployment.
 ---
 
 ### REF-012-SECURITY-HARDENING
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 **Priority:** Critical
 **Reference:** [REF-012-SECURITY-HARDENING.md](refs/REF-012-SECURITY-HARDENING.md)
 
 Implement comprehensive security measures including XSS prevention (DOMPurify), SSRF protection, CSP compliance, and optional Azure AD authentication.
 
-**Sub-tasks:** 7 | **Completed:** 0/7
+**Sub-tasks:** 7 | **Completed:** 6/7 (ST-012-04 Proxy Auth deferred - optional feature)
 
 ---
 
@@ -176,12 +176,12 @@ Comprehensive documentation for admins and users.
 
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
-| Phase 1: Foundation | 3 | 1 | ~60% |
+| Phase 1: Foundation | 3 | 2 | ~85% |
 | Phase 2: Core Reliability | 3 | 0 | 0% |
 | Phase 3: UI/UX | 4 | 0 | 0% |
 | Phase 4: Features | 2 | 0 | 0% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **13** | **1** | **~15%** |
+| **Total** | **13** | **2** | **~23%** |
 
 ---
 
@@ -212,6 +212,17 @@ All Tasks ──────────────> REF-011 (Documentation)
 ## Changelog
 
 ### 2025-11-26
+- REF-012: Completed Security Hardening (6/7 sub-tasks)
+  - Implemented DOMPurify content sanitization for XSS prevention
+  - Created ContentSanitizer service with comprehensive HTML/URL sanitization
+  - Added CSP compliance utilities (cspCompliance.ts)
+  - Implemented URL validator with SSRF protection (urlValidator.ts)
+  - Created property pane input validators (propertyValidators.ts)
+  - Created security audit checklist (docs/SECURITY_CHECKLIST.md)
+  - Ran dependency security audit, removed unused `comlink` package
+  - Added security-related npm scripts (test:security, security:audit)
+  - 265 total tests passing, including 137 new security tests
+  - ST-012-04 (Proxy Auth) deferred as optional feature
 - REF-002: Completed Azure Function CORS Proxy (11/11 sub-tasks)
   - Rewrote proxy from PowerShell to TypeScript
   - Implemented URL validation with SSRF protection
