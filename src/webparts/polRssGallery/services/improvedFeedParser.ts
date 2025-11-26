@@ -6,11 +6,43 @@ import { isJsonFeed, parseJsonFeed } from './jsonFeedParser';
 import { decodeXmlText, decodeEntitiesInHtml } from './entityDecoder';
 import { extractImage, ImageExtractionOptions } from './imageExtractor';
 import { parseDate, parseDateToIsoString } from './dateParser';
+import {
+  attemptRecovery,
+  needsRecovery,
+  validateRecoveredContent,
+  extractItemsAlternative,
+  RecoveryResult,
+  RecoveryOptions,
+} from './feedRecovery';
+
+/**
+ * Result from parsing a feed, includes both items and recovery information
+ */
+export interface IFeedParseResult {
+  /** Parsed feed items */
+  items: IRssItem[];
+  /** Whether recovery mode was used */
+  recoveryUsed: boolean;
+  /** Details about recovery actions if recovery was attempted */
+  recoveryInfo?: RecoveryResult;
+  /** Any warnings about the feed (non-fatal issues) */
+  warnings: string[];
+}
 
 export interface IFeedParserOptions {
   fallbackImageUrl: string;
   maxItems?: number;
   enableDebug?: boolean;
+  /**
+   * Enable recovery mode for malformed feeds (ST-003-07)
+   * When enabled, parser will attempt to fix and extract content from broken feeds
+   * @default true
+   */
+  enableRecovery?: boolean;
+  /**
+   * Recovery mode options
+   */
+  recoveryOptions?: RecoveryOptions;
   preprocessingHints?: {
     addMissingNamespaces?: boolean;
     fixUnclosedTags?: boolean;
@@ -20,7 +52,26 @@ export interface IFeedParserOptions {
 }
 
 export class ImprovedFeedParser {
+  /**
+   * Parse a feed and return items (backwards-compatible method)
+   * Uses recovery mode by default to handle malformed feeds
+   */
   public static parse(xmlString: string, options: IFeedParserOptions): IRssItem[] {
+    const result = this.parseWithRecovery(xmlString, options);
+    return result.items;
+  }
+
+  /**
+   * Parse a feed with full recovery information (ST-003-07)
+   * Returns detailed information about any recovery actions taken
+   */
+  public static parseWithRecovery(xmlString: string, options: IFeedParserOptions): IFeedParseResult {
+    const result: IFeedParseResult = {
+      items: [],
+      recoveryUsed: false,
+      warnings: [],
+    };
+
     if (!xmlString) {
       throw new Error("Empty feed content received");
     }
@@ -29,6 +80,8 @@ export class ImprovedFeedParser {
       RssDebugUtils.setDebugMode(true);
     }
 
+    const enableRecovery = options.enableRecovery !== false; // Default to true
+
     // Check if content is JSON Feed format first
     if (isJsonFeed(xmlString)) {
       if (RssDebugUtils.isDebugEnabled()) {
@@ -36,94 +89,201 @@ export class ImprovedFeedParser {
       }
 
       try {
-        const items = parseJsonFeed(xmlString, {
+        result.items = parseJsonFeed(xmlString, {
           fallbackImageUrl: options.fallbackImageUrl,
           maxItems: options.maxItems,
         });
 
         if (RssDebugUtils.isDebugEnabled()) {
           // eslint-disable-next-line no-console
-          console.log(`JSON Feed Parser found ${items.length} items`);
+          console.log(`JSON Feed Parser found ${result.items.length} items`);
         }
 
-        return items;
+        return result;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : strings.ErrorParsingFeed;
         throw new Error(`${strings.ErrorParsingFeed}: ${errorMessage}`);
       }
     }
 
+    // Check if recovery might be needed before processing
+    let contentToProcess = xmlString;
+    let recoveryInfo: RecoveryResult | undefined;
+
+    if (enableRecovery && needsRecovery(xmlString)) {
+      if (RssDebugUtils.isDebugEnabled()) {
+        RssDebugUtils.log('RSS Parser: Feed may have issues, attempting proactive recovery');
+      }
+      recoveryInfo = attemptRecovery(xmlString, options.recoveryOptions);
+      if (recoveryInfo.recoveryAttempted) {
+        contentToProcess = recoveryInfo.recoveredContent;
+        result.recoveryUsed = true;
+        result.recoveryInfo = recoveryInfo;
+        result.warnings.push(...recoveryInfo.warnings);
+      }
+    }
+
     // Process as XML feed (RSS/Atom)
     try {
-      const cleanedXml = this.preProcessXml(xmlString, options.preprocessingHints);      
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(cleanedXml, 'application/xml');
-      const hasParserError = xml.querySelector('parsererror');
-      const hasItems = xml.querySelectorAll('item').length > 0;
-      const hasEntries = xml.querySelectorAll('entry').length > 0;
-      
-      if (RssDebugUtils.isDebugEnabled()) {
-        // eslint-disable-next-line no-console
-        console.log(`RSS Parse Info:
-          - Parser errors detected: ${hasParserError ? 'Yes' : 'No'}
-          - RSS items found: ${xml.querySelectorAll('item').length}
-          - ATOM entries found: ${xml.querySelectorAll('entry').length}
-        `);
-      }
-      
-      if (hasParserError && !hasItems && !hasEntries) {
-        const errorMsg = hasParserError.textContent || strings.ErrorParsingFeed;
-        throw new Error(`${strings.ErrorParsingFeed}: ${errorMsg.substring(0, 200)}`);
-      }
+      const items = this.parseXmlContent(contentToProcess, options);
+      result.items = items;
 
-      const documentElement = xml.documentElement;
-      const namespaces: Record<string, string> = {};
-      
-      if (documentElement && documentElement.attributes) {
-        for (let i = 0; i < documentElement.attributes.length; i++) {
-          const attr = documentElement.attributes[i];
-          if (attr.name.startsWith('xmlns:')) {
-            const prefix = attr.name.substring(6);
-            namespaces[prefix] = attr.value;
-            
-            if (RssDebugUtils.isDebugEnabled()) {
-              // eslint-disable-next-line no-console
-              console.log(`RSS Parse: Found namespace ${prefix} = ${attr.value}`);
-            }
-          }
-        }
-      }
-      
-      let items: IRssItem[];
-      if (xml.querySelector('feed')) {
-        items = this.parseAtom(xml, options);
-      } else {
-        items = this.parseRss(xml, options);
-      }
-      
       if (RssDebugUtils.isDebugEnabled()) {
         // eslint-disable-next-line no-console
         console.log(`RSS Parser found ${items.length} items`);
-        
+
         const withImages = items.filter(i => !!i.imageUrl).length;
         // eslint-disable-next-line no-console
         console.log(`RSS Items with images: ${withImages}/${items.length}`);
-        
+
         // eslint-disable-next-line no-console
         console.log(RssDebugUtils.analyzeRssFeed(items, 'Feed analysis'));
       }
-      
-      return items;
+
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : strings.ErrorParsingFeed;
-      
+
+      // If recovery wasn't tried yet, try it now
+      if (enableRecovery && !result.recoveryUsed) {
+        if (RssDebugUtils.isDebugEnabled()) {
+          RssDebugUtils.log(`RSS Parser: Initial parse failed, attempting recovery. Error: ${errorMessage}`);
+        }
+
+        recoveryInfo = attemptRecovery(xmlString, {
+          ...options.recoveryOptions,
+          aggressive: true, // Use aggressive mode on failure
+        });
+
+        result.recoveryUsed = true;
+        result.recoveryInfo = recoveryInfo;
+        result.recoveryInfo.originalError = errorMessage;
+        result.warnings.push(...recoveryInfo.warnings);
+
+        if (recoveryInfo.recoveryAttempted) {
+          // Validate recovered content before trying to parse
+          const validation = validateRecoveredContent(recoveryInfo.recoveredContent);
+
+          if (validation.valid) {
+            try {
+              const recoveredItems = this.parseXmlContent(recoveryInfo.recoveredContent, options);
+              result.items = recoveredItems;
+
+              if (RssDebugUtils.isDebugEnabled()) {
+                RssDebugUtils.log(`RSS Parser: Recovery successful, found ${recoveredItems.length} items`);
+              }
+
+              return result;
+            } catch (recoveryError) {
+              // Recovery parsing also failed, continue to alternative extraction
+              if (RssDebugUtils.isDebugEnabled()) {
+                RssDebugUtils.log(`RSS Parser: Recovery parse also failed: ${recoveryError instanceof Error ? recoveryError.message : 'Unknown'}`);
+              }
+            }
+          } else {
+            result.warnings.push(`Recovered content still invalid: ${validation.error}`);
+          }
+        }
+
+        // Last resort: try alternative extraction (regex-based)
+        const extractedItems = extractItemsAlternative(xmlString);
+        if (extractedItems.length > 0) {
+          if (RssDebugUtils.isDebugEnabled()) {
+            RssDebugUtils.log(`RSS Parser: Using alternative extraction, found ${extractedItems.length} items`);
+          }
+
+          result.items = extractedItems.map((item) => ({
+            title: item.title || 'Untitled',
+            link: item.link || '',
+            description: item.description ? cleanDescription(item.description) : '',
+            pubDate: item.pubDate || '',
+            imageUrl: options.fallbackImageUrl,
+            feedType: 'rss' as const,
+          }));
+          result.warnings.push('Used fallback extraction method - some content may be incomplete');
+
+          return result;
+        }
+      }
+
       if (RssDebugUtils.isDebugEnabled()) {
         // eslint-disable-next-line no-console
         console.error(`RSS Parse Error: ${errorMessage}`);
       }
-      
+
       throw new Error(`${strings.ErrorParsingFeed}: ${errorMessage}`);
     }
+  }
+
+  /**
+   * Internal method to parse XML content
+   * Uses lazy preprocessing for performance (ST-003-08):
+   * 1. Try parsing raw XML first (fast path for clean feeds)
+   * 2. If that fails, apply preprocessing and retry
+   */
+  private static parseXmlContent(xmlString: string, options: IFeedParserOptions): IRssItem[] {
+    const parser = new DOMParser();
+
+    // ST-003-08: Fast path - try parsing without preprocessing first
+    // This significantly improves performance for well-formed feeds
+    let xml = parser.parseFromString(xmlString, 'application/xml');
+    let hasParserError = xml.querySelector('parsererror');
+    let hasItems = xml.querySelectorAll('item').length > 0;
+    let hasEntries = xml.querySelectorAll('entry').length > 0;
+
+    // If parsing failed or no content found, try with preprocessing
+    if ((hasParserError && !hasItems && !hasEntries) || (!hasItems && !hasEntries)) {
+      if (RssDebugUtils.isDebugEnabled()) {
+        RssDebugUtils.log('RSS Parser: Initial parse failed or empty, applying preprocessing');
+      }
+
+      const cleanedXml = this.preProcessXml(xmlString, options.preprocessingHints);
+      xml = parser.parseFromString(cleanedXml, 'application/xml');
+      hasParserError = xml.querySelector('parsererror');
+      hasItems = xml.querySelectorAll('item').length > 0;
+      hasEntries = xml.querySelectorAll('entry').length > 0;
+    }
+
+    if (RssDebugUtils.isDebugEnabled()) {
+      // eslint-disable-next-line no-console
+      console.log(`RSS Parse Info:
+        - Parser errors detected: ${hasParserError ? 'Yes' : 'No'}
+        - RSS items found: ${xml.querySelectorAll('item').length}
+        - ATOM entries found: ${xml.querySelectorAll('entry').length}
+      `);
+    }
+
+    if (hasParserError && !hasItems && !hasEntries) {
+      const errorMsg = hasParserError.textContent || strings.ErrorParsingFeed;
+      throw new Error(`${strings.ErrorParsingFeed}: ${errorMsg.substring(0, 200)}`);
+    }
+
+    const documentElement = xml.documentElement;
+    const namespaces: Record<string, string> = {};
+
+    if (documentElement && documentElement.attributes) {
+      for (let i = 0; i < documentElement.attributes.length; i++) {
+        const attr = documentElement.attributes[i];
+        if (attr.name.startsWith('xmlns:')) {
+          const prefix = attr.name.substring(6);
+          namespaces[prefix] = attr.value;
+
+          if (RssDebugUtils.isDebugEnabled()) {
+            // eslint-disable-next-line no-console
+            console.log(`RSS Parse: Found namespace ${prefix} = ${attr.value}`);
+          }
+        }
+      }
+    }
+
+    let items: IRssItem[];
+    if (xml.querySelector('feed')) {
+      items = this.parseAtom(xml, options);
+    } else {
+      items = this.parseRss(xml, options);
+    }
+
+    return items;
   }
   
   private static preProcessXml(xml: string, hints?: IFeedParserOptions['preprocessingHints']): string {
@@ -262,55 +422,22 @@ export class ImprovedFeedParser {
 
   private static parseRss(xml: Document, options: IFeedParserOptions): IRssItem[] {
     const rssItems: IRssItem[] = [];
-    
-    let itemNodes: Element[] = [];
-    
-    const itemSelectors = [
-      'item',
-      'rss > channel > item',
-      'rdf\\:RDF > item',
-      'channel > item',
-      'feed > entry',
-      'rss > item'
-    ];
-    
-    for (const selector of itemSelectors) {
-      try {
-        const nodes = Array.from(xml.querySelectorAll(selector));
-        if (nodes.length > 0) {
-          itemNodes = nodes;
-          break;
-        }
-      } catch {
-        // Ignore selector errors and try the next one
-        continue;
-      }
-    }
-    
-    if (itemNodes.length === 0) {
-      const possibleItems = Array.from(xml.querySelectorAll('*'))
-        .filter(el => {
-          return (
-            (el.querySelector('title') || el.querySelector('heading')) &&
-            (el.querySelector('link') || el.querySelector('guid'))
-          );
-        });
-        
-      if (possibleItems.length > 0) {
-        itemNodes = possibleItems;
-      }
-    }
-    
+    const maxItems = options.maxItems && options.maxItems > 0 ? options.maxItems : Infinity;
+
+    // Get item nodes using optimized selector strategy
+    const itemNodes = this.getItemNodes(xml);
+
     if (RssDebugUtils.isDebugEnabled()) {
       // eslint-disable-next-line no-console
       console.log(`Found ${itemNodes.length} RSS items in the feed`);
     }
-    
-    if (options.maxItems && options.maxItems > 0 && itemNodes.length > options.maxItems) {
-      itemNodes = itemNodes.slice(0, options.maxItems);
-    }
-    
-    itemNodes.forEach(itemNode => {
+
+    // Cache channel node lookup once for all items
+    const channelNode = xml.querySelector('channel');
+
+    // Process items with early termination (ST-003-08 performance optimization)
+    for (let i = 0; i < itemNodes.length && rssItems.length < maxItems; i++) {
+      const itemNode = itemNodes[i];
       try {
         let title = '';
         const titleNode = itemNode.querySelector('title') || 
@@ -360,7 +487,7 @@ export class ImprovedFeedParser {
         }
         
         // Image extraction using priority chain (ST-003-04)
-        const channelNode = itemNode.closest('channel') || xml.querySelector('channel');
+        // channelNode is cached outside the loop for performance (ST-003-08)
         const imageOptions: ImageExtractionOptions = {
           fallbackImageUrl: options.fallbackImageUrl,
           channelElement: channelNode,
@@ -417,9 +544,54 @@ export class ImprovedFeedParser {
           console.error(`Error processing RSS item: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
-    });
+    }
 
     return rssItems;
+  }
+
+  /**
+   * Get item nodes from XML document with optimized selector strategy (ST-003-08)
+   * Uses the most common selector first for performance
+   */
+  private static getItemNodes(xml: Document): Element[] {
+    // Try the most common selector first (fastest)
+    let items = xml.querySelectorAll('item');
+    if (items.length > 0) {
+      return Array.from(items);
+    }
+
+    // Try RDF items (RSS 1.0)
+    items = xml.querySelectorAll('rdf\\:RDF > item');
+    if (items.length > 0) {
+      return Array.from(items);
+    }
+
+    // Try more specific selectors
+    const selectors = [
+      'rss > channel > item',
+      'channel > item',
+      'rss > item'
+    ];
+
+    for (const selector of selectors) {
+      try {
+        items = xml.querySelectorAll(selector);
+        if (items.length > 0) {
+          return Array.from(items);
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    // Last resort: find elements that look like items
+    return Array.from(xml.querySelectorAll('*')).filter(el => {
+      return (
+        el.tagName.toLowerCase() === 'item' ||
+        ((el.querySelector('title') || el.querySelector('heading')) &&
+         (el.querySelector('link') || el.querySelector('guid')))
+      );
+    });
   }
 
   /**
@@ -427,15 +599,21 @@ export class ImprovedFeedParser {
    */
   private static parseAtom(xml: Document, options: IFeedParserOptions): IRssItem[] {
     const atomItems: IRssItem[] = [];
-    
-    const entryNodes = Array.from(xml.querySelectorAll('entry'));
-    
+    const maxItems = options.maxItems && options.maxItems > 0 ? options.maxItems : Infinity;
+
+    const entryNodes = xml.querySelectorAll('entry');
+
     if (RssDebugUtils.isDebugEnabled()) {
       // eslint-disable-next-line no-console
       console.log(`Found ${entryNodes.length} ATOM entries in the feed`);
     }
 
-    entryNodes.forEach(entryNode => {
+    // Cache feed element for all entries
+    const feedElement = xml.querySelector('feed');
+
+    // Process entries with early termination (ST-003-08 performance optimization)
+    for (let i = 0; i < entryNodes.length && atomItems.length < maxItems; i++) {
+      const entryNode = entryNodes[i];
       try {
         let title = '';
         const titleNode = entryNode.querySelector('title');
@@ -477,10 +655,10 @@ export class ImprovedFeedParser {
         }
                            
         // Image extraction using priority chain (ST-003-04)
-        const feedElement = xml.querySelector('feed');
+        // feedElement is cached outside the loop for performance (ST-003-08)
         const atomImageOptions: ImageExtractionOptions = {
           fallbackImageUrl: options.fallbackImageUrl,
-          channelElement: feedElement, // Atom uses <feed> as channel equivalent
+          channelElement: feedElement,
         };
         const extractedImage = extractImage(entryNode, atomImageOptions);
 
@@ -516,7 +694,7 @@ export class ImprovedFeedParser {
           console.error(`Error processing ATOM entry: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
-    });
+    }
 
     return atomItems;
   }
