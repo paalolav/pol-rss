@@ -1,11 +1,12 @@
 import { IRssItem } from '../components/IRssItem';
-import { cleanDescription, resolveImageUrl, findImage } from '../components/rssUtils';
+import { cleanDescription, resolveImageUrl } from '../components/rssUtils';
 import * as strings from 'RssFeedWebPartStrings';
 import { RssDebugUtils } from '../utils/rssDebugUtils';
+import { isJsonFeed, parseJsonFeed } from './jsonFeedParser';
+import { decodeXmlText, decodeEntitiesInHtml } from './entityDecoder';
+import { extractImage, ImageExtractionOptions } from './imageExtractor';
+import { parseDate, parseDateToIsoString } from './dateParser';
 
-/**
- * Interface for feed parser options
- */
 export interface IFeedParserOptions {
   fallbackImageUrl: string;
   maxItems?: number;
@@ -14,41 +15,53 @@ export interface IFeedParserOptions {
     addMissingNamespaces?: boolean;
     fixUnclosedTags?: boolean;
     addMissingXmlDeclaration?: boolean;
-    fixCdataSequences?: boolean; // Added new option for fixing CDATA specifically
+    fixCdataSequences?: boolean;
   };
 }
 
-/**
- * Improved Feed parser service to handle both RSS and ATOM feeds
- * with better support for various feed formats including Meltwater
- */
 export class ImprovedFeedParser {
-  /**
-   * Parse XML feed content (RSS or ATOM) and convert to IRssItem array
-   */
   public static parse(xmlString: string, options: IFeedParserOptions): IRssItem[] {
     if (!xmlString) {
       throw new Error("Empty feed content received");
     }
-    
-    // Enable debug mode if requested
+
     if (options.enableDebug) {
       RssDebugUtils.setDebugMode(true);
     }
-    
+
+    // Check if content is JSON Feed format first
+    if (isJsonFeed(xmlString)) {
+      if (RssDebugUtils.isDebugEnabled()) {
+        RssDebugUtils.log('RSS Parser: Detected JSON Feed format');
+      }
+
+      try {
+        const items = parseJsonFeed(xmlString, {
+          fallbackImageUrl: options.fallbackImageUrl,
+          maxItems: options.maxItems,
+        });
+
+        if (RssDebugUtils.isDebugEnabled()) {
+          // eslint-disable-next-line no-console
+          console.log(`JSON Feed Parser found ${items.length} items`);
+        }
+
+        return items;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : strings.ErrorParsingFeed;
+        throw new Error(`${strings.ErrorParsingFeed}: ${errorMessage}`);
+      }
+    }
+
+    // Process as XML feed (RSS/Atom)
     try {
-      // Pre-process the XML string to handle common issues
-      const cleanedXml = this.preProcessXml(xmlString, options.preprocessingHints);
-      
+      const cleanedXml = this.preProcessXml(xmlString, options.preprocessingHints);      
       const parser = new DOMParser();
       const xml = parser.parseFromString(cleanedXml, 'application/xml');
-
-      // Debug info for parser errors
       const hasParserError = xml.querySelector('parsererror');
       const hasItems = xml.querySelectorAll('item').length > 0;
       const hasEntries = xml.querySelectorAll('entry').length > 0;
       
-      // Debug logging if enabled
       if (RssDebugUtils.isDebugEnabled()) {
         // eslint-disable-next-line no-console
         console.log(`RSS Parse Info:
@@ -59,12 +72,10 @@ export class ImprovedFeedParser {
       }
       
       if (hasParserError && !hasItems && !hasEntries) {
-        // Try to extract the error message for better debugging
         const errorMsg = hasParserError.textContent || strings.ErrorParsingFeed;
         throw new Error(`${strings.ErrorParsingFeed}: ${errorMsg.substring(0, 200)}`);
       }
 
-      // Log namespaces for debugging
       const documentElement = xml.documentElement;
       const namespaces: Record<string, string> = {};
       
@@ -83,7 +94,6 @@ export class ImprovedFeedParser {
         }
       }
       
-      // Detect feed type
       let items: IRssItem[];
       if (xml.querySelector('feed')) {
         items = this.parseAtom(xml, options);
@@ -91,24 +101,20 @@ export class ImprovedFeedParser {
         items = this.parseRss(xml, options);
       }
       
-      // Debug log the results
       if (RssDebugUtils.isDebugEnabled()) {
         // eslint-disable-next-line no-console
         console.log(`RSS Parser found ${items.length} items`);
         
-        // Analyze how many items have images
         const withImages = items.filter(i => !!i.imageUrl).length;
         // eslint-disable-next-line no-console
         console.log(`RSS Items with images: ${withImages}/${items.length}`);
         
-        // Log detailed analysis
         // eslint-disable-next-line no-console
         console.log(RssDebugUtils.analyzeRssFeed(items, 'Feed analysis'));
       }
       
       return items;
     } catch (error) {
-      // Provide more context about the error
       const errorMessage = error instanceof Error ? error.message : strings.ErrorParsingFeed;
       
       if (RssDebugUtils.isDebugEnabled()) {
@@ -120,28 +126,21 @@ export class ImprovedFeedParser {
     }
   }
   
-  /**
-   * Pre-process XML string to fix common issues in malformed feeds
-   */
   private static preProcessXml(xml: string, hints?: IFeedParserOptions['preprocessingHints']): string {
     let result = xml;
     
-    // Apply hints if provided
     const addMissingNamespaces = hints?.addMissingNamespaces ?? true;
     const addXmlDeclaration = hints?.addMissingXmlDeclaration ?? true;
     
-    // Detect if the content is actually an HTML page instead of XML/RSS
     if (result.includes('<html') && result.includes('</html>')) {
       if (RssDebugUtils.isDebugEnabled()) {
         RssDebugUtils.log('RSS Parser: Detected HTML instead of XML, attempting to extract RSS content');
       }
       
-      // Try to extract feed data from HTML (for feeds embedded in HTML pages)
       const rssMatch = result.match(/<rss[^>]*>[\s\S]*?<\/rss>/i);
       if (rssMatch) {
         result = rssMatch[0];
       } else {
-        // If no RSS tag found, look for channel section
         const channelMatch = result.match(/<channel[^>]*>[\s\S]*?<\/channel>/i);
         if (channelMatch) {
           result = `<rss version="2.0">${channelMatch[0]}</rss>`;
@@ -149,26 +148,17 @@ export class ImprovedFeedParser {
       }
     }
     
-    // IMPORTANT: Take a minimal approach to fixing feeds to avoid breaking structure
-    
-    // Step 1: Fix basics (XML declaration, entities, CDATA)
-    
-    // Replace common control characters that cause XML parsing to fail
     // eslint-disable-next-line no-control-regex
     result = result.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
     
-    // Make sure all & are properly escaped as &amp; if not in existing entities
     result = result.replace(/&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/g, '&amp;');
     
-    // Fix XML declaration if needed
     if (addXmlDeclaration && !result.trim().startsWith('<?xml')) {
       result = '<?xml version="1.0" encoding="UTF-8"?>' + result;
     }
     
-    // Fix unclosed CDATA sections
     result = result.replace(/<!\[CDATA\[((?!\]\]>).)*$/gs, '$&]]>');
     
-    // Fix invalid CDATA - replace ]]> inside CDATA with ]]&gt;
     result = result.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/gs, (match, content) => {
       if (content.includes(']]>')) {
         return `<![CDATA[${content.replace(/\]\]>/g, ']]&gt;')}]]>`;
@@ -176,29 +166,20 @@ export class ImprovedFeedParser {
       return match;
     });
     
-    // Deal with XML prolog issues that might occur with certain feeds (like Nettavisen)
-    // Sometimes feeds have multiple XML declarations or they're not at the beginning
     const xmlDeclarations = result.match(/<\?xml[^>]*\?>/g);
     if (xmlDeclarations && xmlDeclarations.length > 1) {
-      // Keep only the first XML declaration and remove others
       const firstDeclaration = xmlDeclarations[0];
       const firstIndex = result.indexOf(firstDeclaration);
       
-      // Create a new string with only one XML declaration
       result = firstDeclaration + 
                result.substring(firstIndex + firstDeclaration.length)
                     .replace(/<\?xml[^>]*\?>/g, '');
     }
     
-    // Step 2: Handle incomplete RSS structure
-    
-    // If we have a channel without rss wrapper, add the rss tags
     if (!result.includes('<rss') && result.includes('<channel>')) {
       result = result.replace(/(<channel>)/i, '<rss version="2.0">$1');
       result = result.replace(/(<\/channel>)/i, '$1</rss>');
     }
-    
-    // Step 3: Add missing namespaces if needed
     
     if (addMissingNamespaces) {
       const nsCheck = (ns: string) => !result.includes(`xmlns:${ns}=`) && 
@@ -218,51 +199,72 @@ export class ImprovedFeedParser {
       }
     }
     
-    // Step 4: Carefully fix content in description tags (without breaking the XML structure)
-    
-    // Always wrap description text in CDATA (but don't mess with existing CDATA)
     result = result.replace(/<description>(?!\s*<!\[CDATA\[)([^<][\s\S]*?)<\/description>/g, 
                           '<description><![CDATA[$1]]></description>');
-    
-    // IMPORTANT: Don't try to fix HTML tags or structure anymore - let the browser handle that
-    // Our aggressive tag fixing was breaking the RSS structure
     
     return result;
   }
   
-  // No additional cleaning functions - we're taking a minimal approach to avoid breaking XML structure
-
   /**
-   * Helper method to safely extract text from an element
-   * Handles CDATA sections and common XML quirks
+   * Safely extract text content from an XML node
+   * Handles CDATA sections and decodes XML/HTML entities
    */
-  private static safeExtractText(node: Element | null): string {
+  private static safeExtractText(node: Element | null, decodeHtml: boolean = false): string {
     if (!node) return '';
-    
+
     try {
-      // Get the raw text content
       const content = node.textContent || '';
-      
-      // Remove CDATA wrappers if present
+
+      // Strip any leftover CDATA markers (shouldn't be in textContent but be safe)
       const cdataPattern = /^(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?$/s;
       const match = content.match(cdataPattern);
-      
-      return (match ? match[1] : content).trim();
+      const rawText = (match ? match[1] : content).trim();
+
+      // Decode entities - use appropriate decoder based on content type
+      if (decodeHtml) {
+        // For content that may contain HTML (description, content:encoded)
+        return decodeEntitiesInHtml(rawText);
+      } else {
+        // For plain text fields (title, author, etc.)
+        return decodeXmlText(rawText);
+      }
     } catch {
       return '';
     }
   }
 
   /**
-   * Parse RSS feed format
+   * Normalize a date string to ISO format using robust date parsing
+   * Handles RFC 822 (RSS), RFC 3339 (Atom), and various non-standard formats
+   *
+   * @param dateStr - Raw date string from feed
+   * @returns Normalized ISO date string, or original string if parsing fails
    */
+  private static normalizeDate(dateStr: string): string {
+    if (!dateStr) return '';
+
+    // Try to parse and normalize to ISO format
+    const normalized = parseDateToIsoString(dateStr);
+    if (normalized) {
+      if (RssDebugUtils.isDebugEnabled()) {
+        const result = parseDate(dateStr);
+        RssDebugUtils.log(`Date parsed: "${dateStr}" → "${normalized}" (format: ${result.format})`);
+      }
+      return normalized;
+    }
+
+    // If parsing failed, return original string and log warning in debug mode
+    if (RssDebugUtils.isDebugEnabled()) {
+      RssDebugUtils.log(`Date parsing failed for: "${dateStr}", using original`);
+    }
+    return dateStr;
+  }
+
   private static parseRss(xml: Document, options: IFeedParserOptions): IRssItem[] {
     const rssItems: IRssItem[] = [];
     
-    // Try multiple selectors to find items in various RSS feed structures
     let itemNodes: Element[] = [];
     
-    // Try each selector in order of specificity, using the first one that returns results
     const itemSelectors = [
       'item',
       'rss > channel > item',
@@ -272,7 +274,6 @@ export class ImprovedFeedParser {
       'rss > item'
     ];
     
-    // Try each selector until we find items
     for (const selector of itemSelectors) {
       try {
         const nodes = Array.from(xml.querySelectorAll(selector));
@@ -286,12 +287,9 @@ export class ImprovedFeedParser {
       }
     }
     
-    // If still no items found, try a more generic approach
     if (itemNodes.length === 0) {
-      // Look for elements that look like news items
       const possibleItems = Array.from(xml.querySelectorAll('*'))
         .filter(el => {
-          // An element is likely an RSS item if it has title and link/guid children
           return (
             (el.querySelector('title') || el.querySelector('heading')) &&
             (el.querySelector('link') || el.querySelector('guid'))
@@ -308,16 +306,12 @@ export class ImprovedFeedParser {
       console.log(`Found ${itemNodes.length} RSS items in the feed`);
     }
     
-    // Apply maximum items limit if specified
     if (options.maxItems && options.maxItems > 0 && itemNodes.length > options.maxItems) {
       itemNodes = itemNodes.slice(0, options.maxItems);
     }
     
     itemNodes.forEach(itemNode => {
       try {
-        // --- Extract item properties with robustness ---
-        
-        // Title extraction
         let title = '';
         const titleNode = itemNode.querySelector('title') || 
                           itemNode.querySelector('heading') || 
@@ -337,22 +331,23 @@ export class ImprovedFeedParser {
           }
         }
         
-        // Publication date
+        // Publication date - extract and normalize using robust date parser (ST-003-05)
         let pubDate = '';
-        const dateNode = itemNode.querySelector('pubDate') || 
-                         itemNode.querySelector('dc\\:date') || 
+        const dateNode = itemNode.querySelector('pubDate') ||
+                         itemNode.querySelector('dc\\:date') ||
                          itemNode.querySelector('date') ||
                          itemNode.querySelector('published');
         if (dateNode) {
-          pubDate = this.safeExtractText(dateNode);
+          const rawDate = this.safeExtractText(dateNode);
+          pubDate = this.normalizeDate(rawDate);
         }
         
-        // Description extraction
-        const descNode = itemNode.querySelector('description') || 
-                         itemNode.querySelector('summary') || 
-                         itemNode.querySelector('content\\:encoded') || 
+        // Description extraction - use HTML-aware decoding for content fields
+        const descNode = itemNode.querySelector('description') ||
+                         itemNode.querySelector('summary') ||
+                         itemNode.querySelector('content\\:encoded') ||
                          itemNode.querySelector('content');
-        const descriptionText = descNode ? this.safeExtractText(descNode) : '';
+        const descriptionText = descNode ? this.safeExtractText(descNode, true) : '';
         const cleanedDescription = cleanDescription(descriptionText);
         
         // Author extraction
@@ -364,18 +359,18 @@ export class ImprovedFeedParser {
           author = this.safeExtractText(authorNode);
         }
         
-        // Image extraction
-        let rawImageUrl = findImage(itemNode);
-        
-        // If no image found at item level, try channel level as fallback
-        if (!rawImageUrl) {
-          const channelNode = itemNode.closest('channel');
-          if (channelNode) {
-            rawImageUrl = findImage(channelNode);
-          }
-        }
-        
-        const finalImageUrl = rawImageUrl ? resolveImageUrl(rawImageUrl) || rawImageUrl : options.fallbackImageUrl;
+        // Image extraction using priority chain (ST-003-04)
+        const channelNode = itemNode.closest('channel') || xml.querySelector('channel');
+        const imageOptions: ImageExtractionOptions = {
+          fallbackImageUrl: options.fallbackImageUrl,
+          channelElement: channelNode,
+        };
+        const extractedImage = extractImage(itemNode, imageOptions);
+
+        // resolveImageUrl handles proxy unwrapping and UTM removal
+        const finalImageUrl = extractedImage?.url
+          ? (resolveImageUrl(extractedImage.url) || extractedImage.url)
+          : options.fallbackImageUrl;
         
         // Extract categories
         const categories: string[] = [];
@@ -403,7 +398,6 @@ export class ImprovedFeedParser {
           }
         }
         
-        // Only add items with at least a title (don't add completely empty items)
         if (title || descriptionText) {
           rssItems.push({
             title: title,
@@ -443,14 +437,12 @@ export class ImprovedFeedParser {
 
     entryNodes.forEach(entryNode => {
       try {
-        // Title extraction
         let title = '';
         const titleNode = entryNode.querySelector('title');
         if (titleNode) {
           title = this.safeExtractText(titleNode);
         }
         
-        // Link extraction
         let linkUrl = '';
         const linkNode = entryNode.querySelector('link[rel="alternate"]') || 
                          entryNode.querySelector('link');
@@ -458,25 +450,25 @@ export class ImprovedFeedParser {
           linkUrl = linkNode.getAttribute('href') || '';
         }
         
-        // Date extraction
+        // Publication date - extract and normalize using robust date parser (ST-003-05)
         let pubDate = '';
-        const dateNode = entryNode.querySelector('published') || 
+        const dateNode = entryNode.querySelector('published') ||
                          entryNode.querySelector('updated') ||
                          entryNode.querySelector('issued');
         if (dateNode) {
-          pubDate = this.safeExtractText(dateNode);
+          const rawDate = this.safeExtractText(dateNode);
+          pubDate = this.normalizeDate(rawDate);
         }
         
-        // Content extraction
+        // Description/content extraction - use HTML-aware decoding
         let description = '';
-        const contentNode = entryNode.querySelector('content') || 
+        const contentNode = entryNode.querySelector('content') ||
                            entryNode.querySelector('summary');
         if (contentNode) {
-          description = this.safeExtractText(contentNode);
+          description = this.safeExtractText(contentNode, true);
         }
         const cleanedDescription = cleanDescription(description);
         
-        // Author extraction
         let author = '';
         const authorNode = entryNode.querySelector('author name') ||
                           entryNode.querySelector('author');
@@ -484,24 +476,19 @@ export class ImprovedFeedParser {
           author = this.safeExtractText(authorNode);
         }
                            
-        // Image extraction
-        let rawImageUrl = findImage(entryNode);
-        
-        // Alternative image finding approaches
-        if (!rawImageUrl) {
-          const mediaContent = entryNode.querySelector('media\\:content[type^="image"], content[type^="image"]');
-          if (mediaContent) {
-            rawImageUrl = mediaContent.getAttribute('url') || undefined;
-          } else if (description) {
-            // Try to extract image from content HTML
-            const imgMatch = description.match(/<img[^>]+src=["']([^"']+)["']/i);
-            if (imgMatch?.[1]) {
-              rawImageUrl = imgMatch[1];
-            }
-          }
-        }
+        // Image extraction using priority chain (ST-003-04)
+        const feedElement = xml.querySelector('feed');
+        const atomImageOptions: ImageExtractionOptions = {
+          fallbackImageUrl: options.fallbackImageUrl,
+          channelElement: feedElement, // Atom uses <feed> as channel equivalent
+        };
+        const extractedImage = extractImage(entryNode, atomImageOptions);
 
-        // Extract categories
+        // resolveImageUrl handles proxy unwrapping and UTM removal
+        const finalImageUrl = extractedImage?.url
+          ? (resolveImageUrl(extractedImage.url) || extractedImage.url)
+          : options.fallbackImageUrl;
+
         const categories: string[] = [];
         entryNode.querySelectorAll('category').forEach(categoryNode => {
           const term = categoryNode.getAttribute('term');
@@ -511,9 +498,6 @@ export class ImprovedFeedParser {
           }
         });
 
-        const finalImageUrl = rawImageUrl ? (resolveImageUrl(rawImageUrl) || rawImageUrl) : options.fallbackImageUrl;
-
-        // Only add items with at least a title or content
         if (title || description) {
           atomItems.push({
             title: title,
@@ -527,7 +511,6 @@ export class ImprovedFeedParser {
           });
         }
       } catch (error) {
-        // Skip problematic items
         if (RssDebugUtils.isDebugEnabled()) {
           // eslint-disable-next-line no-console
           console.error(`Error processing ATOM entry: ${error instanceof Error ? error.message : 'Unknown error'}`);
