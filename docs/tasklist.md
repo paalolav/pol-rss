@@ -1,7 +1,7 @@
 # POL RSS Gallery WebPart - Task List
 
 > Version: 1.3.0-dev
-> Last Updated: 2025-11-26
+> Last Updated: 2025-11-27
 > Status: In Progress
 
 ## Overview
@@ -68,24 +68,24 @@ Harden the ImprovedFeedParser for edge cases and malformed feeds. Supports RSS 1
 ---
 
 ### REF-004-ERROR-HANDLING
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 **Priority:** High
 **Reference:** [REF-004-ERROR-HANDLING.md](refs/REF-004-ERROR-HANDLING.md)
 
 Implement comprehensive error handling with user-friendly feedback.
 
-**Sub-tasks:** 8 | **Completed:** 0/8
+**Sub-tasks:** 8 | **Completed:** 8/8
 
 ---
 
 ### REF-005-CACHING-PERFORMANCE
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 **Priority:** High
 **Reference:** [REF-005-CACHING-PERFORMANCE.md](refs/REF-005-CACHING-PERFORMANCE.md)
 
 Improve caching with IndexedDB persistence and smarter invalidation.
 
-**Sub-tasks:** 7 | **Completed:** 0/7
+**Sub-tasks:** 7 | **Completed:** 7/7
 
 ---
 
@@ -177,11 +177,11 @@ Comprehensive documentation for admins and users.
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 2 | ~85% |
-| Phase 2: Core Reliability | 3 | 1 | ~33% |
+| Phase 2: Core Reliability | 3 | 3 | 100% |
 | Phase 3: UI/UX | 4 | 0 | 0% |
 | Phase 4: Features | 2 | 0 | 0% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **13** | **3** | **~31%** |
+| **Total** | **13** | **5** | **~46%** |
 
 ---
 
@@ -210,6 +210,85 @@ All Tasks ──────────────> REF-011 (Documentation)
 ---
 
 ## Changelog
+
+### 2025-11-27 (Session 9)
+- REF-005: Caching & Performance COMPLETED (7/7 sub-tasks)
+  - ST-005-01: IndexedDB Storage Layer (`indexedDbCache.ts`)
+    - Full IndexedDB wrapper with schema versioning
+    - CRUD operations with LRU support and quota handling
+    - 36 tests
+  - ST-005-02: Unified Cache Service (`unifiedCacheService.ts`)
+    - Two-tier caching: Memory L1 → IndexedDB L2
+    - Automatic promotion/demotion between layers
+    - 33 tests
+  - ST-005-03: Stale-While-Revalidate (`swrService.ts`)
+    - SWR pattern with background refresh
+    - Request deduplication to prevent thundering herd
+    - Force refresh and cache invalidation support
+    - 27 tests
+  - ST-005-04: Cache Key Management (`cacheKeyService.ts`)
+    - Deterministic key generation with URL normalization
+    - Hash-based keys for consistent caching
+    - 42 tests
+  - ST-005-05: Cache Size Management (`cacheSizeManager.ts`)
+    - LRU/LFU/TTL eviction strategies
+    - Size tracking and automatic cleanup
+    - 26 tests
+  - ST-005-06: Preloading Support (`feedPreloader.ts`)
+    - Priority queue for feed preloading
+    - Background preloading on idle
+    - Cancellation support
+    - 25 tests
+  - ST-005-07: Performance Monitoring (`performanceMonitor.ts`)
+    - Hit/miss tracking with hit rate calculation
+    - Timing stats for fetch/parse/cache operations
+    - Event logging and report generation
+    - 39 tests
+  - Total new tests: 228
+  - Total tests: 1174
+
+### 2025-11-26 (Session 8)
+- REF-004: Error Handling COMPLETED (8/8 sub-tasks)
+  - ST-004-01: Created comprehensive error type system (`errorTypes.ts`)
+    - RssErrorCode enum with 26 error codes across 4 categories
+    - RssError interface with severity, recoverability, and retryability
+    - Factory functions: createRssError, createRssErrorFromError, classifyError
+    - Utility functions: isRssError, isRetryable, isRecoverable, getRetryDelay
+  - ST-004-02: Enhanced ErrorBoundary with retry mechanism
+    - Integrated with RssError system
+    - Auto-retry with countdown timer
+    - Severity-based icons and styling
+  - ST-004-03: Created ErrorDisplay component
+    - User-friendly error messages
+    - Severity-based icons (info, warning, error, critical)
+    - Action buttons for retry and other recovery options
+  - ST-004-04: Implemented RetryService with exponential backoff
+    - Configurable retry delays and max retries
+    - Jitter support to prevent thundering herd
+    - Error-specific retry delays from error metadata
+    - Helper functions: createRetryService, withRetry
+  - ST-004-05: Created useOnlineStatus hook and OfflineBanner component
+    - Real-time online/offline detection
+    - Callbacks for online, offline, and restore events
+    - Visual offline indicator with cached content info
+  - ST-004-06: Implemented ErrorLogger service
+    - Scoped logging with createScopedLogger
+    - Memory storage with configurable limits
+    - Filtering by code, category, severity, and time
+    - Statistics tracking by category and severity
+    - URL sanitization for privacy
+  - ST-004-07: Created FeedValidator component
+    - Real-time URL format validation
+    - Feed accessibility testing with fetch
+    - Proxy fallback support for CORS issues
+    - Validation states: idle, validating, valid, warning, invalid
+    - useFeedUrlValidation hook for simpler use cases
+  - ST-004-08: Created FallbackContent component
+    - Shows cached content with staleness notice
+    - Skeleton loader during loading
+    - Empty state with configuration guidance
+  - Added 40 new FeedValidator tests (40 tests)
+  - Total tests: 946 (up from 906)
 
 ### 2025-11-26 (Session 7)
 - REF-003: Feed Parser hardening COMPLETED (10/10 sub-tasks)
