@@ -10,12 +10,14 @@
  * Or import individual modules:
  *   @import 'styles/breakpoints';
  *   @import 'styles/typography';
+ *   @import 'styles/animations';
  */
 
 // Foundation
 @import 'breakpoints';
 @import 'spacing';
 @import 'typography';
+@import 'animations';
 
 // Utilities
 @import 'accessibility';

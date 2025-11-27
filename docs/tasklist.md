@@ -103,13 +103,13 @@ Mobile-first responsive layouts with WCAG 2.1 AA accessibility. Includes SharePo
 ---
 
 ### REF-007-LAYOUT-COMPONENTS
-**Status:** `[ ]` Not Started
+**Status:** `[x]` Completed
 **Priority:** Medium
 **Reference:** [REF-007-LAYOUT-COMPONENTS.md](refs/REF-007-LAYOUT-COMPONENTS.md)
 
 Refactor layout components with shared base, skeleton loading, and animations.
 
-**Sub-tasks:** 9 | **Completed:** 0/9
+**Sub-tasks:** 9 | **Completed:** 9/9
 
 ---
 
@@ -178,10 +178,10 @@ Comprehensive documentation for admins and users.
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 2 | ~85% |
 | Phase 2: Core Reliability | 3 | 3 | 100% |
-| Phase 3: UI/UX | 4 | 0.9 | ~22% |
+| Phase 3: UI/UX | 4 | 1.9 | ~47% |
 | Phase 4: Features | 2 | 0 | 0% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **13** | **5.9** | **~51%** |
+| **Total** | **13** | **6.9** | **~57%** |
 
 ---
 
@@ -210,6 +210,66 @@ All Tasks ──────────────> REF-011 (Documentation)
 ---
 
 ## Changelog
+
+### 2025-11-27 (Session 12)
+- REF-007: Layout Components COMPLETED (9/9 sub-tasks)
+  - ST-007-01: Created Shared FeedItem Component (`components/shared/FeedItem/`)
+    - Flexible props interface for card/list/banner variants
+    - Configurable visibility for image, description, date, categories, author
+    - Title and description truncation with character and line limits
+    - Keyboard navigation (Enter/Space) for clickable items
+    - Date formatting with Norwegian locale
+    - Integration with ResponsiveImage for lazy loading
+    - Accessible markup with article element and ARIA attributes
+  - ST-007-02: Implemented Skeleton Loading Components (`components/shared/Skeleton/`)
+    - Base Skeleton with text/rectangular/circular variants
+    - CardSkeleton, ListSkeleton, BannerSkeleton layouts
+    - SkeletonGrid for rendering multiple skeleton items
+    - Wave and pulse animation styles
+    - Hidden from screen readers (aria-hidden)
+  - ST-007-08: Created Empty State Component (`components/shared/EmptyState/`)
+    - EmptyState base component with icon, title, description, action buttons
+    - Size variants (sm, md, lg)
+    - Preset components: NoItemsEmptyState, NoFeedConfiguredEmptyState, FilteredEmptyState, OfflineEmptyState
+    - Norwegian translations
+  - ST-007-07: Added Animation System (`styles/_animations.scss`)
+    - CSS custom properties for timing and easing
+    - Keyframes: fadeIn, fadeOut, slideUp/Down/Left/Right, scaleIn/Out, shimmer, spin, bounce, shake, ripple
+    - Animation mixins and utility classes
+    - Reduced motion support (@media prefers-reduced-motion)
+  - ST-007-06: Lazy Loading integrated via ResponsiveImage (from REF-006)
+  - ST-007-03: Refactored BannerCarousel (`components/layouts/BannerCarousel/`)
+    - Enhanced Swiper with Navigation, Pagination, Keyboard, A11y modules
+    - Pause on hover/focus with visual indicator
+    - Height presets (sm, md, lg, auto)
+    - Live region for screen reader announcements
+    - Uses shared FeedItem component
+    - 32 tests
+  - ST-007-04: Refactored CardLayout (`components/layouts/CardLayout/`)
+    - ResponsiveGrid integration for container-based responsive
+    - Card size presets (sm, md, lg) mapped to min widths
+    - SkeletonGrid for loading state
+    - Uses shared FeedItem component
+    - 28 tests
+  - ST-007-05: Refactored ListLayout (`components/layouts/ListLayout/`)
+    - Thumbnail position options (left, right, none)
+    - Thumbnail size presets (sm, md, lg)
+    - Compact mode and dividers options
+    - Accessible list semantics (role="list", role="listitem")
+    - Uses shared FeedItem component
+    - 36 tests
+  - ST-007-09: Comprehensive Tests
+    - FeedItem: 48 tests
+    - Skeleton: 47 tests
+    - EmptyState: 33 tests
+    - BannerCarousel: 32 tests
+    - CardLayout: 28 tests
+    - ListLayout: 36 tests
+    - Total new tests: 224
+  - New directory structure:
+    - `components/shared/` - FeedItem, Skeleton, EmptyState
+    - `components/layouts/` - BannerCarousel, CardLayout, ListLayout
+  - Total tests: 1604
 
 ### 2025-11-27 (Session 11)
 - REF-006: Responsive Design IN PROGRESS (10/11 sub-tasks)

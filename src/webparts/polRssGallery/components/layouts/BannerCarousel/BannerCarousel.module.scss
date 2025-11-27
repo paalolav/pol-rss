@@ -1,0 +1,298 @@
+/**
+ * BannerCarousel Styles
+ *
+ * Styles for the banner/carousel layout component.
+ */
+
+@import '../../../styles/index';
+
+// ============================================================
+// Container
+// ============================================================
+
+.bannerCarousel {
+  position: relative;
+  width: 100%;
+  height: var(--banner-height, 350px);
+  overflow: hidden;
+  border-radius: var(--borderRadius, 4px);
+  background-color: var(--neutralLight, #edebe9);
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+}
+
+// ============================================================
+// Navigation Buttons
+// ============================================================
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--neutralPrimary, #333);
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease, opacity 150ms ease;
+  opacity: 0;
+
+  &:hover {
+    background-color: #fff;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary, #0078d4);
+    outline-offset: 2px;
+    opacity: 1;
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  // Disabled state
+  &.swiper-button-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Icon
+  span {
+    font-size: 16px;
+    font-weight: bold;
+  }
+}
+
+.navPrev {
+  left: 16px;
+}
+
+.navNext {
+  right: 16px;
+}
+
+// Show nav on hover
+.bannerCarousel:hover .navButton,
+.bannerCarousel:focus-within .navButton {
+  opacity: 1;
+}
+
+// ============================================================
+// Pagination
+// ============================================================
+
+.pagination {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background-color: rgba(0, 0, 0, 0.5);
+
+  :global(.swiper-pagination-bullet) {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+    cursor: pointer;
+    transition: background-color 150ms ease, transform 150ms ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+  }
+
+  :global(.swiper-pagination-bullet-active) {
+    background-color: #fff;
+    transform: scale(1.2);
+  }
+}
+
+// ============================================================
+// Pause Indicator
+// ============================================================
+
+.pauseIndicator {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 14px;
+  pointer-events: none;
+  animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ============================================================
+// Screen Reader Only
+// ============================================================
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ============================================================
+// Touch Devices
+// ============================================================
+
+@media (pointer: coarse) {
+  .navButton {
+    width: 48px;
+    height: 48px;
+    opacity: 1;
+  }
+
+  .navPrev {
+    left: 8px;
+  }
+
+  .navNext {
+    right: 8px;
+  }
+}
+
+// ============================================================
+// Responsive
+// ============================================================
+
+@media (max-width: 600px) {
+  .navButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .pagination {
+    padding: 6px 10px;
+
+    :global(.swiper-pagination-bullet) {
+      width: 6px;
+      height: 6px;
+    }
+  }
+}
+
+// ============================================================
+// Accessibility
+// ============================================================
+
+// High contrast mode
+@media (forced-colors: active) {
+  .bannerCarousel {
+    border: 1px solid CanvasText;
+  }
+
+  .navButton {
+    background-color: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
+    opacity: 1;
+  }
+
+  .pagination {
+    background-color: Canvas;
+    border: 1px solid CanvasText;
+
+    :global(.swiper-pagination-bullet) {
+      border: 1px solid CanvasText;
+      background-color: Canvas;
+    }
+
+    :global(.swiper-pagination-bullet-active) {
+      background-color: CanvasText;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .navButton,
+  .pagination :global(.swiper-pagination-bullet) {
+    transition: none;
+  }
+
+  .pauseIndicator {
+    animation: none;
+  }
+
+  // Disable Swiper animations
+  .swiper :global(.swiper-wrapper) {
+    transition-duration: 0ms !important;
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .bannerCarousel {
+    height: auto;
+    max-height: 300px;
+  }
+
+  .navButton,
+  .pagination,
+  .pauseIndicator {
+    display: none;
+  }
+
+  .slide {
+    display: none;
+
+    &:first-child {
+      display: block;
+    }
+  }
+}

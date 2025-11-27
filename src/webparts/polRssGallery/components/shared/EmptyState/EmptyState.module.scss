@@ -1,0 +1,171 @@
+/**
+ * EmptyState Styles
+ *
+ * Styles for the empty state component.
+ */
+
+// ============================================================
+// Base Empty State
+// ============================================================
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 16px;
+  min-height: 200px;
+}
+
+// ============================================================
+// Size Variants
+// ============================================================
+
+.sm {
+  padding: 16px;
+  min-height: 150px;
+
+  .iconWrapper,
+  .iconEmoji {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .title {
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .description {
+    font-size: 0.8125rem;
+  }
+}
+
+.md {
+  padding: 32px 16px;
+  min-height: 200px;
+
+  .iconWrapper,
+  .iconEmoji {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+  }
+
+  .description {
+    font-size: 0.875rem;
+  }
+}
+
+.lg {
+  padding: 48px 24px;
+  min-height: 300px;
+
+  .iconWrapper,
+  .iconEmoji {
+    font-size: 64px;
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+}
+
+// ============================================================
+// Icon
+// ============================================================
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutralSecondary, #666);
+}
+
+.iconEmoji {
+  display: block;
+  line-height: 1;
+}
+
+// ============================================================
+// Title
+// ============================================================
+
+.title {
+  margin: 0;
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--neutralPrimary, #333);
+  line-height: 1.3;
+}
+
+// ============================================================
+// Description
+// ============================================================
+
+.description {
+  margin: 0;
+  color: var(--neutralSecondary, #666);
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+// ============================================================
+// Actions
+// ============================================================
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.actionButton {
+  min-width: 120px;
+}
+
+// ============================================================
+// Accessibility
+// ============================================================
+
+// High contrast mode
+@media (forced-colors: active) {
+  .emptyState {
+    border: 1px solid CanvasText;
+    border-radius: 4px;
+  }
+
+  .title,
+  .description {
+    color: CanvasText;
+  }
+}
+
+// Reduced motion (no animations needed for static component)
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .emptyState {
+    border: 1px solid #ccc;
+    background: none;
+  }
+
+  .actions {
+    display: none;
+  }
+}

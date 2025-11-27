@@ -1,0 +1,191 @@
+/**
+ * ListLayout Styles
+ *
+ * Styles for the list layout component.
+ */
+
+@import '../../../styles/index';
+
+// ============================================================
+// Container
+// ============================================================
+
+.listLayout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================
+// List Item
+// ============================================================
+
+.listItem {
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: var(--neutralLighter, #f3f2f1);
+  }
+
+  &:focus-within {
+    background-color: var(--neutralLighter, #f3f2f1);
+  }
+}
+
+// ============================================================
+// Dividers
+// ============================================================
+
+.withDividers .listItem {
+  border-bottom: 1px solid var(--neutralLight, #edebe9);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+// ============================================================
+// Compact Mode
+// ============================================================
+
+.compact .listItem {
+  // FeedItem styles will handle the compact styling via variant
+}
+
+// ============================================================
+// Thumbnail Position
+// ============================================================
+
+// Thumbnail on the right
+.thumbnailRight {
+  // FeedItem handles this - we need to override for RTL-like layout
+  :global(.feedItem) {
+    flex-direction: row-reverse;
+  }
+}
+
+// ============================================================
+// Thumbnail Sizes
+// ============================================================
+
+.thumbnailSizeSm {
+  // Small thumbnails (80px width)
+  :global(.imageLink),
+  :global(.imageWrapper) {
+    width: 80px;
+    min-width: 80px;
+  }
+}
+
+.thumbnailSizeMd {
+  // Medium thumbnails (120px width)
+  :global(.imageLink),
+  :global(.imageWrapper) {
+    width: 120px;
+    min-width: 120px;
+  }
+}
+
+.thumbnailSizeLg {
+  // Large thumbnails (160px width)
+  :global(.imageLink),
+  :global(.imageWrapper) {
+    width: 160px;
+    min-width: 160px;
+  }
+}
+
+// ============================================================
+// Touch Devices
+// ============================================================
+
+@media (pointer: coarse) {
+  .listItem {
+    // Larger touch targets are handled by FeedItem
+
+    &:hover {
+      background-color: transparent;
+    }
+
+    &:active {
+      background-color: var(--neutralLighter, #f3f2f1);
+    }
+  }
+}
+
+// ============================================================
+// Responsive
+// ============================================================
+
+@media (max-width: 480px) {
+  .thumbnailSizeLg {
+    :global(.imageLink),
+    :global(.imageWrapper) {
+      width: 100px;
+      min-width: 100px;
+    }
+  }
+
+  .thumbnailSizeMd {
+    :global(.imageLink),
+    :global(.imageWrapper) {
+      width: 80px;
+      min-width: 80px;
+    }
+  }
+}
+
+// ============================================================
+// Accessibility
+// ============================================================
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .listItem {
+    transition: none;
+  }
+}
+
+// High contrast mode
+@media (forced-colors: active) {
+  .listLayout {
+    border: 1px solid CanvasText;
+  }
+
+  .withDividers .listItem {
+    border-bottom-color: CanvasText;
+  }
+
+  .listItem {
+    &:hover,
+    &:focus-within {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .listItem {
+    break-inside: avoid;
+    border-bottom: 1px solid #ccc;
+
+    &:hover {
+      background-color: transparent;
+    }
+  }
+
+  .thumbnailSizeSm,
+  .thumbnailSizeMd,
+  .thumbnailSizeLg {
+    :global(.imageLink),
+    :global(.imageWrapper) {
+      width: 80px;
+      min-width: 80px;
+    }
+  }
+}

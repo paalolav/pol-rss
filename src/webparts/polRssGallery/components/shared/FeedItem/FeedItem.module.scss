@@ -1,0 +1,427 @@
+/**
+ * FeedItem Styles
+ *
+ * Styles for the shared FeedItem component used by all layouts.
+ * Includes variant-specific styles for card, list, and banner displays.
+ */
+
+@import '../../../styles/index';
+
+// Animation tokens
+$transition-fast: 150ms;
+$transition-normal: 250ms;
+$easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ============================================================
+// Base Feed Item
+// ============================================================
+
+.feedItem {
+  position: relative;
+  background-color: var(--backgroundColor, #fff);
+  border-radius: var(--borderRadius, 4px);
+  overflow: hidden;
+  transition: transform $transition-fast $easing-standard,
+              box-shadow $transition-fast $easing-standard;
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary, #0078d4);
+    outline-offset: 2px;
+  }
+
+  // When clickable
+  &[role="button"] {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// ============================================================
+// Image Section
+// ============================================================
+
+.imageLink,
+.imageWrapper {
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  transition: transform $transition-normal $easing-standard;
+}
+
+.feedItem:hover .image {
+  transform: scale(1.02);
+}
+
+// ============================================================
+// Content Section
+// ============================================================
+
+.content {
+  padding: var(--spacing-md, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+}
+
+// ============================================================
+// Title
+// ============================================================
+
+.title {
+  margin: 0;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: var(--font-weight-semibold, 600);
+  line-height: var(--line-height-tight, 1.3);
+}
+
+.titleLink {
+  color: var(--textColor, #333);
+  text-decoration: none;
+  transition: color $transition-fast $easing-standard;
+
+  &:hover {
+    color: var(--themePrimary, #0078d4);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary, #0078d4);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+// ============================================================
+// Meta Information
+// ============================================================
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs, 8px);
+  align-items: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--neutralSecondary, #666);
+}
+
+.date {
+  display: inline-flex;
+  align-items: center;
+}
+
+.author {
+  display: inline-flex;
+  align-items: center;
+
+  &::before {
+    content: '•';
+    margin-right: var(--spacing-xs, 8px);
+  }
+}
+
+// ============================================================
+// Description
+// ============================================================
+
+.description {
+  margin: 0;
+  font-size: var(--font-size-body, 1rem);
+  line-height: var(--line-height-relaxed, 1.6);
+  color: var(--neutralPrimary, #333);
+}
+
+// ============================================================
+// Categories
+// ============================================================
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs, 8px);
+  margin-top: auto;
+}
+
+.category {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--themePrimary, #0078d4);
+  background-color: var(--themeLighter, #deecf9);
+  border-radius: 12px;
+  transition: background-color $transition-fast $easing-standard;
+
+  &:hover {
+    background-color: var(--themeLight, #c7e0f4);
+  }
+
+  // Touch-friendly sizing
+  @media (pointer: coarse) {
+    min-height: 32px;
+    padding: 6px 14px;
+  }
+}
+
+// ============================================================
+// Card Variant
+// ============================================================
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--neutralLight, #edebe9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .imageLink,
+  .imageWrapper {
+    flex-shrink: 0;
+  }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .description {
+    flex: 1;
+  }
+}
+
+// ============================================================
+// List Variant
+// ============================================================
+
+.list {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--neutralLight, #edebe9);
+  background: transparent;
+  border-radius: 0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .imageLink,
+  .imageWrapper {
+    flex-shrink: 0;
+    width: 120px;
+    border-radius: var(--borderRadius, 4px);
+    overflow: hidden;
+  }
+
+  .content {
+    flex: 1;
+    padding: 0;
+    min-width: 0; // Allow text truncation
+  }
+
+  .title {
+    font-size: var(--font-size-body, 1rem);
+  }
+
+  .description {
+    font-size: var(--font-size-sm, 0.875rem);
+  }
+
+  // Touch-friendly list items
+  @media (pointer: coarse) {
+    padding: var(--spacing-lg, 24px) var(--spacing-md, 16px);
+
+    .imageLink,
+    .imageWrapper {
+      width: 100px;
+    }
+  }
+}
+
+// ============================================================
+// Banner Variant
+// ============================================================
+
+.banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+
+  .imageLink,
+  .imageWrapper {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.4) 40%,
+        rgba(0, 0, 0, 0) 100%
+      );
+    }
+  }
+
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .content {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    padding: var(--spacing-lg, 24px);
+    color: #fff;
+  }
+
+  .title {
+    font-size: var(--font-size-xl, 1.5rem);
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .titleLink {
+    color: #fff;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .meta {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .description {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .category {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    backdrop-filter: blur(4px);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+  }
+}
+
+// ============================================================
+// Accessibility
+// ============================================================
+
+// High contrast mode
+@media (forced-colors: active) {
+  .feedItem {
+    border: 1px solid CanvasText;
+  }
+
+  .titleLink {
+    text-decoration: underline;
+  }
+
+  .category {
+    border: 1px solid CanvasText;
+  }
+
+  .banner {
+    .imageLink::after,
+    .imageWrapper::after {
+      background: none;
+    }
+
+    .content {
+      background: Canvas;
+      color: CanvasText;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .feedItem,
+  .image,
+  .titleLink,
+  .category {
+    transition: none;
+  }
+
+  .feedItem[role="button"]:hover {
+    transform: none;
+  }
+
+  .feedItem:hover .image {
+    transform: none;
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .feedItem {
+    break-inside: avoid;
+    border: 1px solid #ccc;
+    box-shadow: none;
+  }
+
+  .banner {
+    min-height: auto;
+
+    .imageLink::after,
+    .imageWrapper::after {
+      display: none;
+    }
+
+    .content {
+      position: static;
+      color: #000;
+    }
+
+    .title,
+    .titleLink,
+    .description {
+      color: #000;
+      text-shadow: none;
+    }
+  }
+
+  .imageLink,
+  .imageWrapper {
+    max-height: 200px;
+  }
+
+  .category {
+    border: 1px solid #ccc;
+    background: none;
+  }
+}

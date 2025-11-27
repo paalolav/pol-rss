@@ -1,0 +1,259 @@
+/**
+ * Skeleton Loading Styles
+ *
+ * Styles for skeleton loading components with animations.
+ */
+
+// Animation tokens
+$skeleton-base-color: var(--neutralLight, #edebe9);
+$skeleton-highlight-color: var(--neutralLighter, #f3f2f1);
+$animation-duration: 1.5s;
+
+// ============================================================
+// Base Skeleton
+// ============================================================
+
+.skeleton {
+  background-color: $skeleton-base-color;
+  border-radius: 4px;
+
+  // Text variant
+  &.text {
+    height: 1em;
+    border-radius: 2px;
+    margin-bottom: 4px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Rectangular variant
+  &.rectangular {
+    border-radius: 4px;
+  }
+
+  // Circular variant
+  &.circular {
+    border-radius: 50%;
+  }
+
+  // Pulse animation
+  &.pulse {
+    animation: pulse $animation-duration ease-in-out infinite;
+  }
+
+  // Wave animation
+  &.wave {
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        $skeleton-highlight-color 50%,
+        transparent 100%
+      );
+      animation: wave $animation-duration ease-in-out infinite;
+    }
+  }
+
+  // No animation
+  &.none {
+    animation: none;
+  }
+}
+
+// ============================================================
+// Animations
+// ============================================================
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes wave {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// ============================================================
+// Card Skeleton
+// ============================================================
+
+.cardSkeleton {
+  background: var(--backgroundColor, #fff);
+  border: 1px solid var(--neutralLight, #edebe9);
+  border-radius: var(--borderRadius, 4px);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cardContent {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+// ============================================================
+// List Skeleton
+// ============================================================
+
+.listSkeleton {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--neutralLight, #edebe9);
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.listContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+// ============================================================
+// Banner Skeleton
+// ============================================================
+
+.bannerSkeleton {
+  position: relative;
+  border-radius: var(--borderRadius, 4px);
+  overflow: hidden;
+}
+
+.bannerBackground {
+  position: absolute;
+  inset: 0;
+}
+
+.bannerContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.5) 0%,
+    transparent 100%
+  );
+}
+
+.bannerTitle {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+// ============================================================
+// Shared Components
+// ============================================================
+
+.descriptionLines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.categoriesRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.categoryPill {
+  border-radius: 12px;
+}
+
+// ============================================================
+// Grid Layouts
+// ============================================================
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.listGrid {
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================
+// Accessibility
+// ============================================================
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    &.pulse,
+    &.wave {
+      animation: none;
+    }
+
+    &.wave::after {
+      animation: none;
+      display: none;
+    }
+  }
+}
+
+// High contrast mode
+@media (forced-colors: active) {
+  .skeleton {
+    background-color: Canvas;
+    border: 1px solid CanvasText;
+  }
+
+  .cardSkeleton,
+  .listSkeleton,
+  .bannerSkeleton {
+    border: 1px solid CanvasText;
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .skeleton,
+  .cardSkeleton,
+  .listSkeleton,
+  .bannerSkeleton {
+    display: none;
+  }
+}

@@ -1,0 +1,413 @@
+/**
+ * Animation System
+ *
+ * Consistent animation tokens and keyframes for all components.
+ * Includes reduced motion support for accessibility.
+ *
+ * Usage:
+ *   @import 'styles/animations';
+ *
+ *   .myElement {
+ *     @include animate-fadeIn;
+ *   }
+ */
+
+// ============================================================
+// Animation Tokens (CSS Custom Properties)
+// ============================================================
+
+:root {
+  // Durations
+  --transition-instant: 50ms;
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 350ms;
+  --transition-slower: 500ms;
+
+  // Easings
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --easing-sharp: cubic-bezier(0.4, 0, 0.6, 1);
+  --easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+// ============================================================
+// Keyframes
+// ============================================================
+
+// Fade animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+// Slide animations
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Scale animations
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleOut {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+// Pulse animation
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Shimmer animation (for skeletons)
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+// Spin animation
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Bounce animation
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+// Shake animation
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+// Ripple animation (for touch feedback)
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+// ============================================================
+// Animation Mixins
+// ============================================================
+
+// Base animation mixin
+@mixin animation($name, $duration: var(--transition-normal), $easing: var(--easing-decelerate), $fill-mode: forwards) {
+  animation: $name $duration $easing $fill-mode;
+}
+
+// Fade in
+@mixin animate-fadeIn($duration: var(--transition-normal)) {
+  @include animation(fadeIn, $duration);
+}
+
+// Fade out
+@mixin animate-fadeOut($duration: var(--transition-normal)) {
+  @include animation(fadeOut, $duration);
+}
+
+// Slide up
+@mixin animate-slideUp($duration: var(--transition-normal)) {
+  @include animation(slideUp, $duration);
+}
+
+// Slide down
+@mixin animate-slideDown($duration: var(--transition-normal)) {
+  @include animation(slideDown, $duration);
+}
+
+// Slide left
+@mixin animate-slideLeft($duration: var(--transition-normal)) {
+  @include animation(slideLeft, $duration);
+}
+
+// Slide right
+@mixin animate-slideRight($duration: var(--transition-normal)) {
+  @include animation(slideRight, $duration);
+}
+
+// Scale in
+@mixin animate-scaleIn($duration: var(--transition-normal)) {
+  @include animation(scaleIn, $duration);
+}
+
+// Spin
+@mixin animate-spin($duration: 1s) {
+  animation: spin $duration linear infinite;
+}
+
+// ============================================================
+// Transition Mixins
+// ============================================================
+
+// Standard transition
+@mixin transition($properties: all, $duration: var(--transition-normal), $easing: var(--easing-standard)) {
+  transition: $properties $duration $easing;
+}
+
+// Fast transition
+@mixin transition-fast($properties: all) {
+  @include transition($properties, var(--transition-fast));
+}
+
+// Slow transition
+@mixin transition-slow($properties: all) {
+  @include transition($properties, var(--transition-slow));
+}
+
+// Transform transition
+@mixin transition-transform($duration: var(--transition-normal)) {
+  @include transition(transform, $duration);
+}
+
+// Opacity transition
+@mixin transition-opacity($duration: var(--transition-normal)) {
+  @include transition(opacity, $duration);
+}
+
+// Color transition
+@mixin transition-colors($duration: var(--transition-normal)) {
+  @include transition((color, background-color, border-color), $duration);
+}
+
+// ============================================================
+// Hover Effects
+// ============================================================
+
+// Lift on hover
+@mixin hover-lift($distance: 4px, $shadow: true) {
+  @include transition((transform, box-shadow));
+
+  &:hover {
+    transform: translateY(-$distance);
+
+    @if $shadow {
+      box-shadow: 0 #{$distance * 2} #{$distance * 4} rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Scale on hover
+@mixin hover-scale($scale: 1.02) {
+  @include transition-transform;
+
+  &:hover {
+    transform: scale($scale);
+  }
+
+  &:active {
+    transform: scale(1);
+  }
+}
+
+// Brightness on hover
+@mixin hover-brighten($amount: 1.05) {
+  @include transition(filter);
+
+  &:hover {
+    filter: brightness($amount);
+  }
+}
+
+// ============================================================
+// Staggered Animations
+// ============================================================
+
+// Stagger delay for child elements
+@mixin stagger-children($base-delay: 50ms, $max-items: 10) {
+  @for $i from 1 through $max-items {
+    &:nth-child(#{$i}) {
+      animation-delay: calc(#{$base-delay} * #{$i - 1});
+    }
+  }
+}
+
+// ============================================================
+// Utility Classes
+// ============================================================
+
+.animate-fadeIn {
+  @include animate-fadeIn;
+}
+
+.animate-fadeOut {
+  @include animate-fadeOut;
+}
+
+.animate-slideUp {
+  @include animate-slideUp;
+}
+
+.animate-slideDown {
+  @include animate-slideDown;
+}
+
+.animate-slideLeft {
+  @include animate-slideLeft;
+}
+
+.animate-slideRight {
+  @include animate-slideRight;
+}
+
+.animate-scaleIn {
+  @include animate-scaleIn;
+}
+
+.animate-spin {
+  @include animate-spin;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s ease infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+// ============================================================
+// Reduced Motion Support
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  // Allow some essential animations with shorter duration
+  .animate-fadeIn,
+  .animate-fadeOut {
+    animation-duration: 100ms !important;
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
