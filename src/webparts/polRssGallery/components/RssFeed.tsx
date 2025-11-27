@@ -30,11 +30,6 @@ export interface IRssFeedProps {
   showPubDate: boolean;
   showDescription: boolean;
   maxItems: number;
-  filterByKeywords?: boolean;
-  filterKeywords?: string;
-  filterMode?: 'include' | 'exclude';
-  filterByCategory?: boolean;
-  categoryFilterMode?: 'include' | 'exclude';
   themeVariant?: IReadonlyTheme;
 }
 
@@ -250,25 +245,8 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     }
   }, [props.feedUrl]);
   
-  const filteredItems = React.useMemo(() => {
-    if (!items) return null;
-    
-    let result = [...items];
-    
-    if (props.filterByKeywords && props.filterKeywords) {
-      const keywords = props.filterKeywords.toLowerCase().split(',').map(k => k.trim()).filter(Boolean);
-      
-      if (keywords.length > 0) {
-        result = result.filter(item => {
-          const text = [item.title, item.description].filter(Boolean).join(' ').toLowerCase();
-          const matchesKeyword = keywords.some(keyword => text.includes(keyword));
-          return props.filterMode === 'include' ? matchesKeyword : !matchesKeyword;
-        });
-      }
-    }
-    
-    return result;
-  }, [items, props.filterByKeywords, props.filterKeywords, props.filterMode]);
+  // Items are used directly without filtering (filter feature removed)
+  const filteredItems = items;
 
   if (isLoading && !filteredItems && !error) {
   return (

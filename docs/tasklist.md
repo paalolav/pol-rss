@@ -223,19 +223,14 @@ All Tasks ──────────────> REF-011 (Documentation)
     - Short description (100 chars max)
     - Optimized for 1/3 column views
 - **REMOVED Categories feature**: Feature was broken and removed per user request
-  - Removed `showCategories` from:
-    - `RssFeedWebPart.ts` (interface and property pane)
-    - `RssFeed.tsx` (interface, state, and filtering logic)
-    - `layouts/ListLayout.tsx` (interface and FeedItem prop)
-    - `layouts/CardLayout.tsx` (interface, props, SkeletonGrid, FeedItem)
-    - `propertyPane/presets.ts` (all preset configurations)
-  - Removed unused code from RssFeed.tsx:
-    - `selectedCategories` state
-    - `handleCategoryToggle` callback
-    - `allCategories` useMemo
-    - Category filtering logic in `filteredItems`
+  - Removed `showCategories` from all layout components and presets
   - Shared components (FeedItem, Skeleton) retain `showCategories` with default `false` for potential future use
-- Build status: ✅ Compiles successfully (169 lint warnings, no errors)
+- **REMOVED Filter Settings (Innholdsfilter)**: Entire filter section removed from property pane
+  - Removed from `IRssFeedWebPartProps`: filterByKeywords, filterKeywords, filterMode, filterByCategory, categoryFilterMode
+  - Removed Filter Settings group from property pane configuration
+  - Removed filtering logic from `RssFeed.tsx`
+  - Cleaned up `conditionalFields.ts` to remove filter-related rules
+- Build status: ✅ Compiles successfully
 
 ### 2025-11-27 (Session 14) - Manual Testing & Bug Fixes
 - REF-006: ST-006-08 Manual Device/Browser Testing IN PROGRESS

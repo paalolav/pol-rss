@@ -5,7 +5,6 @@ import {
   PropertyPaneTextField,
   PropertyPaneToggle,
   PropertyPaneSlider,
-  PropertyPaneChoiceGroup,
   IPropertyPaneGroup
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -37,11 +36,6 @@ export interface IRssFeedWebPartProps {
   maxItems: number;
   showPubDate: boolean;
   showDescription: boolean;
-  filterByKeywords: boolean;
-  filterKeywords: string;
-  filterMode: 'include' | 'exclude';
-  filterByCategory: boolean;
-  categoryFilterMode: 'include' | 'exclude';
   proxyUrl: string;
   selectedPreset: string;
 }
@@ -83,12 +77,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showPubDate,
       showDescription,
       autoRefresh,
-      refreshInterval,
-      filterByKeywords,
-      filterKeywords,
-      filterMode,
-      filterByCategory,
-      categoryFilterMode
+      refreshInterval
     } = this.properties;
 
     // Minimal layout always hides images
@@ -108,11 +97,6 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showDescription,
       autoRefresh,
       refreshInterval: (refreshInterval || 5) * 60,
-      filterByKeywords: filterByKeywords || false,
-      filterKeywords: filterKeywords || '',
-      filterMode: filterMode || 'include',
-      filterByCategory: filterByCategory || false,
-      categoryFilterMode: categoryFilterMode || 'include',
       themeVariant: this._themeVariant
     });
 
@@ -140,7 +124,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     }
 
     // Refresh when toggles change that affect conditional fields
-    const toggleFields = ['autoRefresh', 'filterByKeywords', 'filterByCategory', 'forceFallbackImage', 'autoscroll'];
+    const toggleFields = ['autoRefresh', 'forceFallbackImage', 'autoscroll'];
     if (toggleFields.includes(propertyPath) && oldValue !== newValue) {
       this.context.propertyPane.refresh();
     }
@@ -287,43 +271,6 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
         ]
       });
     }
-
-    // Filter Settings Group
-    groups.push({
-      groupName: strings.FilterGroupName,
-      isCollapsed: false,
-      groupFields: [
-        PropertyPaneToggle('filterByKeywords', {
-          label: strings.FilterByKeywordsFieldLabel,
-          onText: strings.FilterByKeywordsOnLabel,
-          offText: strings.FilterByKeywordsOffLabel
-        }),
-        PropertyPaneTextField('filterKeywords', {
-          label: strings.FilterKeywordsFieldLabel,
-          description: strings.FilterKeywordsDescription,
-          disabled: isFieldDisabled('filterKeywords', this.properties)
-        }),
-        PropertyPaneChoiceGroup('filterMode', {
-          label: strings.FilterModeFieldLabel,
-          options: [
-            { key: 'include', text: strings.FilterModeIncludeLabel, disabled: isFieldDisabled('filterMode', this.properties) },
-            { key: 'exclude', text: strings.FilterModeExcludeLabel, disabled: isFieldDisabled('filterMode', this.properties) }
-          ]
-        }),
-        PropertyPaneToggle('filterByCategory', {
-          label: strings.FilterByCategoryFieldLabel,
-          onText: strings.FilterByCategoryOnLabel,
-          offText: strings.FilterByCategoryOffLabel
-        }),
-        PropertyPaneChoiceGroup('categoryFilterMode', {
-          label: strings.CategoryFilterModeFieldLabel,
-          options: [
-            { key: 'include', text: strings.CategoryFilterModeIncludeLabel, disabled: isFieldDisabled('categoryFilterMode', this.properties) },
-            { key: 'exclude', text: strings.CategoryFilterModeExcludeLabel, disabled: isFieldDisabled('categoryFilterMode', this.properties) }
-          ]
-        })
-      ]
-    });
 
     // Advanced Settings Group
     groups.push({

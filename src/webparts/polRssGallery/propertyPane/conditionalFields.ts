@@ -18,13 +18,6 @@ export function shouldShowField(
     autoscroll: () => properties.layout === 'banner',
     interval: () => properties.layout === 'banner' && properties.autoscroll === true,
 
-    // Filter keywords only when filtering enabled
-    filterKeywords: () => properties.filterByKeywords === true,
-    filterMode: () => properties.filterByKeywords === true,
-
-    // Category filter options only when enabled
-    categoryFilterMode: () => properties.filterByCategory === true,
-
     // Fallback image URL only when force fallback enabled
     fallbackImageUrl: () => properties.forceFallbackImage === true,
 
@@ -67,15 +60,6 @@ export function isFieldDisabled(
     // Refresh interval disabled when auto refresh is off
     refreshInterval: () => !properties.autoRefresh,
 
-    // Filter keywords disabled when filter by keywords is off
-    filterKeywords: () => !properties.filterByKeywords,
-
-    // Filter mode disabled when filter by keywords is off
-    filterMode: () => !properties.filterByKeywords,
-
-    // Category filter mode disabled when category filter is off
-    categoryFilterMode: () => !properties.filterByCategory,
-
     // Fallback URL disabled when force fallback is off
     fallbackImageUrl: () => !properties.forceFallbackImage
   };
@@ -94,8 +78,6 @@ export function getDependentFields(
     layout: ['autoscroll', 'interval'],
     autoscroll: ['interval'],
     autoRefresh: ['refreshInterval'],
-    filterByKeywords: ['filterKeywords', 'filterMode'],
-    filterByCategory: ['categoryFilterMode'],
     forceFallbackImage: ['fallbackImageUrl']
   };
 
