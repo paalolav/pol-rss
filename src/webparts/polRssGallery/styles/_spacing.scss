@@ -1,0 +1,194 @@
+/**
+ * Spacing Scale System
+ *
+ * Consistent spacing system for margins, padding, and gaps.
+ * Based on a 4px base unit for visual consistency.
+ *
+ * Usage:
+ *   @import 'styles/spacing';
+ *
+ *   .card {
+ *     padding: $spacing-4;
+ *     margin-bottom: $spacing-6;
+ *     gap: $spacing-3;
+ *   }
+ */
+
+// =============================================================================
+// Base Spacing Unit
+// =============================================================================
+
+$spacing-base: 4px;
+
+// =============================================================================
+// Spacing Scale (4px increments)
+// =============================================================================
+
+$spacing-0: 0;
+$spacing-px: 1px;
+$spacing-0-5: calc($spacing-base * 0.5);  // 2px
+$spacing-1: $spacing-base;                 // 4px
+$spacing-1-5: calc($spacing-base * 1.5);  // 6px
+$spacing-2: calc($spacing-base * 2);      // 8px
+$spacing-2-5: calc($spacing-base * 2.5);  // 10px
+$spacing-3: calc($spacing-base * 3);      // 12px
+$spacing-3-5: calc($spacing-base * 3.5);  // 14px
+$spacing-4: calc($spacing-base * 4);      // 16px
+$spacing-5: calc($spacing-base * 5);      // 20px
+$spacing-6: calc($spacing-base * 6);      // 24px
+$spacing-7: calc($spacing-base * 7);      // 28px
+$spacing-8: calc($spacing-base * 8);      // 32px
+$spacing-9: calc($spacing-base * 9);      // 36px
+$spacing-10: calc($spacing-base * 10);    // 40px
+$spacing-11: calc($spacing-base * 11);    // 44px
+$spacing-12: calc($spacing-base * 12);    // 48px
+$spacing-14: calc($spacing-base * 14);    // 56px
+$spacing-16: calc($spacing-base * 16);    // 64px
+$spacing-20: calc($spacing-base * 20);    // 80px
+$spacing-24: calc($spacing-base * 24);    // 96px
+$spacing-28: calc($spacing-base * 28);    // 112px
+$spacing-32: calc($spacing-base * 32);    // 128px
+
+// =============================================================================
+// Semantic Spacing (for common use cases)
+// =============================================================================
+
+// Inline spacing (between text elements)
+$spacing-inline-xs: $spacing-1;    // 4px
+$spacing-inline-sm: $spacing-2;    // 8px
+$spacing-inline-md: $spacing-3;    // 12px
+$spacing-inline-lg: $spacing-4;    // 16px
+
+// Stack spacing (between stacked elements)
+$spacing-stack-xs: $spacing-2;     // 8px
+$spacing-stack-sm: $spacing-3;     // 12px
+$spacing-stack-md: $spacing-4;     // 16px
+$spacing-stack-lg: $spacing-6;     // 24px
+$spacing-stack-xl: $spacing-8;     // 32px
+
+// Component padding
+$spacing-padding-xs: $spacing-2;   // 8px
+$spacing-padding-sm: $spacing-3;   // 12px
+$spacing-padding-md: $spacing-4;   // 16px
+$spacing-padding-lg: $spacing-6;   // 24px
+$spacing-padding-xl: $spacing-8;   // 32px
+
+// Card-specific spacing
+$spacing-card-padding: $spacing-4;        // 16px
+$spacing-card-padding-sm: $spacing-3;     // 12px
+$spacing-card-gap: $spacing-4;            // 16px
+
+// Touch-friendly spacing (for interactive elements)
+$spacing-touch-target: $spacing-11;       // 44px (WCAG minimum)
+
+// =============================================================================
+// Spacing Mixins
+// =============================================================================
+
+/**
+ * Apply consistent padding to a container
+ * @param {String} $size - Size variant (xs, sm, md, lg, xl)
+ */
+@mixin padding($size: 'md') {
+  @if $size == 'xs' {
+    padding: $spacing-padding-xs;
+  } @else if $size == 'sm' {
+    padding: $spacing-padding-sm;
+  } @else if $size == 'md' {
+    padding: $spacing-padding-md;
+  } @else if $size == 'lg' {
+    padding: $spacing-padding-lg;
+  } @else if $size == 'xl' {
+    padding: $spacing-padding-xl;
+  }
+}
+
+/**
+ * Apply vertical (stack) spacing between child elements
+ * @param {String} $size - Size variant (xs, sm, md, lg, xl)
+ */
+@mixin stack-spacing($size: 'md') {
+  @if $size == 'xs' {
+    gap: $spacing-stack-xs;
+  } @else if $size == 'sm' {
+    gap: $spacing-stack-sm;
+  } @else if $size == 'md' {
+    gap: $spacing-stack-md;
+  } @else if $size == 'lg' {
+    gap: $spacing-stack-lg;
+  } @else if $size == 'xl' {
+    gap: $spacing-stack-xl;
+  }
+}
+
+/**
+ * Apply inline (horizontal) spacing between child elements
+ * @param {String} $size - Size variant (xs, sm, md, lg)
+ */
+@mixin inline-spacing($size: 'md') {
+  @if $size == 'xs' {
+    gap: $spacing-inline-xs;
+  } @else if $size == 'sm' {
+    gap: $spacing-inline-sm;
+  } @else if $size == 'md' {
+    gap: $spacing-inline-md;
+  } @else if $size == 'lg' {
+    gap: $spacing-inline-lg;
+  }
+}
+
+/**
+ * Ensure element meets touch target size requirements
+ */
+@mixin touch-target {
+  min-width: $spacing-touch-target;
+  min-height: $spacing-touch-target;
+}
+
+// =============================================================================
+// CSS Custom Properties
+// =============================================================================
+
+:root {
+  // Gap custom properties (for responsive grids)
+  --gap-xs: #{$spacing-1};
+  --gap-sm: #{$spacing-2};
+  --gap-md: #{$spacing-4};
+  --gap-lg: #{$spacing-6};
+  --gap-xl: #{$spacing-8};
+
+  // Padding custom properties
+  --padding-xs: #{$spacing-2};
+  --padding-sm: #{$spacing-3};
+  --padding-md: #{$spacing-4};
+  --padding-lg: #{$spacing-6};
+  --padding-xl: #{$spacing-8};
+}
+
+// =============================================================================
+// Responsive Spacing Adjustments
+// =============================================================================
+
+@media (max-width: 480px) {
+  :root {
+    // Slightly reduce spacing on mobile
+    --gap-lg: #{$spacing-5};
+    --gap-xl: #{$spacing-6};
+    --padding-lg: #{$spacing-5};
+    --padding-xl: #{$spacing-6};
+  }
+}
+
+// =============================================================================
+// Print Spacing
+// =============================================================================
+
+@media print {
+  :root {
+    // Minimal spacing for print
+    --gap-md: 0.5rem;
+    --gap-lg: 0.75rem;
+    --padding-md: 0.5rem;
+    --padding-lg: 0.75rem;
+  }
+}

@@ -1,0 +1,340 @@
+/**
+ * Accessibility Utilities
+ *
+ * WCAG 2.1 AA compliant utilities for focus states, screen reader support,
+ * and keyboard navigation.
+ *
+ * Usage:
+ *   @import 'styles/accessibility';
+ *
+ *   .button {
+ *     @include focus-visible;
+ *   }
+ *
+ *   .hidden-label {
+ *     @include sr-only;
+ *   }
+ */
+
+// =============================================================================
+// Focus State Variables
+// =============================================================================
+
+$focus-ring-color: var(--themePrimary, #0078d4);
+$focus-ring-width: 2px;
+$focus-ring-offset: 2px;
+$focus-ring-style: solid;
+
+// =============================================================================
+// Screen Reader Only
+// =============================================================================
+
+/**
+ * Visually hide content but keep it accessible to screen readers
+ */
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/**
+ * Undo sr-only (for skip links that become visible on focus)
+ */
+@mixin not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/**
+ * Screen reader only, but visible when focused (for skip links)
+ */
+@mixin sr-only-focusable {
+  @include sr-only;
+
+  &:focus,
+  &:focus-visible {
+    @include not-sr-only;
+  }
+}
+
+// =============================================================================
+// Focus Indicators
+// =============================================================================
+
+/**
+ * Standard focus ring using :focus-visible
+ * Only shows focus ring for keyboard navigation, not mouse clicks
+ */
+@mixin focus-visible {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: $focus-ring-width $focus-ring-style $focus-ring-color;
+    outline-offset: $focus-ring-offset;
+  }
+}
+
+/**
+ * Focus ring that always shows (for accessibility testing)
+ */
+@mixin focus-always {
+  &:focus {
+    outline: $focus-ring-width $focus-ring-style $focus-ring-color;
+    outline-offset: $focus-ring-offset;
+  }
+}
+
+/**
+ * Inset focus ring (for elements with rounded borders)
+ */
+@mixin focus-visible-inset {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: $focus-ring-width $focus-ring-style $focus-ring-color;
+    outline-offset: -$focus-ring-offset;
+  }
+}
+
+/**
+ * Focus ring using box-shadow (preserves border-radius)
+ */
+@mixin focus-shadow {
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 $focus-ring-width $focus-ring-color;
+  }
+}
+
+// =============================================================================
+// Touch Targets
+// =============================================================================
+
+$touch-target-min: 44px; // WCAG 2.1 AA minimum
+
+/**
+ * Ensure element meets minimum touch target size
+ */
+@mixin touch-target {
+  min-width: $touch-target-min;
+  min-height: $touch-target-min;
+}
+
+/**
+ * Expand clickable area without changing visual size
+ */
+@mixin touch-target-expand {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: $touch-target-min;
+    height: $touch-target-min;
+    min-width: 100%;
+    min-height: 100%;
+  }
+}
+
+// =============================================================================
+// Color Contrast
+// =============================================================================
+
+/**
+ * Ensure text has sufficient contrast
+ * Use with SharePoint theme variables
+ */
+@mixin high-contrast-text {
+  color: var(--neutralPrimary, #323130);
+  background-color: var(--white, #ffffff);
+}
+
+/**
+ * Ensure links are distinguishable from text
+ */
+@mixin accessible-link {
+  color: var(--themePrimary, #0078d4);
+  text-decoration: underline;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+// =============================================================================
+// Motion Preferences
+// =============================================================================
+
+/**
+ * Respect reduced motion preference
+ */
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/**
+ * Apply animation only when user hasn't requested reduced motion
+ */
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+// =============================================================================
+// Keyboard Navigation
+// =============================================================================
+
+/**
+ * Skip link styles (visible on focus)
+ */
+@mixin skip-link {
+  @include sr-only;
+  @include focus-visible;
+
+  &:focus,
+  &:focus-visible {
+    @include not-sr-only;
+    position: fixed;
+    top: $focus-ring-offset;
+    left: $focus-ring-offset;
+    z-index: 9999;
+    padding: 8px 16px;
+    background-color: var(--white, #ffffff);
+    color: var(--themePrimary, #0078d4);
+    font-weight: 600;
+    text-decoration: none;
+    border: $focus-ring-width $focus-ring-style $focus-ring-color;
+    border-radius: 2px;
+  }
+}
+
+// =============================================================================
+// ARIA Live Regions
+// =============================================================================
+
+/**
+ * Styles for live region announcements
+ */
+@mixin live-region {
+  @include sr-only;
+}
+
+/**
+ * Visible live region (for toast notifications, etc.)
+ */
+@mixin live-region-visible {
+  position: relative;
+  // Content styling handled by component
+}
+
+// =============================================================================
+// High Contrast Mode Support
+// =============================================================================
+
+/**
+ * Ensure visibility in Windows High Contrast mode
+ */
+@mixin high-contrast-support {
+  @media (forced-colors: active) {
+    // Use system colors
+    color: CanvasText;
+    background-color: Canvas;
+    border-color: CanvasText;
+
+    // Ensure focus is visible
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid Highlight;
+      outline-offset: 2px;
+    }
+  }
+}
+
+/**
+ * Ensure buttons are visible in high contrast mode
+ */
+@mixin high-contrast-button {
+  @media (forced-colors: active) {
+    border: 2px solid ButtonText;
+    background-color: ButtonFace;
+    color: ButtonText;
+
+    &:hover {
+      background-color: Highlight;
+      color: HighlightText;
+      border-color: Highlight;
+    }
+
+    &:focus-visible {
+      outline: 3px solid Highlight;
+      outline-offset: 2px;
+    }
+
+    &:disabled {
+      color: GrayText;
+      border-color: GrayText;
+    }
+  }
+}
+
+/**
+ * Ensure images have visible borders in high contrast mode
+ */
+@mixin high-contrast-image {
+  @media (forced-colors: active) {
+    border: 1px solid CanvasText;
+  }
+}
+
+// =============================================================================
+// Utility Classes
+// =============================================================================
+
+.sr-only {
+  @include sr-only;
+}
+
+.sr-only-focusable {
+  @include sr-only-focusable;
+}
+
+.focus-visible {
+  @include focus-visible;
+}
+
+.touch-target {
+  @include touch-target;
+}
+
+.reduced-motion {
+  @include reduced-motion;
+}

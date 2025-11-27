@@ -1,0 +1,346 @@
+/**
+ * Typography Scale System
+ *
+ * A responsive typography system using CSS clamp for fluid sizing.
+ * Respects user font size preferences and provides consistent hierarchy.
+ *
+ * Usage:
+ *   @import 'styles/typography';
+ *
+ *   .heading {
+ *     @include heading-xl;
+ *   }
+ *
+ *   .body {
+ *     @include body-text;
+ *   }
+ */
+
+// =============================================================================
+// Base Typography Variables
+// =============================================================================
+
+// Font stacks (SharePoint-compatible)
+$font-family-base: 'Segoe UI', 'Segoe UI Web (West European)', -apple-system,
+  BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+$font-family-mono: 'Consolas', 'Courier New', monospace;
+
+// Base font size (browser default is usually 16px)
+$font-size-root: 1rem;
+
+// Font weights
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// =============================================================================
+// Fluid Font Size Scale
+// Uses clamp() for smooth scaling between breakpoints
+// Format: clamp(min, preferred, max)
+// =============================================================================
+
+// Caption/Small text
+$font-size-xs: clamp(0.6875rem, 0.65rem + 0.1875vw, 0.75rem); // 11px - 12px
+
+// Small body text
+$font-size-sm: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem); // 12px - 14px
+
+// Body text (default)
+$font-size-md: clamp(0.875rem, 0.825rem + 0.25vw, 1rem); // 14px - 16px
+
+// Large body / Small heading
+$font-size-lg: clamp(1rem, 0.95rem + 0.25vw, 1.125rem); // 16px - 18px
+
+// Heading levels
+$font-size-xl: clamp(1.125rem, 1.05rem + 0.375vw, 1.375rem); // 18px - 22px
+$font-size-2xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.625rem); // 20px - 26px
+$font-size-3xl: clamp(1.5rem, 1.35rem + 0.75vw, 2rem); // 24px - 32px
+$font-size-4xl: clamp(1.875rem, 1.65rem + 1.125vw, 2.5rem); // 30px - 40px
+
+// =============================================================================
+// Line Heights
+// =============================================================================
+
+$line-height-none: 1;
+$line-height-tight: 1.2;
+$line-height-snug: 1.375;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.625;
+$line-height-loose: 2;
+
+// =============================================================================
+// Letter Spacing
+// =============================================================================
+
+$letter-spacing-tighter: -0.05em;
+$letter-spacing-tight: -0.025em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.025em;
+$letter-spacing-wider: 0.05em;
+$letter-spacing-widest: 0.1em;
+
+// =============================================================================
+// Typography Mixins
+// =============================================================================
+
+/**
+ * Base text styles - applies font family and resets
+ */
+@mixin text-base {
+  font-family: $font-family-base;
+  font-weight: $font-weight-regular;
+  letter-spacing: $letter-spacing-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/**
+ * Truncate text with ellipsis
+ */
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
+ * Multi-line text truncate with -webkit-line-clamp
+ * @param {Number} $lines - Number of lines before truncating
+ */
+@mixin text-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// =============================================================================
+// Heading Styles
+// =============================================================================
+
+/**
+ * Extra large heading (page title)
+ */
+@mixin heading-4xl {
+  @include text-base;
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  letter-spacing: $letter-spacing-tight;
+}
+
+/**
+ * Large heading (section title)
+ */
+@mixin heading-3xl {
+  @include text-base;
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  letter-spacing: $letter-spacing-tight;
+}
+
+/**
+ * Medium heading (subsection)
+ */
+@mixin heading-2xl {
+  @include text-base;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-snug;
+}
+
+/**
+ * Small heading (card title, article title)
+ */
+@mixin heading-xl {
+  @include text-base;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-snug;
+}
+
+/**
+ * XS heading (list item title)
+ */
+@mixin heading-lg {
+  @include text-base;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+}
+
+// =============================================================================
+// Body Text Styles
+// =============================================================================
+
+/**
+ * Default body text
+ */
+@mixin body-text {
+  @include text-base;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-normal;
+}
+
+/**
+ * Large body text (lead paragraph)
+ */
+@mixin body-large {
+  @include text-base;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-relaxed;
+}
+
+/**
+ * Small body text
+ */
+@mixin body-small {
+  @include text-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-normal;
+}
+
+/**
+ * Caption/metadata text
+ */
+@mixin caption {
+  @include text-base;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-normal;
+  color: var(--neutralSecondary);
+}
+
+/**
+ * Label text (form labels, metadata labels)
+ */
+@mixin label {
+  @include text-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-normal;
+  text-transform: none;
+}
+
+// =============================================================================
+// Link Styles
+// =============================================================================
+
+/**
+ * Default link style
+ */
+@mixin link {
+  color: var(--themePrimary);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: var(--themeDarker);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    color: var(--themeDarkAlt);
+  }
+}
+
+/**
+ * Subtle link (less prominent)
+ */
+@mixin link-subtle {
+  color: var(--neutralSecondary);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    color: var(--themePrimary);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary);
+    outline-offset: 2px;
+  }
+}
+
+// =============================================================================
+// Utility Classes (optional - generate with SCSS)
+// =============================================================================
+
+/**
+ * Generate typography utility classes
+ * Uncomment to include in your stylesheets
+ */
+
+// .text-xs { font-size: $font-size-xs; }
+// .text-sm { font-size: $font-size-sm; }
+// .text-md { font-size: $font-size-md; }
+// .text-lg { font-size: $font-size-lg; }
+// .text-xl { font-size: $font-size-xl; }
+// .text-2xl { font-size: $font-size-2xl; }
+// .text-3xl { font-size: $font-size-3xl; }
+// .text-4xl { font-size: $font-size-4xl; }
+
+// .font-light { font-weight: $font-weight-light; }
+// .font-normal { font-weight: $font-weight-regular; }
+// .font-medium { font-weight: $font-weight-medium; }
+// .font-semibold { font-weight: $font-weight-semibold; }
+// .font-bold { font-weight: $font-weight-bold; }
+
+// .leading-none { line-height: $line-height-none; }
+// .leading-tight { line-height: $line-height-tight; }
+// .leading-snug { line-height: $line-height-snug; }
+// .leading-normal { line-height: $line-height-normal; }
+// .leading-relaxed { line-height: $line-height-relaxed; }
+// .leading-loose { line-height: $line-height-loose; }
+
+// =============================================================================
+// Print Typography
+// =============================================================================
+
+@media print {
+  // Use static font sizes for print
+  :root {
+    font-size: 12pt;
+  }
+
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+}
+
+// =============================================================================
+// High Contrast Mode
+// =============================================================================
+
+@media (forced-colors: active) {
+  // Ensure text is visible in high contrast mode
+  a {
+    text-decoration: underline;
+  }
+}

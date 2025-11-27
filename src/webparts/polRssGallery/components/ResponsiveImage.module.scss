@@ -1,0 +1,163 @@
+/**
+ * ResponsiveImage Styles
+ *
+ * Styles for responsive images with lazy loading,
+ * aspect ratio preservation, and fallback states.
+ */
+
+.imageContainer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--neutralLighter, #f3f2f1);
+  width: 100%;
+}
+
+.hasAspectRatio {
+  height: 0;
+
+  .image,
+  .skeleton,
+  .error,
+  .placeholderContent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.loaded {
+  opacity: 1;
+}
+
+.fadeIn {
+  animation: imageLoad 0.3s ease-out;
+}
+
+@keyframes imageLoad {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Skeleton loader
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--neutralLight, #edebe9) 25%,
+    var(--neutralLighter, #f3f2f1) 50%,
+    var(--neutralLight, #edebe9) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Error state
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--neutralLighter, #f3f2f1);
+  color: var(--neutralSecondary, #605e5c);
+}
+
+.errorIcon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.errorText {
+  font-size: 0.875rem;
+}
+
+// Placeholder state
+.placeholder {
+  background-color: var(--neutralLighter, #f3f2f1);
+}
+
+.placeholderContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholderIcon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+
+  .fadeIn {
+    animation: none;
+  }
+
+  .skeleton {
+    animation: none;
+    background: var(--neutralLight, #edebe9);
+  }
+}
+
+// High contrast mode
+@media (forced-colors: active) {
+  .imageContainer {
+    border: 1px solid CanvasText;
+  }
+
+  .error,
+  .placeholder {
+    background-color: Canvas;
+    color: CanvasText;
+  }
+
+  .skeleton {
+    background: ButtonFace;
+    animation: none;
+  }
+}
+
+// Print styles
+@media print {
+  .skeleton {
+    display: none;
+  }
+
+  .image {
+    opacity: 1;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .error {
+    border: 1px solid #ccc;
+  }
+}

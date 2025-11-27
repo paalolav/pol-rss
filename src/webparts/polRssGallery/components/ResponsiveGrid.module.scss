@@ -1,0 +1,96 @@
+/**
+ * ResponsiveGrid Styles
+ *
+ * CSS Grid layout with auto-fit for responsive column sizing.
+ * Uses CSS custom properties for runtime configuration.
+ */
+
+// Default gap values (can be overridden by SharePoint theme)
+:root {
+  --gap-xs: 4px;
+  --gap-sm: 8px;
+  --gap-md: 16px;
+  --gap-lg: 24px;
+  --gap-xl: 32px;
+}
+
+.responsiveGrid {
+  display: grid;
+  width: 100%;
+
+  // Auto-fit columns with minimum width
+  // Uses min(100%, minItemWidth) to handle narrow containers
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(100%, var(--min-item-width, 280px)), 1fr)
+  );
+
+  gap: var(--grid-gap, 16px);
+
+  // Limit maximum columns using container queries or JS
+  // When JS provides --max-columns, respect it
+  @supports (container-type: inline-size) {
+    container-type: inline-size;
+  }
+
+  // Animation for layout changes
+  & > * {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+// Centered variant - for when items don't fill a row
+.centered {
+  justify-content: center;
+}
+
+// Grid item base styles
+.gridItem {
+  min-width: 0; // Prevent grid blowout
+  width: 100%;
+}
+
+// Fade-in animation for grid items
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive gap adjustments
+@media (max-width: 480px) {
+  .responsiveGrid {
+    --gap-md: 12px;
+    --gap-lg: 16px;
+    --gap-xl: 20px;
+  }
+}
+
+// Print styles - single column for printing
+@media print {
+  .responsiveGrid {
+    display: block !important;
+
+    & > * {
+      margin-bottom: 1rem;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+  }
+}
+
+// High contrast mode adjustments
+@media (forced-colors: active) {
+  .responsiveGrid {
+    gap: 2px;
+  }
+
+  .gridItem {
+    border: 1px solid CanvasText;
+  }
+}

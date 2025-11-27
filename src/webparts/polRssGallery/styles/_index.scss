@@ -1,0 +1,21 @@
+/**
+ * Main Styles Index
+ *
+ * Import all SCSS partials in the correct order.
+ * Import this file in your main component stylesheet.
+ *
+ * Usage:
+ *   @import 'styles/index';
+ *
+ * Or import individual modules:
+ *   @import 'styles/breakpoints';
+ *   @import 'styles/typography';
+ */
+
+// Foundation
+@import 'breakpoints';
+@import 'spacing';
+@import 'typography';
+
+// Utilities
+@import 'accessibility';

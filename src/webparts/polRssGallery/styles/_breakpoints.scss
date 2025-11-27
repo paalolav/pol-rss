@@ -1,0 +1,274 @@
+/**
+ * Responsive Breakpoints SCSS
+ *
+ * Provides SCSS mixins and variables for responsive design.
+ * Values aligned with TypeScript breakpoints.ts for consistency.
+ *
+ * Usage:
+ *   @import 'styles/breakpoints';
+ *
+ *   .card {
+ *     width: 100%;
+ *
+ *     @include respond-to(md) {
+ *       width: 50%;
+ *     }
+ *
+ *     @include respond-to(lg) {
+ *       width: 33.333%;
+ *     }
+ *   }
+ */
+
+// =============================================================================
+// Breakpoint Values
+// =============================================================================
+
+$breakpoint-xs: 320px;   // Small phones
+$breakpoint-sm: 480px;   // Phones
+$breakpoint-md: 768px;   // Tablets / SharePoint 1-column max
+$breakpoint-lg: 1024px;  // Small laptops
+$breakpoint-xl: 1280px;  // Desktops
+$breakpoint-xxl: 1440px; // Large desktops
+
+// Breakpoint map for mixin usage
+$breakpoints: (
+  'xs': $breakpoint-xs,
+  'sm': $breakpoint-sm,
+  'md': $breakpoint-md,
+  'lg': $breakpoint-lg,
+  'xl': $breakpoint-xl,
+  'xxl': $breakpoint-xxl
+);
+
+// Container breakpoints for SharePoint column layouts
+$container-narrow: 256px;      // 3-column section
+$container-compact: 384px;     // 2-column section
+$container-standard: 768px;    // 1-column section
+$container-wide: 1200px;       // Full-width (not max)
+$container-full-width: 1440px; // Full-width section on large screens
+
+// =============================================================================
+// Responsive Mixins
+// =============================================================================
+
+/**
+ * Respond to a minimum width breakpoint (mobile-first)
+ * @param {String} $breakpoint - Breakpoint name (xs, sm, md, lg, xl, xxl)
+ */
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+/**
+ * Respond to a maximum width breakpoint (desktop-first)
+ * @param {String} $breakpoint - Breakpoint name (xs, sm, md, lg, xl, xxl)
+ */
+@mixin respond-below($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (max-width: #{map-get($breakpoints, $breakpoint) - 1px}) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+/**
+ * Respond between two breakpoints
+ * @param {String} $lower - Lower breakpoint name (inclusive)
+ * @param {String} $upper - Upper breakpoint name (exclusive)
+ */
+@mixin respond-between($lower, $upper) {
+  @if map-has-key($breakpoints, $lower) and map-has-key($breakpoints, $upper) {
+    @media (min-width: map-get($breakpoints, $lower)) and (max-width: #{map-get($breakpoints, $upper) - 1px}) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoints: #{$lower} or #{$upper}";
+  }
+}
+
+/**
+ * Target only a specific breakpoint range
+ * @param {String} $breakpoint - Breakpoint name
+ */
+@mixin respond-only($breakpoint) {
+  $breakpoint-names: ('xs', 'sm', 'md', 'lg', 'xl', 'xxl');
+  $index: index($breakpoint-names, $breakpoint);
+
+  @if $index {
+    $min: map-get($breakpoints, $breakpoint);
+
+    @if $index < length($breakpoint-names) {
+      $next: nth($breakpoint-names, $index + 1);
+      $max: map-get($breakpoints, $next) - 1px;
+
+      @media (min-width: $min) and (max-width: $max) {
+        @content;
+      }
+    } @else {
+      // Last breakpoint (xxl) - no upper bound
+      @media (min-width: $min) {
+        @content;
+      }
+    }
+  } @else {
+    @warn "Unknown breakpoint: #{$breakpoint}";
+  }
+}
+
+// =============================================================================
+// Device-Type Convenience Mixins
+// =============================================================================
+
+/**
+ * Target mobile devices (below sm breakpoint)
+ */
+@mixin mobile-only {
+  @include respond-below(sm) {
+    @content;
+  }
+}
+
+/**
+ * Target tablet devices (sm to lg breakpoint)
+ */
+@mixin tablet-only {
+  @include respond-between(sm, lg) {
+    @content;
+  }
+}
+
+/**
+ * Target desktop devices (lg and above)
+ */
+@mixin desktop-only {
+  @include respond-to(lg) {
+    @content;
+  }
+}
+
+/**
+ * Target touch devices (typically below lg)
+ */
+@mixin touch-device {
+  @include respond-below(lg) {
+    @content;
+  }
+}
+
+// =============================================================================
+// Container-Based Mixins
+// =============================================================================
+
+/**
+ * Respond based on container width using CSS container queries
+ * Note: Requires container-type: inline-size on parent element
+ * @param {Number} $min-width - Minimum container width
+ */
+@mixin container-min($min-width) {
+  @container (min-width: #{$min-width}) {
+    @content;
+  }
+}
+
+/**
+ * Respond based on container width for narrow containers (3-column section)
+ */
+@mixin container-narrow {
+  @container (max-width: #{$container-compact - 1px}) {
+    @content;
+  }
+}
+
+/**
+ * Respond based on container width for compact containers (2-column section)
+ */
+@mixin container-compact {
+  @container (min-width: #{$container-compact}) and (max-width: #{$container-standard - 1px}) {
+    @content;
+  }
+}
+
+/**
+ * Respond based on container width for standard containers (1-column section)
+ */
+@mixin container-standard {
+  @container (min-width: #{$container-standard}) {
+    @content;
+  }
+}
+
+// =============================================================================
+// Utility Classes Generator
+// =============================================================================
+
+/**
+ * Generate responsive utility classes
+ * Usage: @include generate-responsive-utilities('.hide', display, none);
+ * Generates: .hide, .hide-sm, .hide-md, etc.
+ */
+@mixin generate-responsive-utilities($class, $property, $value) {
+  #{$class} {
+    #{$property}: $value;
+  }
+
+  @each $name, $width in $breakpoints {
+    @media (min-width: $width) {
+      #{$class}-#{$name} {
+        #{$property}: $value;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Visibility Helpers
+// =============================================================================
+
+/**
+ * Show only on specific breakpoint and above
+ */
+@mixin show-from($breakpoint) {
+  display: none;
+
+  @include respond-to($breakpoint) {
+    display: block;
+  }
+}
+
+/**
+ * Hide on specific breakpoint and above
+ */
+@mixin hide-from($breakpoint) {
+  @include respond-to($breakpoint) {
+    display: none;
+  }
+}
+
+/**
+ * Show only below specific breakpoint
+ */
+@mixin show-below($breakpoint) {
+  @include respond-to($breakpoint) {
+    display: none;
+  }
+}
+
+/**
+ * Hide below specific breakpoint
+ */
+@mixin hide-below($breakpoint) {
+  display: none;
+
+  @include respond-to($breakpoint) {
+    display: block;
+  }
+}
