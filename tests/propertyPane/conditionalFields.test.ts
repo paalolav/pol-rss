@@ -24,16 +24,10 @@ describe('Property Pane Conditional Fields', () => {
     maxItems: 6,
     showPubDate: true,
     showDescription: true,
-    filterByKeywords: false,
-    filterKeywords: '',
-    filterMode: 'include',
-    showCategories: false,
-    filterByCategory: false,
-    categoryFilterMode: 'include',
     proxyUrl: '',
     selectedPreset: 'custom',
     ...overrides
-  });
+  } as IRssFeedWebPartProps);
 
   describe('shouldShowField', () => {
     describe('carousel fields', () => {
@@ -50,22 +44,7 @@ describe('Property Pane Conditional Fields', () => {
       });
     });
 
-    describe('filter fields', () => {
-      it('should show filterKeywords only when filterByKeywords is enabled', () => {
-        expect(shouldShowField('filterKeywords', createDefaultProps({ filterByKeywords: true }))).toBe(true);
-        expect(shouldShowField('filterKeywords', createDefaultProps({ filterByKeywords: false }))).toBe(false);
-      });
-
-      it('should show filterMode only when filterByKeywords is enabled', () => {
-        expect(shouldShowField('filterMode', createDefaultProps({ filterByKeywords: true }))).toBe(true);
-        expect(shouldShowField('filterMode', createDefaultProps({ filterByKeywords: false }))).toBe(false);
-      });
-
-      it('should show categoryFilterMode only when filterByCategory is enabled', () => {
-        expect(shouldShowField('categoryFilterMode', createDefaultProps({ filterByCategory: true }))).toBe(true);
-        expect(shouldShowField('categoryFilterMode', createDefaultProps({ filterByCategory: false }))).toBe(false);
-      });
-    });
+    // Note: Filter fields were removed from the webpart in Session 15
 
     describe('image fields', () => {
       it('should show fallbackImageUrl only when forceFallbackImage is enabled', () => {
@@ -132,35 +111,7 @@ describe('Property Pane Conditional Fields', () => {
       });
     });
 
-    describe('filterKeywords field', () => {
-      it('should be disabled when filterByKeywords is off', () => {
-        expect(isFieldDisabled('filterKeywords', createDefaultProps({ filterByKeywords: false }))).toBe(true);
-      });
-
-      it('should be enabled when filterByKeywords is on', () => {
-        expect(isFieldDisabled('filterKeywords', createDefaultProps({ filterByKeywords: true }))).toBe(false);
-      });
-    });
-
-    describe('filterMode field', () => {
-      it('should be disabled when filterByKeywords is off', () => {
-        expect(isFieldDisabled('filterMode', createDefaultProps({ filterByKeywords: false }))).toBe(true);
-      });
-
-      it('should be enabled when filterByKeywords is on', () => {
-        expect(isFieldDisabled('filterMode', createDefaultProps({ filterByKeywords: true }))).toBe(false);
-      });
-    });
-
-    describe('categoryFilterMode field', () => {
-      it('should be disabled when filterByCategory is off', () => {
-        expect(isFieldDisabled('categoryFilterMode', createDefaultProps({ filterByCategory: false }))).toBe(true);
-      });
-
-      it('should be enabled when filterByCategory is on', () => {
-        expect(isFieldDisabled('categoryFilterMode', createDefaultProps({ filterByCategory: true }))).toBe(false);
-      });
-    });
+    // Note: Filter field disabled rules were removed in Session 15
 
     describe('fallbackImageUrl field', () => {
       it('should be disabled when forceFallbackImage is off', () => {
@@ -199,16 +150,7 @@ describe('Property Pane Conditional Fields', () => {
       expect(deps).toContain('refreshInterval');
     });
 
-    it('should return dependent fields for filterByKeywords', () => {
-      const deps = getDependentFields('filterByKeywords');
-      expect(deps).toContain('filterKeywords');
-      expect(deps).toContain('filterMode');
-    });
-
-    it('should return dependent fields for filterByCategory', () => {
-      const deps = getDependentFields('filterByCategory');
-      expect(deps).toContain('categoryFilterMode');
-    });
+    // Note: Filter dependent fields were removed in Session 15
 
     it('should return dependent fields for forceFallbackImage', () => {
       const deps = getDependentFields('forceFallbackImage');

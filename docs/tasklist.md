@@ -211,6 +211,24 @@ All Tasks ──────────────> REF-011 (Documentation)
 
 ## Changelog
 
+### 2025-11-28 (Session 19) - Test Suite Fixes
+- **All 1638 tests now passing** (was 15 failing)
+- Fixed tests broken by feature removals (filter, categories):
+  - `conditionalFields.test.ts`: Removed filter field tests (filterByKeywords, categoryFilterMode)
+  - `presets.test.ts`: Removed showCategories expectations
+  - `RssFeed.test.tsx`: Removed category and keyword filtering tests
+- Fixed `BannerCarousel.test.tsx`:
+  - Updated default height expectation (md = 500px, not 350px)
+  - Removed pause indicator tests (feature removed in Session 16)
+- Fixed `RssFeed.test.tsx` Swiper ESM import error:
+  - Added Swiper mocks (swiper/react, swiper/modules, swiper/css)
+  - Fixed layout component mock paths (layouts/BannerCarousel, etc.)
+  - Added MinimalLayout mock
+- Fixed `FeedValidator.test.tsx`:
+  - Fixed ImprovedFeedParser mock to use static method pattern
+- Excluded E2E tests from Jest:
+  - Added `/tests/e2e/` to testPathIgnorePatterns in jest.config.js
+
 ### 2025-11-28 (Session 18) - E2E Testing with Playwright
 - REF-001: Testing Infrastructure COMPLETED (9/9 sub-tasks)
   - ST-001-09: Implemented E2E Testing with Playwright

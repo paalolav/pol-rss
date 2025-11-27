@@ -25,16 +25,10 @@ describe('Property Pane Presets', () => {
     maxItems: 6,
     showPubDate: true,
     showDescription: true,
-    filterByKeywords: false,
-    filterKeywords: '',
-    filterMode: 'include',
-    showCategories: false,
-    filterByCategory: false,
-    categoryFilterMode: 'include',
     proxyUrl: '',
     selectedPreset: 'custom',
     ...overrides
-  });
+  } as IRssFeedWebPartProps);
 
   describe('presets array', () => {
     it('should have 4 presets defined', () => {
@@ -133,7 +127,7 @@ describe('Property Pane Presets', () => {
       expect(result.maxItems).toBe(6);
       expect(result.showDescription).toBe(true);
       expect(result.showPubDate).toBe(true);
-      expect(result.showCategories).toBe(true);
+      // Note: showCategories removed in Session 15
     });
 
     it('should apply compact-list preset correctly', () => {
@@ -143,7 +137,7 @@ describe('Property Pane Presets', () => {
       expect(result.layout).toBe('list');
       expect(result.maxItems).toBe(10);
       expect(result.showDescription).toBe(false);
-      expect(result.showCategories).toBe(false);
+      // Note: showCategories removed in Session 15
     });
   });
 
@@ -155,8 +149,7 @@ describe('Property Pane Presets', () => {
         interval: 5,
         maxItems: 5,
         showDescription: false,
-        showPubDate: true,
-        showCategories: false
+        showPubDate: true
       });
 
       const detected = detectCurrentPreset(props);
@@ -169,7 +162,6 @@ describe('Property Pane Presets', () => {
         maxItems: 6,
         showDescription: true,
         showPubDate: true,
-        showCategories: true,
         autoscroll: false
       });
 
@@ -183,7 +175,6 @@ describe('Property Pane Presets', () => {
         maxItems: 10,
         showDescription: false,
         showPubDate: true,
-        showCategories: false,
         autoscroll: false
       });
 

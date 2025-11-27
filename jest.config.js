@@ -86,7 +86,7 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 
   // Ignore patterns
-  testPathIgnorePatterns: ['/node_modules/', '/lib/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/lib/', '/dist/', '/tests/e2e/'],
 
   // Clear mocks between tests
   clearMocks: true,
