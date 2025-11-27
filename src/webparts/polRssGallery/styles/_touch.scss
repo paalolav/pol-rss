@@ -1,0 +1,460 @@
+/**
+ * Touch Interaction Styles
+ *
+ * Provides touch-friendly styles and feedback for interactive elements.
+ * Ensures WCAG 2.1 AA compliance with 44px minimum touch targets.
+ *
+ * Usage:
+ *   @import 'styles/touch';
+ *
+ *   .button {
+ *     @include touch-interactive;
+ *   }
+ *
+ *   .card {
+ *     @include touch-card;
+ *   }
+ */
+
+@import 'accessibility';
+
+// =============================================================================
+// Touch Target Variables
+// =============================================================================
+
+$touch-target-min: 44px; // WCAG 2.1 AA minimum
+$touch-target-comfortable: 48px; // Recommended comfortable size
+$touch-feedback-duration: 0.15s;
+$touch-feedback-scale: 0.98;
+$touch-ripple-duration: 0.6s;
+
+// =============================================================================
+// Touch Action Utilities
+// =============================================================================
+
+/**
+ * Prevent double-tap zoom on interactive elements
+ */
+@mixin touch-action-manipulation {
+  touch-action: manipulation;
+}
+
+/**
+ * Allow only horizontal pan (for carousels)
+ */
+@mixin touch-action-pan-x {
+  touch-action: pan-x;
+}
+
+/**
+ * Allow only vertical pan (for scrolling lists)
+ */
+@mixin touch-action-pan-y {
+  touch-action: pan-y;
+}
+
+/**
+ * Disable all touch gestures (for custom gesture handlers)
+ */
+@mixin touch-action-none {
+  touch-action: none;
+}
+
+// =============================================================================
+// Touch Feedback Mixins
+// =============================================================================
+
+/**
+ * Standard touch feedback with scale animation
+ * Only applies to touch devices to avoid unwanted mouse hover effects
+ */
+@mixin touch-feedback {
+  transition: transform $touch-feedback-duration ease;
+
+  // Use :active for touch feedback
+  &:active {
+    transform: scale($touch-feedback-scale);
+  }
+
+  // Respect reduced motion preference
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:active {
+      transform: none;
+      opacity: 0.8;
+    }
+  }
+}
+
+/**
+ * Touch feedback without scale (uses opacity)
+ */
+@mixin touch-feedback-opacity {
+  transition: opacity $touch-feedback-duration ease;
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+/**
+ * Touch feedback with background color change
+ */
+@mixin touch-feedback-background($color: var(--neutralLighter)) {
+  transition: background-color $touch-feedback-duration ease;
+
+  &:active {
+    background-color: $color;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+// =============================================================================
+// Interactive Element Mixins
+// =============================================================================
+
+/**
+ * Make element touch-friendly with proper target size and feedback
+ */
+@mixin touch-interactive {
+  @include touch-target;
+  @include touch-action-manipulation;
+  @include touch-feedback;
+  cursor: pointer;
+
+  // Prevent text selection during touch
+  user-select: none;
+  -webkit-user-select: none;
+
+  // Prevent tap highlight on mobile WebKit
+  -webkit-tap-highlight-color: transparent;
+}
+
+/**
+ * Touch-friendly button styles
+ */
+@mixin touch-button {
+  @include touch-interactive;
+  @include focus-visible;
+  @include high-contrast-button;
+
+  // Ensure proper alignment
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  // Touch-friendly padding
+  padding: 12px 16px;
+  min-height: $touch-target-min;
+
+  // Visual feedback
+  &.pressed,
+  &[data-pressed='true'] {
+    transform: scale($touch-feedback-scale);
+  }
+}
+
+/**
+ * Touch-friendly card styles
+ */
+@mixin touch-card {
+  @include touch-action-manipulation;
+  @include touch-feedback;
+  @include focus-visible;
+
+  cursor: pointer;
+
+  // Prevent tap highlight
+  -webkit-tap-highlight-color: transparent;
+
+  // Visual states
+  &.pressed,
+  &[data-pressed='true'] {
+    transform: scale($touch-feedback-scale);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  // Hover state (mouse only)
+  @media (hover: hover) {
+    &:hover:not(:active) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover:not(:active) {
+      transform: none;
+    }
+  }
+}
+
+/**
+ * Touch-friendly link styles
+ */
+@mixin touch-link {
+  @include touch-target-expand;
+  @include touch-action-manipulation;
+  @include focus-visible;
+  @include accessible-link;
+
+  // Prevent tap highlight
+  -webkit-tap-highlight-color: transparent;
+
+  // Active state
+  &:active {
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      opacity: 0.8;
+    }
+  }
+}
+
+/**
+ * Touch-friendly list item styles
+ */
+@mixin touch-list-item {
+  @include touch-action-manipulation;
+  @include touch-feedback-background;
+  @include focus-visible;
+
+  position: relative;
+  min-height: $touch-target-min;
+  padding: 12px 16px;
+
+  // Prevent tap highlight
+  -webkit-tap-highlight-color: transparent;
+
+  // Visual separator
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background-color: var(--neutralLight);
+  }
+}
+
+// =============================================================================
+// Ripple Effect
+// =============================================================================
+
+/**
+ * Container for ripple effect
+ */
+@mixin ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/**
+ * Ripple effect styles
+ */
+@mixin ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background-color: var(--themePrimary);
+  opacity: 0.3;
+  transform: scale(0);
+  animation: ripple-animation $touch-ripple-duration ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  0% {
+    transform: scale(0);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// =============================================================================
+// Swipe Indicator
+// =============================================================================
+
+/**
+ * Styles for swipe indicator feedback
+ */
+@mixin swipe-indicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  &.left {
+    left: 8px;
+  }
+
+  &.right {
+    right: 8px;
+  }
+}
+
+// =============================================================================
+// Scroll Behavior
+// =============================================================================
+
+/**
+ * Smooth scrolling with momentum on touch devices
+ */
+@mixin touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+
+  @media (prefers-reduced-motion: reduce) {
+    scroll-behavior: auto;
+  }
+}
+
+/**
+ * Horizontal scroll container
+ */
+@mixin touch-scroll-horizontal {
+  @include touch-scroll;
+  @include touch-action-pan-x;
+
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+
+  // Hide scrollbar on touch devices
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/**
+ * Scroll item that snaps
+ */
+@mixin touch-scroll-item {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+// =============================================================================
+// Input Enhancements
+// =============================================================================
+
+/**
+ * Touch-friendly input/textarea styles
+ */
+@mixin touch-input {
+  @include touch-target;
+  @include touch-action-manipulation;
+  @include focus-visible;
+
+  // Prevent zoom on iOS
+  font-size: 16px;
+
+  // Touch-friendly padding
+  padding: 12px 16px;
+
+  // Prevent tap highlight
+  -webkit-tap-highlight-color: transparent;
+}
+
+// =============================================================================
+// Utility Classes
+// =============================================================================
+
+.touch-action-manipulation {
+  @include touch-action-manipulation;
+}
+
+.touch-action-pan-x {
+  @include touch-action-pan-x;
+}
+
+.touch-action-pan-y {
+  @include touch-action-pan-y;
+}
+
+.touch-action-none {
+  @include touch-action-none;
+}
+
+.touch-interactive {
+  @include touch-interactive;
+}
+
+.touch-button {
+  @include touch-button;
+}
+
+.touch-card {
+  @include touch-card;
+}
+
+.touch-link {
+  @include touch-link;
+}
+
+.touch-list-item {
+  @include touch-list-item;
+}
+
+.touch-scroll {
+  @include touch-scroll;
+}
+
+.touch-scroll-horizontal {
+  @include touch-scroll-horizontal;
+}
+
+.touch-scroll-item {
+  @include touch-scroll-item;
+}
+
+.touch-input {
+  @include touch-input;
+}
+
+// Ripple container
+.ripple-container {
+  @include ripple-container;
+}
+
+.ripple {
+  @include ripple-effect;
+}
+
+// Pressed state helper
+.is-pressed {
+  transform: scale($touch-feedback-scale) !important;
+}
+
+// No tap highlight
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+}
+
+// Prevent text selection
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
