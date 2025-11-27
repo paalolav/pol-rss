@@ -233,6 +233,7 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
             showDate={showPubDate}
             imageAspectRatio={thumbnailSizeToAspectRatio[thumbnailSize]}
             fallbackImageUrl={fallbackImageUrl}
+            forceFallback={forceFallback}
             onItemClick={handleItemClick}
             descriptionTruncation={{
               maxChars: truncateDescription,

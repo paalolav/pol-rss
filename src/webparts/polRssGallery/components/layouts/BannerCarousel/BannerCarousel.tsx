@@ -286,6 +286,7 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
               showDescription={showDescription}
               showDate={showPubDate}
               fallbackImageUrl={fallbackImageUrl}
+              forceFallback={forceFallback}
               onItemClick={handleItemClick}
               descriptionTruncation={{ maxLines: 2, maxChars: 150 }}
               testId={`${testId}-item-${index}`}

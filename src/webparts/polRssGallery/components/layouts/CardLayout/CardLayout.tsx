@@ -216,6 +216,7 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
             showDate={showPubDate}
             imageAspectRatio={imageAspectRatio}
             fallbackImageUrl={fallbackImageUrl}
+            forceFallback={forceFallback}
             onItemClick={handleItemClick}
             descriptionTruncation={{
               maxChars: truncateDescription,

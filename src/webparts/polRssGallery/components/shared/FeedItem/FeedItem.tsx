@@ -85,6 +85,11 @@ export interface IFeedItemProps {
    */
   fallbackImageUrl?: string;
   /**
+   * Force using fallback image for all items
+   * @default false
+   */
+  forceFallback?: boolean;
+  /**
    * Callback when item is clicked
    */
   onItemClick?: (item: IRssItem, event: React.MouseEvent) => void;
@@ -169,6 +174,7 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   showAuthor = false,
   imageAspectRatio = '16:9',
   fallbackImageUrl,
+  forceFallback = false,
   onItemClick,
   descriptionTruncation,
   titleTruncation,
@@ -243,9 +249,13 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   const renderImage = () => {
     if (!showImage) return null;
 
-    const imageContent = item.imageUrl ? (
+    // Determine which image to use
+    const useForced = forceFallback && fallbackImageUrl;
+    const imageSrc = useForced ? fallbackImageUrl : item.imageUrl;
+
+    const imageContent = imageSrc ? (
       <ResponsiveImage
-        src={item.imageUrl}
+        src={imageSrc}
         alt={item.title}
         aspectRatio={imageAspectRatio}
         fallbackSrc={fallbackImageUrl}

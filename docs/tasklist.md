@@ -222,6 +222,10 @@ All Tasks ──────────────> REF-011 (Documentation)
     - No images, compact spacing
     - Short description (100 chars max)
     - Optimized for 1/3 column views
+  - **Fixed fallback image (Reservebilde) not working**:
+    - Root cause: `forceFallback` prop was defined but not passed from layouts to FeedItem
+    - Added `forceFallback={forceFallback}` to FeedItem in CardLayout, ListLayout, BannerCarousel
+    - Now forces fallback image for all items when enabled in property pane
 - **REMOVED Categories feature**: Feature was broken and removed per user request
   - Removed `showCategories` from all layout components and presets
   - Shared components (FeedItem, Skeleton) retain `showCategories` with default `false` for potential future use
