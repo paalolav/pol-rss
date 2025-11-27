@@ -1,0 +1,4 @@
+# Ignore authentication state files (contain sensitive session data)
+.auth/
+*.json
+!package.json
