@@ -29,8 +29,7 @@ export const presets: IPreset[] = [
       interval: 5,
       maxItems: 5,
       showDescription: false,
-      showPubDate: true,
-      showCategories: false
+      showPubDate: true
     }
   },
   {
@@ -42,7 +41,6 @@ export const presets: IPreset[] = [
       maxItems: 6,
       showDescription: true,
       showPubDate: true,
-      showCategories: true,
       autoscroll: false
     }
   },
@@ -55,7 +53,6 @@ export const presets: IPreset[] = [
       maxItems: 10,
       showDescription: false,
       showPubDate: true,
-      showCategories: false,
       autoscroll: false
     }
   },

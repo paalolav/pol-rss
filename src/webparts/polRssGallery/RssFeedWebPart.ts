@@ -28,9 +28,10 @@ export interface IRssFeedWebPartProps {
   feedUrl: string;
   autoRefresh: boolean;
   refreshInterval: number;
-  layout: 'banner' | 'card' | 'list';
+  layout: 'banner' | 'card' | 'list' | 'minimal';
   autoscroll: boolean;
   interval: number;
+  hideImages: boolean;
   forceFallbackImage: boolean;
   fallbackImageUrl: string;
   maxItems: number;
@@ -39,7 +40,6 @@ export interface IRssFeedWebPartProps {
   filterByKeywords: boolean;
   filterKeywords: string;
   filterMode: 'include' | 'exclude';
-  showCategories: boolean;
   filterByCategory: boolean;
   categoryFilterMode: 'include' | 'exclude';
   proxyUrl: string;
@@ -87,10 +87,12 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       filterByKeywords,
       filterKeywords,
       filterMode,
-      showCategories,
       filterByCategory,
       categoryFilterMode
     } = this.properties;
+
+    // Minimal layout always hides images
+    const hideImages = layout === 'minimal';
 
     const element: React.ReactElement<IRssFeedProps> = React.createElement(RssFeed, {
       webPartTitle,
@@ -98,6 +100,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       layout,
       autoscroll,
       interval,
+      hideImages,
       forceFallbackImage,
       fallbackImageUrl,
       maxItems,
@@ -108,7 +111,6 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       filterByKeywords: filterByKeywords || false,
       filterKeywords: filterKeywords || '',
       filterMode: filterMode || 'include',
-      showCategories: showCategories || false,
       filterByCategory: filterByCategory || false,
       categoryFilterMode: categoryFilterMode || 'include',
       themeVariant: this._themeVariant
@@ -127,7 +129,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     if (propertyPath === 'selectedPreset' && oldValue !== newValue) {
       const presetConfig = applyPreset(this.properties, newValue as string);
       Object.keys(presetConfig).forEach(key => {
-        (this.properties as Record<string, unknown>)[key] = (presetConfig as Record<string, unknown>)[key];
+        (this.properties as unknown as Record<string, unknown>)[key] = (presetConfig as unknown as Record<string, unknown>)[key];
       });
       this.context.propertyPane.refresh();
     }
@@ -181,6 +183,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             onPresetSelect: (presetKey: string) => {
               this.properties.selectedPreset = presetKey;
               this.onPropertyPaneFieldChanged('selectedPreset', currentPreset, presetKey);
+              this.render(); // Trigger immediate re-render for custom controls
             }
           }),
           PropertyPaneTextField('webPartTitle', {
@@ -196,6 +199,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
               this.properties.feedUrl = newValue;
               this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
+              this.render(); // Trigger immediate re-render for custom controls
             }
           }),
           PropertyPaneLayoutPicker({
@@ -205,11 +209,13 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             options: [
               { key: 'banner', text: strings.LayoutBannerLabel, description: strings.LayoutBannerDescription },
               { key: 'card', text: strings.LayoutCardLabel, description: strings.LayoutCardDescription },
-              { key: 'list', text: strings.LayoutListLabel, description: strings.LayoutListDescription }
+              { key: 'list', text: strings.LayoutListLabel, description: strings.LayoutListDescription },
+              { key: 'minimal', text: strings.LayoutMinimalLabel, description: strings.LayoutMinimalDescription }
             ],
             onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
-              this.properties.layout = newValue as 'banner' | 'card' | 'list';
+              this.properties.layout = newValue as 'banner' | 'card' | 'list' | 'minimal';
               this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
+              this.render(); // Trigger immediate re-render for custom controls
             }
           })
         ]
@@ -218,7 +224,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       // Display Settings Group
       {
         groupName: strings.DisplayGroupName,
-        isCollapsed: true,
+        isCollapsed: false,
         groupFields: [
           PropertyPaneSlider('maxItems', {
             label: strings.MaxItemsFieldLabel,
@@ -237,28 +243,24 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             onText: strings.ShowDescriptionOnLabel,
             offText: strings.ShowDescriptionOffLabel
           }),
-          PropertyPaneToggle('showCategories', {
-            label: strings.ShowCategoriesFieldLabel,
-            onText: strings.ShowCategoriesOnLabel,
-            offText: strings.ShowCategoriesOffLabel
-          })
         ]
       },
 
-      // Images Group
+      // Images Group (only for layouts with images)
       {
         groupName: strings.ImagesGroupName,
-        isCollapsed: true,
+        isCollapsed: false,
         groupFields: [
           PropertyPaneToggle('forceFallbackImage', {
             label: strings.ForceFallbackFieldLabel,
             onText: strings.ForceFallbackOnLabel,
-            offText: strings.ForceFallbackOffLabel
+            offText: strings.ForceFallbackOffLabel,
+            disabled: this.properties.layout === 'minimal'
           }),
           PropertyPaneTextField('fallbackImageUrl', {
             label: strings.FallbackUrlFieldLabel,
             description: strings.FallbackUrlDescription,
-            disabled: isFieldDisabled('fallbackImageUrl', this.properties)
+            disabled: this.properties.layout === 'minimal' || isFieldDisabled('fallbackImageUrl', this.properties)
           })
         ]
       }
@@ -268,7 +270,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     if (this.properties.layout === 'banner') {
       groups.push({
         groupName: strings.BannerSettingsGroupName,
-        isCollapsed: true,
+        isCollapsed: false,
         groupFields: [
           PropertyPaneToggle('autoscroll', {
             label: strings.AutoscrollFieldLabel,
@@ -289,7 +291,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     // Filter Settings Group
     groups.push({
       groupName: strings.FilterGroupName,
-      isCollapsed: true,
+      isCollapsed: false,
       groupFields: [
         PropertyPaneToggle('filterByKeywords', {
           label: strings.FilterByKeywordsFieldLabel,
@@ -326,7 +328,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     // Advanced Settings Group
     groups.push({
       groupName: strings.AdvancedGroupName,
-      isCollapsed: true,
+      isCollapsed: false,
       groupFields: [
         PropertyPaneToggle('autoRefresh', {
           label: strings.AutoRefreshFieldLabel,
@@ -358,6 +360,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
           onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
             this.properties.proxyUrl = newValue;
             this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
+            this.render(); // Trigger immediate re-render for custom controls
           }
         })
       ]

@@ -82,6 +82,11 @@ export interface IBannerCarouselProps {
    */
   forceFallback?: boolean;
   /**
+   * Whether to hide all images
+   * @default false
+   */
+  hideImages?: boolean;
+  /**
    * Whether to show publication date
    * @default true
    */
@@ -91,11 +96,6 @@ export interface IBannerCarouselProps {
    * @default true
    */
   showDescription?: boolean;
-  /**
-   * Whether to show categories
-   * @default false
-   */
-  showCategories?: boolean;
   /**
    * Whether the component is loading
    * @default false
@@ -138,9 +138,9 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
   height = 'md',
   fallbackImageUrl,
   forceFallback = false,
+  hideImages = false,
   showPubDate = true,
   showDescription = true,
-  showCategories = false,
   isLoading = false,
   onItemClick,
   className = '',
@@ -205,7 +205,6 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
         <BannerSkeleton
           height={heightPresets[height]}
           showDescription={showDescription}
-          showCategories={showCategories}
         />
       </div>
     );
@@ -283,10 +282,9 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
             <FeedItem
               item={item}
               variant="banner"
-              showImage={true}
+              showImage={!hideImages}
               showDescription={showDescription}
               showDate={showPubDate}
-              showCategories={showCategories}
               fallbackImageUrl={fallbackImageUrl}
               onItemClick={handleItemClick}
               descriptionTruncation={{ maxLines: 2, maxChars: 150 }}

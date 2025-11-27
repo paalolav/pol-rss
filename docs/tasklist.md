@@ -98,7 +98,7 @@ Improve caching with IndexedDB persistence and smarter invalidation.
 
 Mobile-first responsive layouts with WCAG 2.1 AA accessibility. Includes SharePoint theme integration, high contrast mode, and print styles.
 
-**Sub-tasks:** 11 | **Completed:** 10/11 (ST-006-08 manual testing remaining)
+**Sub-tasks:** 11 | **Completed:** 10/11 (ST-006-08 in progress - bugs fixed, testing continues)
 
 ---
 
@@ -210,6 +210,70 @@ All Tasks ──────────────> REF-011 (Documentation)
 ---
 
 ## Changelog
+
+### 2025-11-27 (Session 15) - Bug Fixes & Feature Removal
+- REF-008: Property Pane bug fixes
+  - Fixed property pane groups not expanding - changed all groups to `isCollapsed: false`
+  - Groups now display expanded by default for immediate access to settings
+- REF-007: Layout component fixes
+  - **Fixed BannerCarousel pagination centering**: Pagination dots were off to the left in 1/3 section view
+    - Added `justify-content: center` and `align-items: center` to `.pagination` in BannerCarousel.module.scss
+  - **Added MinimalLayout**: New text-only layout for sidebar views (from previous session)
+    - No images, compact spacing
+    - Short description (100 chars max)
+    - Optimized for 1/3 column views
+- **REMOVED Categories feature**: Feature was broken and removed per user request
+  - Removed `showCategories` from:
+    - `RssFeedWebPart.ts` (interface and property pane)
+    - `RssFeed.tsx` (interface, state, and filtering logic)
+    - `layouts/ListLayout.tsx` (interface and FeedItem prop)
+    - `layouts/CardLayout.tsx` (interface, props, SkeletonGrid, FeedItem)
+    - `propertyPane/presets.ts` (all preset configurations)
+  - Removed unused code from RssFeed.tsx:
+    - `selectedCategories` state
+    - `handleCategoryToggle` callback
+    - `allCategories` useMemo
+    - Category filtering logic in `filteredItems`
+  - Shared components (FeedItem, Skeleton) retain `showCategories` with default `false` for potential future use
+- Build status: ✅ Compiles successfully (169 lint warnings, no errors)
+
+### 2025-11-27 (Session 14) - Manual Testing & Bug Fixes
+- REF-006: ST-006-08 Manual Device/Browser Testing IN PROGRESS
+  - Started manual testing on local workbench (https://localhost:4321)
+  - **Bugs Found and Fixed:**
+    - **Layout buttons not working**: Custom PropertyPaneLayoutPicker wasn't triggering re-render
+      - Fixed by adding `this.render()` call after property change in RssFeedWebPart.ts
+    - **Preset buttons not working**: Custom PropertyPanePresets wasn't triggering re-render
+      - Fixed by adding `this.render()` call after preset selection
+    - **Norwegian character encoding broken**: Retriever feeds showing garbled æ, ø, å characters
+      - Root cause: `response.text()` assumes UTF-8, but Retriever uses ISO-8859-1
+      - Created `encodingUtils.ts` with `decodeResponseText()` function
+      - Detects encoding from Content-Type header and XML declaration
+      - Uses proper TextDecoder with detected encoding
+      - Updated `RssFeed.tsx` to use encoding-aware decoder
+  - **New Feature Added:**
+    - **Hide Images option** in property pane (user request)
+      - Added `hideImages` toggle to Images settings group
+      - When enabled, hides images in all layouts (Banner, Cards, List)
+      - Disables other image settings when Hide Images is on
+      - Updated all layout components (CardLayout, ListLayout, BannerCarousel)
+      - Localized strings for nb-no and nn-no
+  - **Testing Remaining:**
+    - Test Norwegian character encoding with Retriever feed (clear cache + reload)
+    - Test Hide Images toggle in all three layouts
+    - Browser compatibility testing (Chrome, Firefox, Safari, Edge)
+    - Mobile/tablet responsive testing
+    - Touch interaction testing on touch devices
+  - New/modified files:
+    - `services/encodingUtils.ts` (NEW)
+    - `RssFeed.tsx` (encoding fix)
+    - `RssFeedWebPart.ts` (hideImages prop, render calls)
+    - `layouts/CardLayout/CardLayout.tsx` (hideImages support)
+    - `layouts/ListLayout/ListLayout.tsx` (hideImages support)
+    - `layouts/BannerCarousel/BannerCarousel.tsx` (hideImages support)
+    - `loc/RssFeedWebPartStrings.d.ts` (HideImages strings)
+    - `loc/nb-no.js` (Norwegian Bokmål)
+    - `loc/nn-no.js` (Norwegian Nynorsk)
 
 ### 2025-11-27 (Session 13)
 - REF-008: Property Pane UX COMPLETED (7/7 sub-tasks)

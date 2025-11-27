@@ -60,6 +60,11 @@ export interface ICardLayoutProps {
    */
   forceFallback?: boolean;
   /**
+   * Whether to hide all images
+   * @default false
+   */
+  hideImages?: boolean;
+  /**
    * Whether to show publication date
    * @default true
    */
@@ -69,11 +74,6 @@ export interface ICardLayoutProps {
    * @default true
    */
   showDescription?: boolean;
-  /**
-   * Whether to show categories
-   * @default false
-   */
-  showCategories?: boolean;
   /**
    * Maximum characters for description truncation
    * @default 150
@@ -127,9 +127,9 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
   gap = 'md',
   fallbackImageUrl,
   forceFallback = false,
+  hideImages = false,
   showPubDate = true,
   showDescription = true,
-  showCategories = false,
   truncateDescription = 150,
   imageAspectRatio = '16:9',
   isLoading = false,
@@ -181,8 +181,7 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
           count={skeletonCount}
           type="card"
           itemProps={{
-            showDescription,
-            showCategories
+            showDescription
           }}
           testId={`${testId}-skeleton`}
         />
@@ -212,10 +211,9 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
             key={`${item.link}-${index}`}
             item={item}
             variant="card"
-            showImage={true}
+            showImage={!hideImages}
             showDescription={showDescription}
             showDate={showPubDate}
-            showCategories={showCategories}
             imageAspectRatio={imageAspectRatio}
             fallbackImageUrl={fallbackImageUrl}
             onItemClick={handleItemClick}

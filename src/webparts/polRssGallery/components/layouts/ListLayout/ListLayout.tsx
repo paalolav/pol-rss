@@ -69,6 +69,11 @@ export interface IListLayoutProps {
    */
   forceFallback?: boolean;
   /**
+   * Whether to hide all images
+   * @default false
+   */
+  hideImages?: boolean;
+  /**
    * Whether to show publication date
    * @default true
    */
@@ -78,11 +83,6 @@ export interface IListLayoutProps {
    * @default true
    */
   showDescription?: boolean;
-  /**
-   * Whether to show categories
-   * @default false
-   */
-  showCategories?: boolean;
   /**
    * Maximum characters for description truncation
    * @default 200
@@ -132,9 +132,9 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
   showDividers = true,
   fallbackImageUrl,
   forceFallback = false,
+  hideImages = false,
   showPubDate = true,
   showDescription = true,
-  showCategories = false,
   truncateDescription = 200,
   isLoading = false,
   skeletonCount = 5,
@@ -158,13 +158,30 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
     }
   }, [onItemClick]);
 
+  // Cast styles to allow dynamic access
+  const stylesAny = styles as Record<string, string>;
+
+  // Thumbnail position class mapping
+  const thumbnailPositionClasses: Record<ThumbnailPosition, string> = {
+    left: stylesAny.thumbnailLeft || '',
+    right: stylesAny.thumbnailRight || '',
+    none: ''
+  };
+
+  // Thumbnail size class mapping
+  const thumbnailSizeClasses: Record<ThumbnailSize, string> = {
+    sm: stylesAny.thumbnailSizeSm || '',
+    md: stylesAny.thumbnailSizeMd || '',
+    lg: stylesAny.thumbnailSizeLg || ''
+  };
+
   // Container classes
   const containerClasses = [
     styles.listLayout,
-    compact ? styles.compact : '',
+    compact ? (stylesAny.compact || '') : '',
     showDividers ? styles.withDividers : '',
-    thumbnailPosition !== 'none' ? styles[`thumbnail${thumbnailPosition.charAt(0).toUpperCase()}${thumbnailPosition.slice(1)}`] : '',
-    styles[`thumbnailSize${thumbnailSize.charAt(0).toUpperCase()}${thumbnailSize.slice(1)}`],
+    thumbnailPositionClasses[thumbnailPosition],
+    thumbnailSizeClasses[thumbnailSize],
     className
   ].filter(Boolean).join(' ');
 
@@ -177,8 +194,7 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
           type="list"
           itemProps={{
             showThumbnail: thumbnailPosition !== 'none',
-            showDescription,
-            showCategories
+            showDescription
           }}
           testId={`${testId}-skeleton`}
         />
@@ -212,10 +228,9 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
           <FeedItem
             item={item}
             variant="list"
-            showImage={thumbnailPosition !== 'none'}
+            showImage={!hideImages && thumbnailPosition !== 'none'}
             showDescription={showDescription}
             showDate={showPubDate}
-            showCategories={showCategories}
             imageAspectRatio={thumbnailSizeToAspectRatio[thumbnailSize]}
             fallbackImageUrl={fallbackImageUrl}
             onItemClick={handleItemClick}
