@@ -262,7 +262,7 @@ $easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 300px;
+  height: 100%;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -286,10 +286,10 @@ $easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
     }
   }
 
+  // .image class is applied to ResponsiveImage's container.
+  // With imageAspectRatio="auto", we need the container to fill the banner.
   .image {
-    width: 100%;
     height: 100%;
-    object-fit: cover;
   }
 
   .content {
@@ -297,6 +297,7 @@ $easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1;
     margin-top: auto;
     padding: var(--spacing-lg, 24px);
+    padding-bottom: var(--banner-content-padding-bottom, 48px); // Space for pagination dots
     color: #fff;
   }
 

@@ -116,13 +116,13 @@ export interface IBannerCarouselProps {
 }
 
 /**
- * Height presets in pixels
+ * Max height presets in pixels (container uses aspect-ratio for dynamic sizing)
  */
 const heightPresets: Record<BannerHeight, string> = {
-  sm: '250px',
-  md: '350px',
-  lg: '450px',
-  auto: 'auto'
+  sm: '350px',
+  md: '500px',
+  lg: '600px',
+  auto: 'none'
 };
 
 /**
@@ -189,7 +189,8 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
 
   // Container styles
   const containerStyle: React.CSSProperties = {
-    '--banner-height': heightPresets[height]
+    '--banner-height': heightPresets[height],
+    '--banner-content-padding-bottom': showPagination && items.length > 1 ? '48px' : '24px'
   } as React.CSSProperties;
 
   // Container classes
@@ -289,6 +290,7 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
               forceFallback={forceFallback}
               onItemClick={handleItemClick}
               descriptionTruncation={{ maxLines: 2, maxChars: 150 }}
+              imageAspectRatio="auto"
               testId={`${testId}-item-${index}`}
             />
           </SwiperSlide>
@@ -330,16 +332,6 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
         {isPaused && ' (pauset)'}
       </div>
 
-      {/* Pause indicator */}
-      {isPaused && autoplay && (
-        <div
-          className={styles.pauseIndicator}
-          aria-hidden="true"
-          data-testid={`${testId}-pause-indicator`}
-        >
-          <span className="ms-Icon ms-Icon--Pause" />
-        </div>
-      )}
     </div>
   );
 };

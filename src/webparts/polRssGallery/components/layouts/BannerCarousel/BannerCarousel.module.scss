@@ -13,15 +13,40 @@
 .bannerCarousel {
   position: relative;
   width: 100%;
-  height: var(--banner-height, 350px);
+  aspect-ratio: 21 / 9;
+  max-height: var(--banner-height, 500px);
   overflow: hidden;
   border-radius: var(--borderRadius, 4px);
-  background-color: var(--neutralLight, #edebe9);
+  background-color: transparent;
+
+  @media (max-width: 768px) {
+    aspect-ratio: 16 / 9;
+  }
+
+  @media (max-width: 480px) {
+    aspect-ratio: 4 / 3;
+    max-height: 350px;
+  }
 }
 
 .swiper {
   width: 100%;
   height: 100%;
+
+  // Hide Swiper's default horizontal pagination bar styling
+  :global(.swiper-pagination-horizontal) {
+    position: static !important;
+    width: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    background: transparent !important;
+  }
+
+  // Hide any progress bars or scrollbars
+  :global(.swiper-scrollbar),
+  :global(.swiper-progressbar) {
+    display: none !important;
+  }
 }
 
 .slide {
@@ -100,14 +125,16 @@
 // ============================================================
 
 .pagination {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: absolute !important;
+  bottom: 16px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  width: auto !important;
   z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   gap: 8px;
   padding: 8px 12px;
   border-radius: 16px;
@@ -116,6 +143,7 @@
   :global(.swiper-pagination-bullet) {
     width: 8px;
     height: 8px;
+    margin: 0 !important;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.5);
     opacity: 1;

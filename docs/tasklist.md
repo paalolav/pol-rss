@@ -211,6 +211,29 @@ All Tasks ──────────────> REF-011 (Documentation)
 
 ## Changelog
 
+### 2025-11-28 (Session 17) - Banner Image Zoom Fix
+- **FIXED: Banner Image Zoom Issue**
+  - Root cause: FeedItem's `.banner .image` CSS was overriding ResponsiveImage's aspect ratio
+    - The `.image` class was applied to ResponsiveImage's container, setting `height: 100%`
+    - This broke the padding-bottom aspect ratio technique
+  - Solution:
+    - Changed BannerCarousel container to use `aspect-ratio: 21/9` (cinematic) with responsive breakpoints
+    - Added `imageAspectRatio="auto"` prop to FeedItem in BannerCarousel
+    - This tells ResponsiveImage not to enforce its own aspect ratio
+    - Container fills the banner, image uses `object-fit: cover` naturally
+  - Files modified:
+    - `BannerCarousel.module.scss`: aspect-ratio based sizing
+    - `BannerCarousel.tsx`: imageAspectRatio="auto", updated height presets
+    - `FeedItem.module.scss`: simplified banner .image rule
+
+### 2025-11-27 (Session 16) - Banner Fixes
+- BannerCarousel fixes:
+  - Fixed text overlapping pagination dots when "Vis navigasjonsprikker" is enabled
+    - Added dynamic padding-bottom CSS variable based on pagination visibility
+  - Removed pause indicator button (was not functional)
+  - Fixed gray bar appearing below banner when pagination hidden
+    - Changed background-color from gray to transparent
+
 ### 2025-11-27 (Session 15) - Bug Fixes & Feature Removal
 - REF-008: Property Pane bug fixes
   - Fixed property pane groups not expanding - changed all groups to `isCollapsed: false`
