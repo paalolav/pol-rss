@@ -375,4 +375,4 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   );
 };
 
-export default FeedItem;
+export default React.memo(FeedItem);

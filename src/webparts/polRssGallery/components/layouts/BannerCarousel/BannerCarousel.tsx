@@ -336,4 +336,4 @@ export const BannerCarousel: React.FC<IBannerCarouselProps> = ({
   );
 };
 
-export default BannerCarousel;
+export default React.memo(BannerCarousel);

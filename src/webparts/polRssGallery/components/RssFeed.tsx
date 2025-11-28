@@ -1,10 +1,37 @@
 import * as React from 'react';
-import { Spinner, DefaultButton } from '@fluentui/react';
-import { BannerCarousel } from './layouts/BannerCarousel';
-import { CardLayout } from './layouts/CardLayout';
-import { ListLayout } from './layouts/ListLayout';
-import { MinimalLayout } from './layouts/MinimalLayout';
+import { Spinner, DefaultButton, Shimmer, ShimmerElementType } from '@fluentui/react';
 import styles from './RssFeed.module.scss';
+
+// Lazy load layout components for code splitting - each becomes a separate chunk
+const BannerCarousel = React.lazy(() =>
+  import(/* webpackChunkName: "layout-banner" */ './layouts/BannerCarousel')
+    .then(module => ({ default: module.BannerCarousel }))
+);
+const CardLayout = React.lazy(() =>
+  import(/* webpackChunkName: "layout-card" */ './layouts/CardLayout')
+    .then(module => ({ default: module.CardLayout }))
+);
+const ListLayout = React.lazy(() =>
+  import(/* webpackChunkName: "layout-list" */ './layouts/ListLayout')
+    .then(module => ({ default: module.ListLayout }))
+);
+const MinimalLayout = React.lazy(() =>
+  import(/* webpackChunkName: "layout-minimal" */ './layouts/MinimalLayout')
+    .then(module => ({ default: module.MinimalLayout }))
+);
+
+// Fallback component for lazy loading
+const LayoutFallback: React.FC = () => (
+  <div className={styles.layoutFallback}>
+    <Shimmer shimmerElements={[
+      { type: ShimmerElementType.line, height: 200 },
+      { type: ShimmerElementType.gap, height: 16 },
+      { type: ShimmerElementType.line, height: 24, width: '60%' },
+      { type: ShimmerElementType.gap, height: 8 },
+      { type: ShimmerElementType.line, height: 16, width: '80%' },
+    ]} />
+  </div>
+);
 
 const extendedStyles: any = styles;
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -24,6 +51,7 @@ export interface IRssFeedProps {
   layout: 'banner' | 'card' | 'list' | 'minimal';
   autoscroll: boolean;
   interval: number;
+  showPagination: boolean;
   hideImages: boolean;
   forceFallbackImage: boolean;
   fallbackImageUrl: string;
@@ -241,9 +269,9 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     if (props.feedUrl) {
       cacheService.delete(props.feedUrl);
       setRetryCount(0);
-      loadFeed(true);
+      loadFeedRef.current(true);
     }
-  }, [props.feedUrl]);
+  }, [props.feedUrl, props.maxItems, props.fallbackImageUrl, props.forceFallbackImage, cacheService]);
   
   // Items are used directly without filtering (filter feature removed)
   const filteredItems = items;
@@ -312,34 +340,41 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     const bannerProps = {
       ...layoutProps,
       autoplay: props.autoscroll,
-      interval: props.interval
+      interval: props.interval,
+      showPagination: props.showPagination
     };
     
     switch (props.layout) {
       case 'banner':
         return (
           <RssErrorBoundary>
-            <BannerCarousel {...bannerProps} />
+            <React.Suspense fallback={<LayoutFallback />}>
+              <BannerCarousel {...bannerProps} />
+            </React.Suspense>
           </RssErrorBoundary>
         );
-      
+
       case 'list':
         return (
           <RssErrorBoundary>
-            <ListLayout {...layoutProps} />
+            <React.Suspense fallback={<LayoutFallback />}>
+              <ListLayout {...layoutProps} />
+            </React.Suspense>
           </RssErrorBoundary>
         );
 
       case 'minimal':
         return (
           <RssErrorBoundary>
-            <MinimalLayout
-              items={filteredItems}
-              showPubDate={props.showPubDate}
-              showDescription={props.showDescription}
-              truncateDescription={100}
-              isLoading={isLoading}
-            />
+            <React.Suspense fallback={<LayoutFallback />}>
+              <MinimalLayout
+                items={filteredItems}
+                showPubDate={props.showPubDate}
+                showDescription={props.showDescription}
+                truncateDescription={100}
+                isLoading={isLoading}
+              />
+            </React.Suspense>
           </RssErrorBoundary>
         );
 
@@ -347,7 +382,9 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
       default:
         return (
           <RssErrorBoundary>
-            <CardLayout {...layoutProps} />
+            <React.Suspense fallback={<LayoutFallback />}>
+              <CardLayout {...layoutProps} />
+            </React.Suspense>
           </RssErrorBoundary>
         );
     }

@@ -352,6 +352,12 @@
   margin: 10px 0;
 }
 
+/* Lazy loading fallback */
+.layoutFallback {
+  padding: 1rem;
+  min-height: 200px;
+}
+
 /* Error boundary styles */
 .errorContainer {
   display: flex;
