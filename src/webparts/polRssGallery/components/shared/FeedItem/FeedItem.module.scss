@@ -177,6 +177,61 @@ $easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 // ============================================================
+// Inverted Theme (Strong Background)
+// ============================================================
+
+.inverted {
+  // Card variant on strong backgrounds needs transparent background
+  &.card {
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+  }
+
+  // List variant on strong backgrounds needs transparent background
+  &.list {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  // Card and List variants on strong backgrounds need white text
+  &.card,
+  &.list {
+    .titleLink {
+      color: #fff;
+
+      &:hover {
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    .meta {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .date {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .source {
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .description {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .category {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+}
+
+// ============================================================
 // Card Variant
 // ============================================================
 

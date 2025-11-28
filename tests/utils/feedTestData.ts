@@ -97,6 +97,52 @@ export const rss2WithContentEncodedXml = `<?xml version="1.0" encoding="UTF-8"?>
 </rss>`;
 
 /**
+ * WordPress-style RSS with wp-block-image figures (sentralregisteret.no style)
+ */
+export const wordpressRssWithFiguresXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+  <title>WordPress Blog</title>
+  <link>https://example.com</link>
+  <description>WordPress RSS feed with wp-block-image</description>
+  <item>
+    <title>Article 1 with Figure</title>
+    <link>https://example.com/article-1</link>
+    <dc:creator><![CDATA[author1]]></dc:creator>
+    <pubDate>Fri, 31 Oct 2025 13:35:57 +0000</pubDate>
+    <description><![CDATA[<p>Short excerpt without image...</p>]]></description>
+    <content:encoded><![CDATA[
+<figure class="wp-block-image size-large"><img fetchpriority="high" decoding="async" width="1024" height="768" src="https://example.com/uploads/article1-image.jpg" alt="" class="wp-image-5068" srcset="https://example.com/uploads/article1-image.jpg 1024w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+<p>Full article content here...</p>
+]]></content:encoded>
+  </item>
+  <item>
+    <title>Article 2 with Figure</title>
+    <link>https://example.com/article-2</link>
+    <dc:creator><![CDATA[author2]]></dc:creator>
+    <pubDate>Wed, 29 Oct 2025 10:00:00 +0000</pubDate>
+    <description><![CDATA[<p>Another short excerpt...</p>]]></description>
+    <content:encoded><![CDATA[
+<figure class="wp-block-image size-large"><img width="800" height="600" src="https://example.com/uploads/article2-image.jpg" alt="Article 2 featured" /></figure>
+<p>Second article content...</p>
+]]></content:encoded>
+  </item>
+  <item>
+    <title>Article 3 without image</title>
+    <link>https://example.com/article-3</link>
+    <dc:creator><![CDATA[author3]]></dc:creator>
+    <pubDate>Mon, 27 Oct 2025 08:00:00 +0000</pubDate>
+    <description><![CDATA[<p>This article has no image...</p>]]></description>
+    <content:encoded><![CDATA[
+<p>Just text content, no images in this one.</p>
+]]></content:encoded>
+  </item>
+</channel>
+</rss>`;
+
+/**
  * Atom 1.0 feed
  */
 export const atom1StandardXml = `<?xml version="1.0" encoding="UTF-8"?>

@@ -105,6 +105,25 @@ describe('ImprovedFeedParser', () => {
       expect(result[0].imageUrl).toBe('https://example.com/images/inline.jpg');
     });
 
+    it('extracts images from WordPress wp-block-image figures (sentralregisteret.no style)', () => {
+      const { wordpressRssWithFiguresXml } = require('../utils/feedTestData');
+      const result = ImprovedFeedParser.parse(wordpressRssWithFiguresXml, defaultOptions);
+
+      expect(result).toHaveLength(3);
+
+      // First item should have image from content:encoded
+      expect(result[0].title).toBe('Article 1 with Figure');
+      expect(result[0].imageUrl).toBe('https://example.com/uploads/article1-image.jpg');
+
+      // Second item should also have image
+      expect(result[1].title).toBe('Article 2 with Figure');
+      expect(result[1].imageUrl).toBe('https://example.com/uploads/article2-image.jpg');
+
+      // Third item has no image, should use fallback
+      expect(result[2].title).toBe('Article 3 without image');
+      expect(result[2].imageUrl).toBe(defaultOptions.fallbackImageUrl);
+    });
+
     it('uses fallback image when no image is found', () => {
       const result = ImprovedFeedParser.parse(rss2MinimalXml, defaultOptions);
 

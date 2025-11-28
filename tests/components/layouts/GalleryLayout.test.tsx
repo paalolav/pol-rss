@@ -28,6 +28,7 @@ jest.mock('../../../src/webparts/polRssGallery/components/layouts/GalleryLayout/
     'title-none': 'title-none',
     'title-hover': 'title-hover',
     'title-below': 'title-below',
+    inverted: 'inverted',
     skeletonItem: 'skeletonItem',
     skeletonImage: 'skeletonImage',
     skeletonTitle: 'skeletonTitle',
@@ -356,6 +357,30 @@ describe('GalleryLayout', () => {
       render(<GalleryLayout {...defaultProps} testId="my-gallery" />);
 
       expect(screen.getByTestId('my-gallery')).toBeInTheDocument();
+    });
+  });
+
+  describe('Inverted Theme (Strong Background)', () => {
+    it('applies inverted class to gallery items when isInverted is true', () => {
+      render(<GalleryLayout {...defaultProps} isInverted={true} />);
+
+      const item = screen.getByTestId('gallery-layout-item-0');
+      expect(item).toHaveClass('inverted');
+    });
+
+    it('does not apply inverted class when isInverted is false', () => {
+      render(<GalleryLayout {...defaultProps} isInverted={false} />);
+
+      const item = screen.getByTestId('gallery-layout-item-0');
+      expect(item).not.toHaveClass('inverted');
+    });
+
+    it('applies inverted class to title-below variant', () => {
+      render(<GalleryLayout {...defaultProps} isInverted={true} showTitles="below" />);
+
+      const item = screen.getByTestId('gallery-layout-item-0');
+      expect(item).toHaveClass('inverted');
+      expect(item).toHaveClass('title-below');
     });
   });
 

@@ -781,6 +781,25 @@ describe('ImageExtractor', () => {
       expect(result?.source).toBe('content:encoded');
     });
 
+    it('handles WordPress feeds with wp-block-image figures (sentralregisteret.no style)', () => {
+      const xml = `<item xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        <title>Besøk hos Volvo Maskin</title>
+        <description><![CDATA[<p>Maskinregisteret hadde gleden av å besøke...</p>]]></description>
+        <content:encoded><![CDATA[
+<figure class="wp-block-image size-large"><img fetchpriority="high" decoding="async" width="1024" height="768" src="https://sentralregisteret.no/wp-content/uploads/2025/10/IMG_1956-1024x768.jpg" alt="" class="wp-image-5068" srcset="https://sentralregisteret.no/wp-content/uploads/2025/10/IMG_1956-1024x768.jpg 1024w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+<p>Article content...</p>
+]]></content:encoded>
+      </item>`;
+
+      const item = getItemElement(xml);
+      const result = extractImage(item);
+
+      expect(result?.url).toBe('https://sentralregisteret.no/wp-content/uploads/2025/10/IMG_1956-1024x768.jpg');
+      expect(result?.source).toBe('content:encoded');
+      expect(result?.width).toBe(1024);
+      expect(result?.height).toBe(768);
+    });
+
     it('handles Atom feeds', () => {
       const xml = `<entry xmlns="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
         <title>Atom Entry</title>

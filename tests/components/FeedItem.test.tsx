@@ -5,8 +5,31 @@
 import * as React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { FeedItem, FeedItemVariant } from '../../src/webparts/polRssGallery/components/shared/FeedItem';
 import { IRssItem } from '../../src/webparts/polRssGallery/components/IRssItem';
+
+// Mock styles - must be before component import
+jest.mock('../../src/webparts/polRssGallery/components/shared/FeedItem/FeedItem.module.scss', () => {
+  const styles = {
+    feedItem: 'feedItem',
+    card: 'card',
+    list: 'list',
+    banner: 'banner',
+    inverted: 'inverted',
+    imageLink: 'imageLink',
+    imageWrapper: 'imageWrapper',
+    image: 'image',
+    content: 'content',
+    title: 'title',
+    titleLink: 'titleLink',
+    meta: 'meta',
+    date: 'date',
+    source: 'source',
+    description: 'description',
+    categories: 'categories',
+    category: 'category',
+  };
+  return { default: styles, ...styles };
+});
 
 // Mock the sanitizer
 jest.mock('../../src/webparts/polRssGallery/services/contentSanitizer', () => ({
@@ -14,6 +37,8 @@ jest.mock('../../src/webparts/polRssGallery/services/contentSanitizer', () => ({
     sanitize: (html: string) => html.replace(/<script.*?>.*?<\/script>/gi, '')
   }
 }));
+
+import { FeedItem, FeedItemVariant } from '../../src/webparts/polRssGallery/components/shared/FeedItem';
 
 // Mock ResponsiveImage
 jest.mock('../../src/webparts/polRssGallery/components/ResponsiveImage', () => ({
@@ -324,6 +349,49 @@ describe('FeedItem', () => {
       );
 
       expect(screen.getByTestId('feed-item')).toHaveClass('custom-class');
+    });
+
+    it('applies inverted class when isInverted is true', () => {
+      render(
+        <FeedItem
+          item={mockItem}
+          variant="card"
+          isInverted={true}
+          testId="feed-item"
+        />
+      );
+
+      const element = screen.getByTestId('feed-item');
+      expect(element).toHaveClass('inverted');
+    });
+
+    it('does not apply inverted class when isInverted is false', () => {
+      render(
+        <FeedItem
+          item={mockItem}
+          variant="card"
+          isInverted={false}
+          testId="feed-item"
+        />
+      );
+
+      const element = screen.getByTestId('feed-item');
+      expect(element).not.toHaveClass('inverted');
+    });
+
+    it('applies inverted class for list variant on strong background', () => {
+      render(
+        <FeedItem
+          item={mockItem}
+          variant="list"
+          isInverted
+          testId="feed-item"
+        />
+      );
+
+      const element = screen.getByTestId('feed-item');
+      expect(element).toHaveClass('inverted');
+      expect(element).toHaveClass('list');
     });
   });
 
