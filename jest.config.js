@@ -29,11 +29,11 @@ module.exports = {
     '\\.(jpg|jpeg|png|gif|svg|webp)$': '<rootDir>/tests/mocks/fileMock.js',
 
     // SPFx module mocks
-    '^@microsoft/sp-core-library$': '<rootDir>/tests/mocks/spfxMocks.ts',
-    '^@microsoft/sp-http$': '<rootDir>/tests/mocks/spfxMocks.ts',
-    '^@microsoft/sp-webpart-base$': '<rootDir>/tests/mocks/spfxMocks.ts',
-    '^@microsoft/sp-property-pane$': '<rootDir>/tests/mocks/spfxMocks.ts',
-    '^@microsoft/sp-component-base$': '<rootDir>/tests/mocks/spfxMocks.ts',
+    '^@microsoft/sp-core-library$': '<rootDir>/tests/mocks/spfxMocks.tsx',
+    '^@microsoft/sp-http$': '<rootDir>/tests/mocks/spfxMocks.tsx',
+    '^@microsoft/sp-webpart-base$': '<rootDir>/tests/mocks/spfxMocks.tsx',
+    '^@microsoft/sp-property-pane$': '<rootDir>/tests/mocks/spfxMocks.tsx',
+    '^@microsoft/sp-component-base$': '<rootDir>/tests/mocks/spfxMocks.tsx',
 
     // DOMPurify mock for security tests
     '^dompurify$': '<rootDir>/tests/mocks/dompurifyMock.ts',

@@ -11,6 +11,7 @@ import {
 import { validateUrlFormat } from '../components/FeedValidator';
 import { validateFeed } from '../services/feedValidator';
 import { ImprovedFeedParser } from '../services/improvedFeedParser';
+import { ProxyService } from '../services/proxyService';
 
 /**
  * Validation result for display
@@ -300,6 +301,7 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneCustom
 
   /**
    * Validate the feed by fetching and parsing
+   * Uses ProxyService for automatic CORS proxy fallback
    */
   private async _validateFeed(): Promise<void> {
     const url = this._state.value;
@@ -314,22 +316,13 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneCustom
     if (testBtn) testBtn.disabled = true;
 
     try {
-      // Try to fetch the feed
-      let response: Response;
-      let usedProxy = false;
-
-      try {
-        response = await fetch(url, { mode: 'cors' });
-      } catch (corsError) {
-        // If CORS fails and we have a proxy, try that
-        if (this._props.proxyUrl) {
-          const proxyFullUrl = `${this._props.proxyUrl}?url=${encodeURIComponent(url)}`;
-          response = await fetch(proxyFullUrl);
-          usedProxy = true;
-        } else {
-          throw corsError;
+      // Use ProxyService.fetch which handles CORS fallback automatically
+      const response = await ProxyService.fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/rss+xml, application/xml, application/atom+xml, text/xml, */*'
         }
-      }
+      });
 
       if (!response.ok) {
         this._updateStatus({
@@ -356,11 +349,11 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneCustom
       const parsedItems = ImprovedFeedParser.parse(content, { fallbackImageUrl: '' });
 
       const result: IFeedValidationResult = {
-        status: usedProxy ? 'warning' : 'valid',
+        status: 'valid',
         feedTitle: validationResult.metadata?.title,
         itemCount: parsedItems.length,
         format: this._formatVersionString(validationResult.format, validationResult.formatVersion),
-        message: usedProxy ? 'Feed requires proxy (CORS)' : undefined
+        message: undefined
       };
 
       this._updateStatus(result);
@@ -378,9 +371,7 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneCustom
       const message = error instanceof Error ? error.message : 'Failed to validate feed';
       this._updateStatus({
         status: 'invalid',
-        message: message.includes('CORS') || message.includes('NetworkError')
-          ? 'CORS error - try configuring a proxy URL'
-          : message
+        message: message
       });
     } finally {
       if (testBtn) testBtn.disabled = false;

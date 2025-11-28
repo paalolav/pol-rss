@@ -233,6 +233,23 @@ export const RssFeedWebPartStringsMock = {
 };
 
 /**
+ * Mock PropertyPaneFieldType enum
+ */
+export enum PropertyPaneFieldType {
+  Button = 1,
+  CheckBox = 2,
+  Custom = 3,
+  Dropdown = 4,
+  HorizontalRule = 5,
+  Label = 6,
+  Link = 7,
+  Slider = 8,
+  TextField = 9,
+  Toggle = 10,
+  DynamicField = 11
+}
+
+/**
  * Mock Fluent UI components commonly used in tests
  */
 export const fluentUIMocks = {
