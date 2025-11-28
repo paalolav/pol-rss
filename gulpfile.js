@@ -51,6 +51,13 @@ build.addSuppression(`Warning - [sass] The local CSS class 'no-select' is not ca
 // Third-party library classes (Swiper)
 build.addSuppression(`Warning - [sass] The local CSS class 'swiper-button-disabled' is not camelCase and will not be type-safe.`);
 
+// Gallery layout classes
+build.addSuppression(`Warning - [sass] The local CSS class 'columns-2' is not camelCase and will not be type-safe.`);
+build.addSuppression(`Warning - [sass] The local CSS class 'columns-3' is not camelCase and will not be type-safe.`);
+build.addSuppression(`Warning - [sass] The local CSS class 'columns-4' is not camelCase and will not be type-safe.`);
+build.addSuppression(`Warning - [sass] The local CSS class 'title-none' is not camelCase and will not be type-safe.`);
+build.addSuppression(`Warning - [sass] The local CSS class 'title-hover' is not camelCase and will not be type-safe.`);
+
 // Suppress console.log warnings for debug/logging utilities (expected behavior)
 build.addSuppression(/Warning - lint - .+errorLogger\.ts.+ error no-console/);
 build.addSuppression(/Warning - lint - .+performanceMonitor\.ts.+ error no-console/);

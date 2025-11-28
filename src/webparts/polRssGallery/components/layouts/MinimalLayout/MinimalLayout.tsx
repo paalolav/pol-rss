@@ -69,6 +69,11 @@ export interface IMinimalLayoutProps {
    * Test ID for testing
    */
   testId?: string;
+  /**
+   * Whether the theme is inverted (strong background)
+   * @default false
+   */
+  isInverted?: boolean;
 }
 
 /**
