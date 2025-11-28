@@ -71,10 +71,10 @@ export interface IFeedItemProps {
    */
   showCategories?: boolean;
   /**
-   * Whether to show the author
+   * Whether to show the source/publication name
    * @default false
    */
-  showAuthor?: boolean;
+  showSource?: boolean;
   /**
    * Image aspect ratio
    * @default '16:9'
@@ -171,7 +171,7 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   showDescription = true,
   showDate = true,
   showCategories = false,
-  showAuthor = false,
+  showSource = false,
   imageAspectRatio = '16:9',
   fallbackImageUrl,
   forceFallback = false,
@@ -329,7 +329,7 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
         </h3>
 
         {/* Meta Information */}
-        {(showDate || showAuthor) && (
+        {(showDate || showSource) && (
           <div className={styles.meta}>
             {showDate && formattedDate && (
               <time
@@ -339,8 +339,8 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
                 {formattedDate}
               </time>
             )}
-            {showAuthor && item.author && (
-              <span className={styles.author}>
+            {showSource && item.author && (
+              <span className={styles.source}>
                 {item.author}
               </span>
             )}

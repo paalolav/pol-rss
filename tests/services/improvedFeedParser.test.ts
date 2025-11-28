@@ -51,6 +51,8 @@ import {
   rss2HtmlEntitiesXml,
   rss2TripleEncodedXml,
   rss2CdataEntitiesXml,
+  // Retriever/Meltwater feed (ST-015)
+  rss2RetrieverSourceXml,
   // Expected results
   expectedRss2StandardParsed,
   // Utilities
@@ -133,6 +135,18 @@ describe('ImprovedFeedParser', () => {
       const result = ImprovedFeedParser.parse(rss2WithSourceXml, defaultOptions);
 
       expect(result[0].author).toBe('Original Feed Name');
+    });
+
+    it('extracts ret:source namespace for Retriever/Meltwater feeds (ST-015)', () => {
+      const result = ImprovedFeedParser.parse(rss2RetrieverSourceXml, defaultOptions);
+
+      expect(result.length).toBe(3);
+      // Item 1: only has ret:source
+      expect(result[0].author).toBe('Dagbladet');
+      // Item 2: has both author and ret:source - author takes priority
+      expect(result[1].author).toBe('VG Nyheter');
+      // Item 3: only has standard source element
+      expect(result[2].author).toBe('NRK Nyheter');
     });
   });
 

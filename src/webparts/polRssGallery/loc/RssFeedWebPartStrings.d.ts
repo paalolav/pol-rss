@@ -35,6 +35,9 @@ declare module 'RssFeedWebPartStrings' {
     ShowDescriptionFieldLabel: string;
     ShowDescriptionOnLabel: string;
     ShowDescriptionOffLabel: string;
+    ShowSourceFieldLabel: string;
+    ShowSourceOnLabel: string;
+    ShowSourceOffLabel: string;
     ShowCategoriesFieldLabel: string;
     ShowCategoriesOnLabel: string;
     ShowCategoriesOffLabel: string;

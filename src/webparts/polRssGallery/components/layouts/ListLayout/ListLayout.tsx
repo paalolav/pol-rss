@@ -84,6 +84,11 @@ export interface IListLayoutProps {
    */
   showDescription?: boolean;
   /**
+   * Whether to show source/publication name
+   * @default false
+   */
+  showSource?: boolean;
+  /**
    * Maximum characters for description truncation
    * @default 200
    */
@@ -135,6 +140,7 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
   hideImages = false,
   showPubDate = true,
   showDescription = true,
+  showSource = false,
   truncateDescription = 200,
   isLoading = false,
   skeletonCount = 5,
@@ -231,6 +237,7 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
             showImage={!hideImages && thumbnailPosition !== 'none'}
             showDescription={showDescription}
             showDate={showPubDate}
+            showSource={showSource}
             imageAspectRatio={thumbnailSizeToAspectRatio[thumbnailSize]}
             fallbackImageUrl={fallbackImageUrl}
             forceFallback={forceFallback}

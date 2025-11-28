@@ -55,7 +55,7 @@ declare const styles: {
     titleLink: string;
     meta: string;
     date: string;
-    author: string;
+    source: string;
     description: string;
     categories: string;
     category: string;

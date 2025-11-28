@@ -14,6 +14,7 @@ export interface IRssFeedWebPartProps {
     maxItems: number;
     showPubDate: boolean;
     showDescription: boolean;
+    showSource: boolean;
     proxyUrl: string;
     galleryColumns: 'auto' | 2 | 3 | 4;
     galleryTitlePosition: 'hover' | 'below' | 'none';

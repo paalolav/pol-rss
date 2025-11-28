@@ -38,6 +38,11 @@ export interface IMinimalLayoutProps {
    */
   showDescription?: boolean;
   /**
+   * Whether to show source/publication name
+   * @default false
+   */
+  showSource?: boolean;
+  /**
    * Maximum characters for description truncation
    * @default 80
    */
@@ -109,6 +114,7 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
   items,
   showPubDate = true,
   showDescription = false,
+  showSource = false,
   truncateDescription = 80,
   isLoading = false,
   skeletonCount = 5,
@@ -200,11 +206,16 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
                 {truncateText(item.description.replace(/<[^>]*>/g, ''), truncateDescription)}
               </p>
             )}
-            {showPubDate && item.pubDate && (
+            {(showPubDate || showSource) && (
               <div className={styles.itemMeta}>
-                <time className={styles.itemDate} dateTime={item.pubDate}>
-                  {formatDate(item.pubDate)}
-                </time>
+                {showPubDate && item.pubDate && (
+                  <time className={styles.itemDate} dateTime={item.pubDate}>
+                    {formatDate(item.pubDate)}
+                  </time>
+                )}
+                {showSource && item.author && (
+                  <span className={styles.itemSource}>{item.author}</span>
+                )}
               </div>
             )}
           </a>

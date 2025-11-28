@@ -35,6 +35,7 @@ export interface IRssFeedWebPartProps {
   maxItems: number;
   showPubDate: boolean;
   showDescription: boolean;
+  showSource: boolean;
   proxyUrl: string;
   // Gallery-specific properties
   galleryColumns: 'auto' | 2 | 3 | 4;
@@ -80,6 +81,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       maxItems,
       showPubDate,
       showDescription,
+      showSource,
       autoRefresh,
       refreshInterval,
       galleryColumns,
@@ -104,6 +106,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       maxItems,
       showPubDate,
       showDescription,
+      showSource,
       autoRefresh,
       refreshInterval: (refreshInterval || 5) * 60,
       themeVariant: this._themeVariant,
@@ -202,6 +205,11 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             label: strings.ShowDescriptionFieldLabel,
             onText: strings.ShowDescriptionOnLabel,
             offText: strings.ShowDescriptionOffLabel
+          }),
+          PropertyPaneToggle('showSource', {
+            label: strings.ShowSourceFieldLabel,
+            onText: strings.ShowSourceOnLabel,
+            offText: strings.ShowSourceOffLabel
           }),
         ]
       },

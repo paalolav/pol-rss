@@ -64,10 +64,10 @@ export interface IFeedItemProps {
      */
     showCategories?: boolean;
     /**
-     * Whether to show the author
+     * Whether to show the source/publication name
      * @default false
      */
-    showAuthor?: boolean;
+    showSource?: boolean;
     /**
      * Image aspect ratio
      * @default '16:9'

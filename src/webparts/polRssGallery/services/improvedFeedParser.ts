@@ -396,6 +396,10 @@ export class ImprovedFeedParser {
       if (nsCheck('atom')) {
         result = result.replace(/<rss([^>]*)>/, '<rss$1 xmlns:atom="http://www.w3.org/2005/Atom">');
       }
+      // Add Retriever namespace support for ret:source
+      if (nsCheck('ret')) {
+        result = result.replace(/<rss([^>]*)>/, '<rss$1 xmlns:ret="http://www.retriever-info.com/rss/">');
+      }
     }
     
     result = result.replace(/<description>(?!\s*<!\[CDATA\[)([^<][\s\S]*?)<\/description>/g, 
@@ -516,13 +520,34 @@ export class ImprovedFeedParser {
         const descriptionText = descNode ? this.safeExtractText(descNode, true) : '';
         const cleanedDescription = cleanDescription(descriptionText);
         
-        // Author extraction
+        // Author/Source extraction - priority chain for source display
+        // For Retriever/Meltwater feeds: author contains publication name
+        // Priority: <author> → <ret:source> → <source> → <dc:creator>
         let author = '';
-        const authorNode = itemNode.querySelector('author') || 
-                          itemNode.querySelector('dc\\:creator') ||
-                          itemNode.querySelector('creator');
+        const authorNode = itemNode.querySelector('author');
         if (authorNode) {
           author = this.safeExtractText(authorNode);
+        }
+        if (!author) {
+          // Try ret:source namespace (Retriever-specific)
+          const retSourceNode = itemNode.querySelector('ret\\:source') ||
+                               itemNode.querySelector('source[ret\\:source]');
+          if (retSourceNode) {
+            author = this.safeExtractText(retSourceNode);
+          }
+        }
+        if (!author) {
+          const sourceNode = itemNode.querySelector('source');
+          if (sourceNode) {
+            author = this.safeExtractText(sourceNode);
+          }
+        }
+        if (!author) {
+          const creatorNode = itemNode.querySelector('dc\\:creator') ||
+                             itemNode.querySelector('creator');
+          if (creatorNode) {
+            author = this.safeExtractText(creatorNode);
+          }
         }
         
         // Image extraction using priority chain (ST-003-04)
@@ -547,13 +572,6 @@ export class ImprovedFeedParser {
           }
         });
         
-        // Source extraction
-        let source = '';
-        const sourceNode = itemNode.querySelector('source');
-        if (sourceNode) {
-          source = this.safeExtractText(sourceNode);
-        }
-        
         // Fallback for link URL
         if (!linkUrl) {
           const guidNode = itemNode.querySelector('guid') || 
@@ -571,7 +589,7 @@ export class ImprovedFeedParser {
             pubDate: pubDate,
             description: cleanedDescription,
             imageUrl: finalImageUrl,
-            author: author || source || undefined,
+            author: author || undefined,
             categories: categories.length > 0 ? categories : undefined,
             feedType: 'rss'
           });

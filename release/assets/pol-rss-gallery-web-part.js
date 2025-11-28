@@ -1012,6 +1012,7 @@ const RssFeed = (props) => {
             items: filteredItems,
             showDescription: props.showDescription,
             showPubDate: props.showPubDate,
+            showSource: props.showSource,
             fallbackImageUrl: props.fallbackImageUrl,
             forceFallback: props.forceFallbackImage,
             hideImages: props.hideImages
@@ -1034,7 +1035,7 @@ const RssFeed = (props) => {
             case 'minimal':
                 return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ErrorBoundary__WEBPACK_IMPORTED_MODULE_4__.RssErrorBoundary, null,
                     react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Suspense, { fallback: react__WEBPACK_IMPORTED_MODULE_0__.createElement(LayoutFallback, null) },
-                        react__WEBPACK_IMPORTED_MODULE_0__.createElement(MinimalLayout, { items: filteredItems, showPubDate: props.showPubDate, showDescription: props.showDescription, truncateDescription: 100, isLoading: isLoading }))));
+                        react__WEBPACK_IMPORTED_MODULE_0__.createElement(MinimalLayout, { items: filteredItems, showPubDate: props.showPubDate, showDescription: props.showDescription, showSource: props.showSource, truncateDescription: 100, isLoading: isLoading }))));
             case 'gallery':
                 return (react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ErrorBoundary__WEBPACK_IMPORTED_MODULE_4__.RssErrorBoundary, null,
                     react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Suspense, { fallback: react__WEBPACK_IMPORTED_MODULE_0__.createElement(LayoutFallback, null) },
@@ -5967,6 +5968,10 @@ class ImprovedFeedParser {
             if (nsCheck('atom')) {
                 result = result.replace(/<rss([^>]*)>/, '<rss$1 xmlns:atom="http://www.w3.org/2005/Atom">');
             }
+            // Add Retriever namespace support for ret:source
+            if (nsCheck('ret')) {
+                result = result.replace(/<rss([^>]*)>/, '<rss$1 xmlns:ret="http://www.retriever-info.com/rss/">');
+            }
         }
         result = result.replace(/<description>(?!\s*<!\[CDATA\[)([^<][\s\S]*?)<\/description>/g, '<description><![CDATA[$1]]></description>');
         return result;
@@ -6073,13 +6078,34 @@ class ImprovedFeedParser {
                     itemNode.querySelector('content');
                 const descriptionText = descNode ? this.safeExtractText(descNode, true) : '';
                 const cleanedDescription = (0,_components_rssUtils__WEBPACK_IMPORTED_MODULE_6__.cleanDescription)(descriptionText);
-                // Author extraction
+                // Author/Source extraction - priority chain for source display
+                // For Retriever/Meltwater feeds: author contains publication name
+                // Priority: <author> → <ret:source> → <source> → <dc:creator>
                 let author = '';
-                const authorNode = itemNode.querySelector('author') ||
-                    itemNode.querySelector('dc\\:creator') ||
-                    itemNode.querySelector('creator');
+                const authorNode = itemNode.querySelector('author');
                 if (authorNode) {
                     author = this.safeExtractText(authorNode);
+                }
+                if (!author) {
+                    // Try ret:source namespace (Retriever-specific)
+                    const retSourceNode = itemNode.querySelector('ret\\:source') ||
+                        itemNode.querySelector('source[ret\\:source]');
+                    if (retSourceNode) {
+                        author = this.safeExtractText(retSourceNode);
+                    }
+                }
+                if (!author) {
+                    const sourceNode = itemNode.querySelector('source');
+                    if (sourceNode) {
+                        author = this.safeExtractText(sourceNode);
+                    }
+                }
+                if (!author) {
+                    const creatorNode = itemNode.querySelector('dc\\:creator') ||
+                        itemNode.querySelector('creator');
+                    if (creatorNode) {
+                        author = this.safeExtractText(creatorNode);
+                    }
                 }
                 // Image extraction using priority chain (ST-003-04)
                 // channelNode is cached outside the loop for performance (ST-003-08)
@@ -6100,12 +6126,6 @@ class ImprovedFeedParser {
                         categories.push(category);
                     }
                 });
-                // Source extraction
-                let source = '';
-                const sourceNode = itemNode.querySelector('source');
-                if (sourceNode) {
-                    source = this.safeExtractText(sourceNode);
-                }
                 // Fallback for link URL
                 if (!linkUrl) {
                     const guidNode = itemNode.querySelector('guid') ||
@@ -6122,7 +6142,7 @@ class ImprovedFeedParser {
                         pubDate: pubDate,
                         description: cleanedDescription,
                         imageUrl: finalImageUrl,
-                        author: author || source || undefined,
+                        author: author || undefined,
                         categories: categories.length > 0 ? categories : undefined,
                         feedType: 'rss'
                     });
@@ -28376,7 +28396,7 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
         this.render();
     }
     render() {
-        const { webPartTitle, feedUrl, layout, autoscroll, interval, showPagination, forceFallbackImage, fallbackImageUrl, maxItems, showPubDate, showDescription, autoRefresh, refreshInterval, galleryColumns, galleryTitlePosition, galleryAspectRatio, galleryGap } = this.properties;
+        const { webPartTitle, feedUrl, layout, autoscroll, interval, showPagination, forceFallbackImage, fallbackImageUrl, maxItems, showPubDate, showDescription, showSource, autoRefresh, refreshInterval, galleryColumns, galleryTitlePosition, galleryAspectRatio, galleryGap } = this.properties;
         // Minimal layout always hides images
         const hideImages = layout === 'minimal';
         const element = react__WEBPACK_IMPORTED_MODULE_0__.createElement(_components_RssFeed__WEBPACK_IMPORTED_MODULE_5__["default"], {
@@ -28392,6 +28412,7 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
             maxItems,
             showPubDate,
             showDescription,
+            showSource,
             autoRefresh,
             refreshInterval: (refreshInterval || 5) * 60,
             themeVariant: this._themeVariant,
@@ -28483,6 +28504,11 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
                         label: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowDescriptionFieldLabel,
                         onText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowDescriptionOnLabel,
                         offText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowDescriptionOffLabel
+                    }),
+                    (0,_microsoft_sp_property_pane__WEBPACK_IMPORTED_MODULE_2__.PropertyPaneToggle)('showSource', {
+                        label: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowSourceFieldLabel,
+                        onText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowSourceOnLabel,
+                        offText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.ShowSourceOffLabel
                     }),
                 ]
             },

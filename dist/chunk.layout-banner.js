@@ -150,7 +150,7 @@ const heightPresets = {
 /**
  * BannerCarousel component
  */
-const BannerCarousel = ({ items, autoplay = true, interval = 5, showNavigation = true, showPagination = true, pauseOnHover = true, height = 'md', fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, isLoading = false, onItemClick, className = '', testId = 'banner-carousel' }) => {
+const BannerCarousel = ({ items, autoplay = true, interval = 5, showNavigation = true, showPagination = true, pauseOnHover = true, height = 'md', fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, showSource = false, isLoading = false, onItemClick, className = '', testId = 'banner-carousel' }) => {
     const [swiperInstance, setSwiperInstance] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null);
     const [currentSlide, setCurrentSlide] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(1);
     const [isPaused, setIsPaused] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
@@ -231,7 +231,7 @@ const BannerCarousel = ({ items, autoplay = true, interval = 5, showNavigation =
                 lastSlideMessage: 'Dette er siste lysbilde',
                 paginationBulletMessage: 'Gå til lysbilde {{index}}'
             }, className: _BannerCarousel_module_scss__WEBPACK_IMPORTED_MODULE_10__["default"].swiper }, items.map((item, index) => (react__WEBPACK_IMPORTED_MODULE_0__.createElement(swiper_react__WEBPACK_IMPORTED_MODULE_1__.SwiperSlide, { key: `${item.link}-${index}`, className: _BannerCarousel_module_scss__WEBPACK_IMPORTED_MODULE_10__["default"].slide, role: "group", "aria-roledescription": "lysbilde", "aria-label": `${index + 1} av ${totalSlides}: ${item.title}` },
-            react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_7__.FeedItem, { item: item, variant: "banner", showImage: !hideImages, showDescription: showDescription, showDate: showPubDate, fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: { maxLines: 2, maxChars: 150 }, imageAspectRatio: "auto", testId: `${testId}-item-${index}` }))))),
+            react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_7__.FeedItem, { item: item, variant: "banner", showImage: !hideImages, showDescription: showDescription, showDate: showPubDate, showSource: showSource, fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: { maxLines: 2, maxChars: 150 }, imageAspectRatio: "auto", testId: `${testId}-item-${index}` }))))),
         showNavigation && items.length > 1 && (react__WEBPACK_IMPORTED_MODULE_0__.createElement(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, null,
             react__WEBPACK_IMPORTED_MODULE_0__.createElement("button", { className: `${_BannerCarousel_module_scss__WEBPACK_IMPORTED_MODULE_10__["default"].navButton} ${_BannerCarousel_module_scss__WEBPACK_IMPORTED_MODULE_10__["default"].navPrev}`, "aria-label": "Forrige lysbilde", "data-testid": `${testId}-prev` },
                 react__WEBPACK_IMPORTED_MODULE_0__.createElement("span", { className: "ms-Icon ms-Icon--ChevronLeft", "aria-hidden": "true" })),

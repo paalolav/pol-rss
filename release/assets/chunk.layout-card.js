@@ -259,7 +259,7 @@ const cardSizeToMinWidth = {
 /**
  * CardLayout component
  */
-const CardLayout = ({ items, columns = 'auto', cardSize = 'md', gap = 'md', fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, truncateDescription = 150, imageAspectRatio = '16:9', isLoading = false, skeletonCount = 6, onItemClick, className = '', testId = 'card-layout' }) => {
+const CardLayout = ({ items, columns = 'auto', cardSize = 'md', gap = 'md', fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, showSource = false, truncateDescription = 150, imageAspectRatio = '16:9', isLoading = false, skeletonCount = 6, onItemClick, className = '', testId = 'card-layout' }) => {
     // Key for forcing re-render when forceFallback changes
     const [layoutKey, setLayoutKey] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
@@ -304,7 +304,7 @@ const CardLayout = ({ items, columns = 'auto', cardSize = 'md', gap = 'md', fall
             react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_EmptyState__WEBPACK_IMPORTED_MODULE_4__.NoItemsEmptyState, null)));
     }
     return (react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { className: containerClasses, "data-testid": testId, key: layoutKey },
-        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ResponsiveGrid__WEBPACK_IMPORTED_MODULE_1__.ResponsiveGrid, { minItemWidth: minItemWidth, maxColumns: maxColumns, gap: gap, testId: `${testId}-grid` }, items.map((item, index) => (react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_2__.FeedItem, { key: `${item.link}-${index}`, item: item, variant: "card", showImage: !hideImages, showDescription: showDescription, showDate: showPubDate, imageAspectRatio: imageAspectRatio, fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: {
+        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_ResponsiveGrid__WEBPACK_IMPORTED_MODULE_1__.ResponsiveGrid, { minItemWidth: minItemWidth, maxColumns: maxColumns, gap: gap, testId: `${testId}-grid` }, items.map((item, index) => (react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_2__.FeedItem, { key: `${item.link}-${index}`, item: item, variant: "card", showImage: !hideImages, showDescription: showDescription, showDate: showPubDate, showSource: showSource, imageAspectRatio: imageAspectRatio, fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: {
                 maxChars: truncateDescription,
                 maxLines: 3
             }, className: _CardLayout_module_scss__WEBPACK_IMPORTED_MODULE_5__["default"].card, testId: `${testId}-item-${index}` }))))));

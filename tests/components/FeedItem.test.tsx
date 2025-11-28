@@ -117,8 +117,8 @@ describe('FeedItem', () => {
       expect(screen.queryByText('News')).not.toBeInTheDocument();
     });
 
-    it('renders author when showAuthor is true', () => {
-      render(<FeedItem item={mockItem} variant="card" showAuthor />);
+    it('renders source when showSource is true', () => {
+      render(<FeedItem item={mockItem} variant="card" showSource />);
 
       expect(screen.getByText(mockItem.author!)).toBeInTheDocument();
     });

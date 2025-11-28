@@ -61,6 +61,7 @@ export interface IRssFeedProps {
   fallbackImageUrl: string;
   showPubDate: boolean;
   showDescription: boolean;
+  showSource?: boolean;
   maxItems: number;
   themeVariant?: IReadonlyTheme;
   // Gallery-specific props
@@ -341,6 +342,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
       items: filteredItems,
       showDescription: props.showDescription,
       showPubDate: props.showPubDate,
+      showSource: props.showSource,
       fallbackImageUrl: props.fallbackImageUrl,
       forceFallback: props.forceFallbackImage,
       hideImages: props.hideImages
@@ -380,6 +382,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
                 items={filteredItems}
                 showPubDate={props.showPubDate}
                 showDescription={props.showDescription}
+                showSource={props.showSource}
                 truncateDescription={100}
                 isLoading={isLoading}
               />

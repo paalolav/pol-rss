@@ -1241,3 +1241,38 @@ export const createMalformedFeed = (options: {
 
   return feed;
 };
+
+/**
+ * Retriever feed with ret:source namespace (Meltwater/media monitoring feeds)
+ * Tests the priority chain: <author> → <ret:source> → <source> → <dc:creator>
+ */
+export const rss2RetrieverSourceXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:ret="http://www.retriever-info.com/rss/">
+  <channel>
+    <title>Media Monitoring Feed</title>
+    <link>https://meltwater.example.com</link>
+    <description>Aggregated media mentions</description>
+    <item>
+      <title>Article from Dagbladet</title>
+      <link>https://dagbladet.no/article-1</link>
+      <description>An article from Dagbladet about technology</description>
+      <ret:source>Dagbladet</ret:source>
+      <pubDate>Mon, 25 Nov 2025 10:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Article from VG</title>
+      <link>https://vg.no/article-2</link>
+      <description>An article from VG about politics</description>
+      <author>VG Nyheter</author>
+      <ret:source>VG</ret:source>
+      <pubDate>Mon, 25 Nov 2025 09:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Article from NRK</title>
+      <link>https://nrk.no/article-3</link>
+      <description>An article from NRK about sports</description>
+      <source url="https://nrk.no/feed.xml">NRK Nyheter</source>
+      <pubDate>Mon, 25 Nov 2025 08:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>`;

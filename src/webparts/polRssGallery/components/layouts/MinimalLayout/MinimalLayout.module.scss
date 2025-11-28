@@ -92,6 +92,18 @@
   white-space: nowrap;
 }
 
+.itemSource {
+  font-size: 0.75rem;
+  color: var(--neutralSecondary, #605e5c);
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &::before {
+    content: '•';
+    margin-right: 8px;
+  }
+}
+
 .itemDescription {
   font-size: 0.8125rem;
   line-height: 1.4;
@@ -181,6 +193,7 @@
 
       .itemTitle,
       .itemDate,
+      .itemSource,
       .itemDescription {
         color: HighlightText;
       }

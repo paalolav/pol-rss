@@ -2,7 +2,7 @@
 
 > Version: 1.3.0-dev
 > Last Updated: 2025-11-28
-> Status: In Progress
+> Status: 92% Complete (12/13 tasks)
 
 ## Overview
 
@@ -148,6 +148,17 @@ New "Gallery" layout showcasing images as the primary content. Masonry-style gri
 
 ---
 
+### REF-015-SOURCE-DISPLAY
+**Status:** `[x]` Completed
+**Priority:** Medium
+**Reference:** [REF-015-SOURCE-DISPLAY.md](refs/REF-015-SOURCE-DISPLAY.md)
+
+Add "Source" display option showing the feed/publication name (e.g., "Finansavisen", "Kapital") next to the date. Essential for Retriever/Meltwater aggregated feeds where users need to see which publication each article comes from.
+
+**Sub-tasks:** 9 | **Completed:** 9/9
+
+---
+
 ## Phase 5: Polish & Documentation
 
 ### REF-011-DOCUMENTATION
@@ -168,23 +179,15 @@ Comprehensive documentation for admins and users.
 | Phase 1: Foundation | 3 | 3 | 100% |
 | Phase 2: Core Reliability | 3 | 3 | 100% |
 | Phase 3: UI/UX | 4 | 4 | 100% |
-| Phase 4: Features | 1 | 1 | 100% |
+| Phase 4: Features | 2 | 2 | 100% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **12** | **11** | **92%** |
+| **Total** | **13** | **12** | **92%** |
 
 ---
 
 ## Future Enhancements (Backlog)
 
 The following features are planned for future versions but not part of the current v1.3.0 release scope.
-
-### REF-015-SOURCE-DISPLAY
-**Priority:** Low
-**Reference:** TBD
-
-Add "Source" as a display option in the property pane. Shows the feed/channel title for each item, useful when aggregating multiple feeds or when users want to see where content originated.
-
----
 
 ### REF-009-FEED-AGGREGATION
 **Priority:** Medium
@@ -224,17 +227,46 @@ REF-007 (Layouts) ──┬──> REF-008 (Property Pane) ✓
                     ├──> REF-013 (Bundle Opt) ✓
                     └──> REF-014 (Gallery) ✓
 
+REF-007 (Layouts) ─────────> REF-015 (Source Display) ✓
+
 REMAINING:
 All Tasks ──────────────> REF-011 (Documentation)
 
 FUTURE (Backlog):
 REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
-REF-009 ────────────────> REF-015 (Source Display)
 ```
 
 ---
 
 ## Changelog
+
+### 2025-11-28 (Session 25) - Source Display Implementation
+- REF-015: Source Display COMPLETED (9/9 sub-tasks)
+  - **ST-015-01: Update FeedItem component** - Renamed `showAuthor` → `showSource` prop
+  - **ST-015-02: Update FeedItem styles** - Renamed `.author` → `.source` class
+  - **ST-015-03: Update parser for ret:source** - Added Retriever namespace support with priority chain: `<author>` → `<ret:source>` → `<source>` → `<dc:creator>`
+  - **ST-015-04: Add showSource to web part props** - Added to IRssFeedWebPartProps interface
+  - **ST-015-05: Add property pane toggle** - Toggle in Display Settings group
+  - **ST-015-06: Add localization strings** - Added to en-us, nb-no, nn-no locales
+  - **ST-015-07: Update layout components** - Added showSource prop to CardLayout, ListLayout, BannerCarousel, MinimalLayout
+  - **ST-015-08: Update RssFeed component** - Pass showSource to all layouts
+  - **ST-015-09: Write tests** - Added test fixture and test for ret:source parsing
+  - All 1673 tests passing
+- **Project Progress: 92% (12/13 active tasks completed)**
+
+---
+
+### 2025-11-28 (Session 24) - Source Display Feature
+- REF-015: Source Display IN PROGRESS (0/9 sub-tasks)
+  - Created reference document with implementation plan
+  - Analyzed Puzzlepart's spfx-solutions RSS Feed implementation for reference
+  - Identified that Retriever feeds use `<author>` tag for publication name
+  - Identified `<ret:source>` namespace for Retriever-specific source extraction
+  - Planned UI: Display source next to date with bullet separator: `25. nov 2025 • Finansavisen`
+  - Moved REF-015 from backlog to Phase 4: Features (active)
+- **Project Progress: 85% (11/13 active tasks completed)**
+
+---
 
 ### 2025-11-28 (Session 23) - Gallery Layout Implementation
 - REF-014: Gallery Layout COMPLETED (10/10 sub-tasks)

@@ -75,6 +75,11 @@ export interface ICardLayoutProps {
    */
   showDescription?: boolean;
   /**
+   * Whether to show source/publication name
+   * @default false
+   */
+  showSource?: boolean;
+  /**
    * Maximum characters for description truncation
    * @default 150
    */
@@ -130,6 +135,7 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
   hideImages = false,
   showPubDate = true,
   showDescription = true,
+  showSource = false,
   truncateDescription = 150,
   imageAspectRatio = '16:9',
   isLoading = false,
@@ -214,6 +220,7 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
             showImage={!hideImages}
             showDescription={showDescription}
             showDate={showPubDate}
+            showSource={showSource}
             imageAspectRatio={imageAspectRatio}
             fallbackImageUrl={fallbackImageUrl}
             forceFallback={forceFallback}

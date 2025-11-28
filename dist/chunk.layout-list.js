@@ -130,7 +130,7 @@ const thumbnailSizeToAspectRatio = {
 /**
  * ListLayout component
  */
-const ListLayout = ({ items, thumbnailPosition = 'left', thumbnailSize = 'md', compact = false, showDividers = true, fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, truncateDescription = 200, isLoading = false, skeletonCount = 5, onItemClick, className = '', testId = 'list-layout' }) => {
+const ListLayout = ({ items, thumbnailPosition = 'left', thumbnailSize = 'md', compact = false, showDividers = true, fallbackImageUrl, forceFallback = false, hideImages = false, showPubDate = true, showDescription = true, showSource = false, truncateDescription = 200, isLoading = false, skeletonCount = 5, onItemClick, className = '', testId = 'list-layout' }) => {
     // Key for forcing re-render when forceFallback changes
     const [layoutKey, setLayoutKey] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0);
     (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
@@ -183,7 +183,7 @@ const ListLayout = ({ items, thumbnailPosition = 'left', thumbnailSize = 'md', c
             react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_EmptyState__WEBPACK_IMPORTED_MODULE_3__.NoItemsEmptyState, null)));
     }
     return (react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { className: containerClasses, "data-testid": testId, key: layoutKey, role: "list", "aria-label": "Nyhetsliste" }, items.map((item, index) => (react__WEBPACK_IMPORTED_MODULE_0__.createElement("div", { key: `${item.link}-${index}`, className: _ListLayout_module_scss__WEBPACK_IMPORTED_MODULE_4__["default"].listItem, role: "listitem" },
-        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_1__.FeedItem, { item: item, variant: "list", showImage: !hideImages && thumbnailPosition !== 'none', showDescription: showDescription, showDate: showPubDate, imageAspectRatio: thumbnailSizeToAspectRatio[thumbnailSize], fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: {
+        react__WEBPACK_IMPORTED_MODULE_0__.createElement(_shared_FeedItem__WEBPACK_IMPORTED_MODULE_1__.FeedItem, { item: item, variant: "list", showImage: !hideImages && thumbnailPosition !== 'none', showDescription: showDescription, showDate: showPubDate, showSource: showSource, imageAspectRatio: thumbnailSizeToAspectRatio[thumbnailSize], fallbackImageUrl: fallbackImageUrl, forceFallback: forceFallback, onItemClick: handleItemClick, descriptionTruncation: {
                 maxChars: truncateDescription,
                 maxLines: compact ? 2 : 3
             }, testId: `${testId}-item-${index}` }))))));

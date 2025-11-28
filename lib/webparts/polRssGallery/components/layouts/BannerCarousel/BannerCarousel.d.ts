@@ -85,6 +85,11 @@ export interface IBannerCarouselProps {
      */
     showDescription?: boolean;
     /**
+     * Whether to show source/publication name
+     * @default false
+     */
+    showSource?: boolean;
+    /**
      * Whether the component is loading
      * @default false
      */

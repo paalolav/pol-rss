@@ -67,6 +67,11 @@ export interface ICardLayoutProps {
      */
     showDescription?: boolean;
     /**
+     * Whether to show source/publication name
+     * @default false
+     */
+    showSource?: boolean;
+    /**
      * Maximum characters for description truncation
      * @default 150
      */

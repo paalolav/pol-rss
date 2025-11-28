@@ -32,6 +32,7 @@ declare const styles: {
     itemLink: string;
     itemMeta: string;
     itemDate: string;
+    itemSource: string;
     itemDescription: string;
     minimalLayoutNumbered: string;
     minimalLayoutBulleted: string;

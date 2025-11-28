@@ -14,6 +14,7 @@ export interface IRssFeedProps {
     fallbackImageUrl: string;
     showPubDate: boolean;
     showDescription: boolean;
+    showSource?: boolean;
     maxItems: number;
     themeVariant?: IReadonlyTheme;
     galleryColumns?: 'auto' | 2 | 3 | 4;
