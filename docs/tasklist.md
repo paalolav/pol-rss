@@ -2,7 +2,7 @@
 
 > Version: 1.3.0-dev
 > Last Updated: 2025-11-28
-> Status: 92% Complete (12/13 tasks)
+> Status: 92% Complete (12/13 tasks) - Gallery display settings implemented
 
 ## Overview
 
@@ -239,6 +239,34 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 ---
 
 ## Changelog
+
+### 2025-11-28 (Session 26) - Gallery Display Settings & E2E Testing
+- **Gallery Display Settings Implementation** (TDD approach)
+  - Added `showDate`, `showDescription`, `showSource` props to GalleryLayout and GalleryItem
+  - Display settings now work in Gallery layout (were previously non-functional)
+  - Hover overlay shows date, source, and description when enabled
+  - Title-below mode shows meta info (date • source separator) and description
+  - Added `truncateText` helper for description truncation (100 chars hover, 80 chars below)
+  - Added 12 new unit tests for Gallery display settings
+  - Fixed bug: Used `item.author` (correct) instead of `item.source` (doesn't exist on IRssItem)
+- **E2E Testing Infrastructure**
+  - Created `gallery-page.spo.spec.ts` for testing deployed SharePoint pages
+  - All 14 E2E tests passing against production page
+  - Tests cover: page loading, images, titles, dates, descriptions, links, responsive layouts
+  - Screenshots captured for visual verification (mobile, tablet, desktop)
+  - Cleaned up non-working workbench E2E tests
+  - Added SharePoint auth setup script (`tests/e2e/auth/setup-auth.js`)
+- **Files modified:**
+  - `src/webparts/polRssGallery/components/layouts/GalleryLayout/GalleryItem.tsx`
+  - `src/webparts/polRssGallery/components/layouts/GalleryLayout/GalleryLayout.tsx`
+  - `src/webparts/polRssGallery/components/layouts/GalleryLayout/GalleryLayout.module.scss`
+  - `src/webparts/polRssGallery/components/RssFeed.tsx`
+  - `tests/components/layouts/GalleryLayout.test.tsx`
+  - `tests/e2e/gallery-page.spo.spec.ts` (NEW)
+  - `tests/e2e/auth/setup-auth.js` (NEW)
+- All 1685 unit tests passing, 14 E2E tests passing
+
+---
 
 ### 2025-11-28 (Session 25) - Source Display Implementation
 - REF-015: Source Display COMPLETED (9/9 sub-tasks)

@@ -402,6 +402,9 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
                 aspectRatio={props.galleryAspectRatio || '4:3'}
                 fallbackImageUrl={props.fallbackImageUrl}
                 forceFallback={props.forceFallbackImage}
+                showDate={props.showPubDate}
+                showDescription={props.showDescription}
+                showSource={props.showSource}
                 isLoading={isLoading}
               />
             </React.Suspense>

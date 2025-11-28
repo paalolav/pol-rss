@@ -74,6 +74,21 @@ export interface IGalleryLayoutProps {
    */
   filterNoImages?: boolean;
   /**
+   * Whether to show the publication date
+   * @default true
+   */
+  showDate?: boolean;
+  /**
+   * Whether to show the description
+   * @default false
+   */
+  showDescription?: boolean;
+  /**
+   * Whether to show the source/publication name
+   * @default false
+   */
+  showSource?: boolean;
+  /**
    * Whether the component is loading
    * @default false
    */
@@ -118,6 +133,9 @@ export const GalleryLayout: React.FC<IGalleryLayoutProps> = ({
   fallbackImageUrl,
   forceFallback = false,
   filterNoImages = true,
+  showDate = true,
+  showDescription = false,
+  showSource = false,
   isLoading = false,
   skeletonCount = 8,
   onItemClick,
@@ -205,6 +223,9 @@ export const GalleryLayout: React.FC<IGalleryLayoutProps> = ({
           aspectRatio={aspectRatio}
           fallbackImageUrl={fallbackImageUrl}
           forceFallback={forceFallback}
+          showDate={showDate}
+          showDescription={showDescription}
+          showSource={showSource}
           onClick={onItemClick ? handleItemClick : undefined}
           testId={`${testId}-item-${index}`}
         />

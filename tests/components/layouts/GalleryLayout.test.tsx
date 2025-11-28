@@ -20,6 +20,10 @@ jest.mock('../../../src/webparts/polRssGallery/components/layouts/GalleryLayout/
     hoverOverlay: 'hoverOverlay',
     title: 'title',
     date: 'date',
+    source: 'source',
+    description: 'description',
+    meta: 'meta',
+    separator: 'separator',
     titleBelow: 'titleBelow',
     'title-none': 'title-none',
     'title-hover': 'title-hover',
@@ -352,6 +356,196 @@ describe('GalleryLayout', () => {
       render(<GalleryLayout {...defaultProps} testId="my-gallery" />);
 
       expect(screen.getByTestId('my-gallery')).toBeInTheDocument();
+    });
+  });
+
+  describe('Display Settings', () => {
+    const itemsWithFullData = (): IRssItem[] => [
+      {
+        title: 'Test Article',
+        link: 'https://example.com/article',
+        pubDate: '2025-01-15T12:00:00Z',
+        description: 'This is the article description with some content.',
+        imageUrl: 'https://example.com/image.jpg',
+        author: 'Test Publication',
+      },
+    ];
+
+    describe('showDate prop', () => {
+      it('shows date in hover overlay when showDate is true and showTitles="hover"', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDate={true}
+          />
+        );
+
+        const overlay = screen.getByTestId('gallery-layout-item-0-hover-overlay');
+        expect(overlay.querySelector('time')).toBeInTheDocument();
+      });
+
+      it('hides date in hover overlay when showDate is false', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDate={false}
+          />
+        );
+
+        const overlay = screen.getByTestId('gallery-layout-item-0-hover-overlay');
+        expect(overlay.querySelector('time')).not.toBeInTheDocument();
+      });
+
+      it('shows date below image when showDate is true and showTitles="below"', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="below"
+            showDate={true}
+          />
+        );
+
+        const titleBelow = screen.getByTestId('gallery-layout-item-0-title-below');
+        expect(titleBelow.querySelector('time')).toBeInTheDocument();
+      });
+
+      it('hides date below image when showDate is false', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="below"
+            showDate={false}
+          />
+        );
+
+        const titleBelow = screen.getByTestId('gallery-layout-item-0-title-below');
+        expect(titleBelow.querySelector('time')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('showDescription prop', () => {
+      it('shows description in hover overlay when showDescription is true', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDescription={true}
+          />
+        );
+
+        expect(screen.getByText(/This is the article description/)).toBeInTheDocument();
+      });
+
+      it('hides description when showDescription is false', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDescription={false}
+          />
+        );
+
+        expect(screen.queryByText(/This is the article description/)).not.toBeInTheDocument();
+      });
+
+      it('shows description below image when showTitles="below" and showDescription is true', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="below"
+            showDescription={true}
+          />
+        );
+
+        expect(screen.getByText(/This is the article description/)).toBeInTheDocument();
+      });
+    });
+
+    describe('showSource prop', () => {
+      it('shows source in hover overlay when showSource is true', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showSource={true}
+          />
+        );
+
+        expect(screen.getByText('Test Publication')).toBeInTheDocument();
+      });
+
+      it('hides source when showSource is false', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showSource={false}
+          />
+        );
+
+        expect(screen.queryByText('Test Publication')).not.toBeInTheDocument();
+      });
+
+      it('shows source below image when showTitles="below" and showSource is true', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="below"
+            showSource={true}
+          />
+        );
+
+        expect(screen.getByText('Test Publication')).toBeInTheDocument();
+      });
+    });
+
+    describe('combined display props', () => {
+      it('shows date, source and description together when all enabled', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDate={true}
+            showDescription={true}
+            showSource={true}
+          />
+        );
+
+        const overlay = screen.getByTestId('gallery-layout-item-0-hover-overlay');
+        expect(overlay.querySelector('time')).toBeInTheDocument();
+        expect(screen.getByText('Test Publication')).toBeInTheDocument();
+        expect(screen.getByText(/This is the article description/)).toBeInTheDocument();
+      });
+
+      it('shows only title when all display props are false', () => {
+        render(
+          <GalleryLayout
+            {...defaultProps}
+            items={itemsWithFullData()}
+            showTitles="hover"
+            showDate={false}
+            showDescription={false}
+            showSource={false}
+          />
+        );
+
+        expect(screen.getByText('Test Article')).toBeInTheDocument();
+        expect(screen.queryByText('Test Publication')).not.toBeInTheDocument();
+        expect(screen.queryByText(/This is the article description/)).not.toBeInTheDocument();
+      });
     });
   });
 });

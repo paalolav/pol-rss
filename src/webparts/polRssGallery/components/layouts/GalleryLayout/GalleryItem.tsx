@@ -54,6 +54,21 @@ export interface IGalleryItemProps {
    */
   forceFallback?: boolean;
   /**
+   * Whether to show the publication date
+   * @default true
+   */
+  showDate?: boolean;
+  /**
+   * Whether to show the description
+   * @default false
+   */
+  showDescription?: boolean;
+  /**
+   * Whether to show the source/publication name
+   * @default false
+   */
+  showSource?: boolean;
+  /**
    * Callback when item is clicked
    */
   onClick?: (item: IRssItem) => void;
@@ -107,12 +122,27 @@ const formatDate = (dateString: string | undefined): string => {
 /**
  * GalleryItem component
  */
+/**
+ * Truncate text to a maximum length
+ */
+const truncateText = (text: string | undefined, maxLength: number): string => {
+  if (!text) return '';
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + '...';
+};
+
+/**
+ * GalleryItem component
+ */
 export const GalleryItem: React.FC<IGalleryItemProps> = ({
   item,
   showTitle,
   aspectRatio,
   fallbackImageUrl,
   forceFallback = false,
+  showDate = true,
+  showDescription = false,
+  showSource = false,
   onClick,
   className = '',
   testId = 'gallery-item'
@@ -198,10 +228,16 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
         {showTitle === 'hover' && (
           <div className={styles.hoverOverlay} data-testid={`${testId}-hover-overlay`}>
             <h3 className={styles.title}>{item.title}</h3>
-            {item.pubDate && (
+            {showDate && item.pubDate && (
               <time className={styles.date} dateTime={item.pubDate}>
                 {formatDate(item.pubDate)}
               </time>
+            )}
+            {showSource && item.author && (
+              <span className={styles.source}>{item.author}</span>
+            )}
+            {showDescription && item.description && (
+              <p className={styles.description}>{truncateText(item.description, 100)}</p>
             )}
           </div>
         )}
@@ -211,6 +247,24 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
       {showTitle === 'below' && (
         <div className={styles.titleBelow} data-testid={`${testId}-title-below`}>
           <h3 className={styles.title}>{item.title}</h3>
+          {(showDate || showSource) && (
+            <div className={styles.meta}>
+              {showDate && item.pubDate && (
+                <time className={styles.date} dateTime={item.pubDate}>
+                  {formatDate(item.pubDate)}
+                </time>
+              )}
+              {showDate && item.pubDate && showSource && item.author && (
+                <span className={styles.separator}>•</span>
+              )}
+              {showSource && item.author && (
+                <span className={styles.source}>{item.author}</span>
+              )}
+            </div>
+          )}
+          {showDescription && item.description && (
+            <p className={styles.description}>{truncateText(item.description, 80)}</p>
+          )}
         </div>
       )}
     </article>
