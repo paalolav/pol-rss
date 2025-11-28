@@ -137,36 +137,14 @@ Optimize bundle size for faster loading. Includes Swiper optimization, code spli
 
 ## Phase 4: New Features
 
-### REF-014-GALLERY-LAYOUT ⭐ NEW
-**Status:** `[ ]` Not Started
+### REF-014-GALLERY-LAYOUT
+**Status:** `[x]` Completed
 **Priority:** High
 **Reference:** [REF-014-GALLERY-LAYOUT.md](refs/REF-014-GALLERY-LAYOUT.md)
 
 New "Gallery" layout showcasing images as the primary content. Masonry-style grid with images as hero, differentiating from text-heavy RSS solutions. Titles on hover or below - direct link to article.
 
-**Sub-tasks:** 10 | **Completed:** 0/10
-
----
-
-### REF-009-FEED-AGGREGATION
-**Status:** `[ ]` Not Started
-**Priority:** Medium
-**Reference:** [REF-009-FEED-AGGREGATION.md](refs/REF-009-FEED-AGGREGATION.md)
-
-Support multiple RSS feeds merged into a single view. Includes duplicate detection and migration strategy.
-
-**Sub-tasks:** 10 | **Completed:** 0/10
-
----
-
-### REF-010-ENHANCED-FILTERING
-**Status:** `[—]` Deferred
-**Priority:** Low
-**Reference:** [REF-010-ENHANCED-FILTERING.md](refs/REF-010-ENHANCED-FILTERING.md)
-
-~~Advanced filtering with date ranges, full-text search, presets, and shareable URL state.~~ Deferred - original filtering removed in Session 15 due to poor UX.
-
-**Sub-tasks:** 8 | **Completed:** 0/8
+**Sub-tasks:** 10 | **Completed:** 10/10
 
 ---
 
@@ -183,47 +161,137 @@ Comprehensive documentation for admins and users.
 
 ---
 
-## Summary
+## Summary (Active Tasks)
 
 | Phase | Tasks | Completed | Progress |
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 3 | 100% |
 | Phase 2: Core Reliability | 3 | 3 | 100% |
 | Phase 3: UI/UX | 4 | 4 | 100% |
-| Phase 4: Features | 3 | 0 | 0% |
+| Phase 4: Features | 1 | 1 | 100% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **14** | **10** | **71%** |
+| **Total** | **12** | **11** | **92%** |
 
-**Note:** REF-010 (Enhanced Filtering) is deferred - not counted as active task.
+---
+
+## Future Enhancements (Backlog)
+
+The following features are planned for future versions but not part of the current v1.3.0 release scope.
+
+### REF-015-SOURCE-DISPLAY
+**Priority:** Low
+**Reference:** TBD
+
+Add "Source" as a display option in the property pane. Shows the feed/channel title for each item, useful when aggregating multiple feeds or when users want to see where content originated.
+
+---
+
+### REF-009-FEED-AGGREGATION
+**Priority:** Medium
+**Reference:** [REF-009-FEED-AGGREGATION.md](refs/REF-009-FEED-AGGREGATION.md)
+
+Support multiple RSS feeds merged into a single view. Includes duplicate detection and migration strategy.
+
+**Sub-tasks:** 10
+
+---
+
+### REF-010-ENHANCED-FILTERING
+**Priority:** Low
+**Reference:** [REF-010-ENHANCED-FILTERING.md](refs/REF-010-ENHANCED-FILTERING.md)
+
+Advanced filtering with date ranges, full-text search, presets, and shareable URL state. Original filtering removed in Session 15 due to poor UX - needs redesign.
 
 ---
 
 ## Dependencies
 
 ```
-REF-001 (Testing) ──┬──> REF-003 (Parser)
-                    ├──> REF-004 (Errors)
-                    └──> REF-005 (Cache)
+COMPLETED DEPENDENCY CHAIN:
 
-REF-002 (Proxy) ────┬──> REF-004 (Errors)
-                    └──> REF-012 (Security) [URL validation]
+REF-001 (Testing) ──┬──> REF-003 (Parser) ✓
+                    ├──> REF-004 (Errors) ✓
+                    └──> REF-005 (Cache) ✓
 
-REF-003 (Parser) ───────> REF-012 (Security) [Content sanitization]
+REF-002 (Proxy) ────┬──> REF-004 (Errors) ✓
+                    └──> REF-012 (Security) ✓
 
-REF-003 + REF-004 ──────> REF-009 (Aggregation)
+REF-003 (Parser) ───────> REF-012 (Security) ✓
 
-REF-006 (Responsive) ───> REF-007 (Layouts)
+REF-006 (Responsive) ───> REF-007 (Layouts) ✓
 
-REF-007 (Layouts) ──┬──> REF-008 (Property Pane)
-                    ├──> REF-013 (Bundle Opt) [Carousel optimization]
-                    └──> REF-014 (Gallery) [New layout] ⭐
+REF-007 (Layouts) ──┬──> REF-008 (Property Pane) ✓
+                    ├──> REF-013 (Bundle Opt) ✓
+                    └──> REF-014 (Gallery) ✓
 
+REMAINING:
 All Tasks ──────────────> REF-011 (Documentation)
+
+FUTURE (Backlog):
+REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
+REF-009 ────────────────> REF-015 (Source Display)
 ```
 
 ---
 
 ## Changelog
+
+### 2025-11-28 (Session 23) - Gallery Layout Implementation
+- REF-014: Gallery Layout COMPLETED (10/10 sub-tasks)
+  - **ST-014-01: Create GalleryLayout Component**
+    - Main gallery grid component with responsive CSS Grid
+    - Container query-based column adjustments
+    - Filtering for items without images (configurable)
+  - **ST-014-02: Create GalleryItem Component**
+    - Individual gallery item with image and title
+    - Configurable title display: hover overlay, below image, or hidden
+    - Keyboard accessible (Enter/Space opens link)
+    - Touch-friendly with hover effects
+  - **ST-014-03: Create Gallery Styles with Masonry**
+    - CSS Grid with auto-fill/auto-fit columns
+    - Container queries for responsive behavior
+    - Gap size options (sm, md, lg)
+    - Smooth hover animations with scale effect
+  - **ST-014-04: Add Gallery Layout to RssFeed**
+    - Added gallery to layout switch statement
+    - Implemented React.lazy() for code splitting
+    - Added gallery-specific props forwarding
+  - **ST-014-05: Add Gallery to PropertyPaneLayoutPicker**
+    - Added 'gallery' to LayoutType union type
+    - Created SVG preview icon for gallery layout
+    - Added PhotoCollection icon
+  - **ST-014-06: Add Gallery-Specific Property Pane Settings**
+    - Gallery Settings group (conditional, only for gallery layout)
+    - Column count: auto, 2, 3, or 4
+    - Title position: hover, below, none
+    - Aspect ratio: 1:1, 4:3, 16:9
+    - Gap size: small, medium, large
+  - **ST-014-07: Add Localization Strings**
+    - 20+ new strings in en-us.js, nb-no.js, nn-no.js
+    - Gallery layout label/description
+    - All gallery settings labels
+  - **ST-014-08: Add Gallery Skeleton Loading**
+    - GallerySkeleton component with shimmer animation
+    - Matches gallery grid layout during loading
+  - **ST-014-09: Add Gallery to Presets**
+    - Added "photo-gallery" preset with optimized gallery settings
+    - Updated preset count from 4 to 5
+  - **ST-014-10: Write Comprehensive Tests**
+    - 33 new tests for GalleryLayout component
+    - Tests for rendering, interactions, accessibility, loading state
+    - Fixed forceFallback prop propagation for image override
+- Reorganized tasklist for v1.3.0 release scope:
+  - Moved REF-009 (Feed Aggregation), REF-010 (Enhanced Filtering), REF-015 (Source Display) to **Future Enhancements (Backlog)**
+  - These features are planned for future versions, not v1.3.0
+  - Active tasks now focused on completing documentation (REF-011)
+- Created REF-015-SOURCE-DISPLAY task (user request)
+  - Add "Source" display option showing feed/channel title
+  - Useful for multi-feed scenarios
+- **Project Progress: 92% (11/12 active tasks completed)**
+- Only REF-011 (Documentation) remains for v1.3.0 release
+- All 298 tests passing
+
+---
 
 ### 2025-11-28 (Session 22) - Gallery Layout Task
 - Created REF-014-GALLERY-LAYOUT (10 sub-tasks)

@@ -284,7 +284,7 @@ export class ContentSanitizer {
           // Ensure noopener and noreferrer are in the rel attribute
           newAttrs = newAttrs.replace(
             /rel\s*=\s*["']([^"']*)["']/i,
-            (relMatch, relValue) => {
+            (_relMatch: string, relValue: string) => {
               let newRel = relValue;
               if (!relValue.includes('noopener')) {
                 newRel += ' noopener';

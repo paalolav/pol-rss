@@ -49,7 +49,7 @@ interface IFeedUrlControlState {
 /**
  * Custom property pane field for feed URL with validation
  */
-class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneFeedUrlProps> {
+class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   public type: PropertyPaneFieldType = PropertyPaneFieldType.Custom;
   public targetProperty: string;
   public properties: IPropertyPaneCustomFieldProps;
@@ -353,13 +353,12 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneFeedUr
       }
 
       // Parse to get details
-      const parser = new ImprovedFeedParser();
-      const parseResult = parser.parse(content);
+      const parsedItems = ImprovedFeedParser.parse(content, { fallbackImageUrl: '' });
 
       const result: IFeedValidationResult = {
         status: usedProxy ? 'warning' : 'valid',
-        feedTitle: parseResult.title || validationResult.metadata?.title,
-        itemCount: parseResult.items.length,
+        feedTitle: validationResult.metadata?.title,
+        itemCount: parsedItems.length,
         format: this._formatVersionString(validationResult.format, validationResult.formatVersion),
         message: usedProxy ? 'Feed requires proxy (CORS)' : undefined
       };
@@ -456,6 +455,6 @@ class PropertyPaneFeedUrlField implements IPropertyPaneField<IPropertyPaneFeedUr
 /**
  * Factory function to create the property pane feed URL field
  */
-export function PropertyPaneFeedUrl(props: IPropertyPaneFeedUrlProps): IPropertyPaneField<IPropertyPaneFeedUrlProps> {
+export function PropertyPaneFeedUrl(props: IPropertyPaneFeedUrlProps): IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   return new PropertyPaneFeedUrlField(props);
 }

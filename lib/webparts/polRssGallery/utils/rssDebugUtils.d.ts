@@ -1,7 +1,3 @@
-/**
- * RSS Debug Utilities
- * This file provides functions for debugging RSS feed processing
- */
 import { IRssItem } from '../components/IRssItem';
 /**
  * RSS Debug class with utilities to help diagnose RSS feed issues

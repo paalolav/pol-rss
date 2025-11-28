@@ -288,10 +288,41 @@ export class ImprovedFeedParser {
   
   private static preProcessXml(xml: string, hints?: IFeedParserOptions['preprocessingHints']): string {
     let result = xml;
-    
+
     const addMissingNamespaces = hints?.addMissingNamespaces ?? true;
     const addXmlDeclaration = hints?.addMissingXmlDeclaration ?? true;
-    
+
+    // Check if feed has an encoding declaration and preserve it
+    const existingDeclaration = result.match(/<\?xml[^>]*\?>/);
+    const existingEncoding = existingDeclaration?.[0]?.match(/encoding=["']([^"']+)["']/)?.[1];
+
+    // Fix ISO-8859-1 encoding issues (common for Norwegian feeds)
+    // If the feed declares ISO-8859-1 but was decoded as UTF-8, we may see garbled characters
+    if (existingEncoding?.toLowerCase() === 'iso-8859-1' ||
+        existingEncoding?.toLowerCase() === 'iso_8859-1' ||
+        existingEncoding?.toLowerCase() === 'latin1' ||
+        existingEncoding?.toLowerCase() === 'latin-1') {
+      // Try to detect if content was incorrectly decoded as UTF-8
+      // Common pattern: Ã¦ instead of æ, Ã¸ instead of ø, Ã¥ instead of å
+      if (result.includes('Ã¦') || result.includes('Ã¸') || result.includes('Ã¥') ||
+          result.includes('Ã†') || result.includes('Ã˜') || result.includes('Ã…')) {
+        if (RssDebugUtils.isDebugEnabled()) {
+          RssDebugUtils.log('RSS Parser: Detected double-encoded ISO-8859-1 content, attempting fix');
+        }
+        // Fix common Norwegian character double-encoding issues
+        result = result
+          .replace(/Ã¦/g, 'æ').replace(/Ã†/g, 'Æ')
+          .replace(/Ã¸/g, 'ø').replace(/Ã˜/g, 'Ø')
+          .replace(/Ã¥/g, 'å').replace(/Ã…/g, 'Å')
+          .replace(/Ã©/g, 'é').replace(/Ã‰/g, 'É')
+          .replace(/Ã¨/g, 'è').replace(/Ã ̈/g, 'È')
+          .replace(/Ã¤/g, 'ä').replace(/Ã„/g, 'Ä')
+          .replace(/Ã¶/g, 'ö').replace(/Ã–/g, 'Ö')
+          .replace(/Ã¼/g, 'ü').replace(/Ãœ/g, 'Ü')
+          .replace(/Ã±/g, 'ñ').replace(/Ã'/g, 'Ñ');
+      }
+    }
+
     if (result.includes('<html') && result.includes('</html>')) {
       if (RssDebugUtils.isDebugEnabled()) {
         RssDebugUtils.log('RSS Parser: Detected HTML instead of XML, attempting to extract RSS content');
@@ -314,7 +345,15 @@ export class ImprovedFeedParser {
     result = result.replace(/&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9a-fA-F]+;)/g, '&amp;');
     
     if (addXmlDeclaration && !result.trim().startsWith('<?xml')) {
+      // Only add UTF-8 declaration if no encoding was detected
       result = '<?xml version="1.0" encoding="UTF-8"?>' + result;
+    } else if (existingEncoding && existingEncoding.toLowerCase() !== 'utf-8') {
+      // For non-UTF-8 encodings that need to work with DOMParser (which expects UTF-8),
+      // update the declaration to UTF-8 after we've fixed the content
+      result = result.replace(
+        /<\?xml[^>]*\?>/,
+        '<?xml version="1.0" encoding="UTF-8"?>'
+      );
     }
     
     result = result.replace(/<!\[CDATA\[((?!\]\]>).)*$/gs, '$&]]>');

@@ -392,7 +392,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
 ---
 
 ### ST-006-08: Test Across Devices and Browsers
-**Status:** `[ ]` Not Started
+**Status:** `[~]` In Progress
 **Test File:** N/A (manual testing)
 
 **Description:**
@@ -406,19 +406,38 @@ Comprehensive testing across devices and browsers.
 5. Test with SharePoint section layouts
 6. Document any browser-specific issues
 
+**Bugs Found and Fixed (Session 14):**
+- **Layout buttons not working**: Fixed by adding `this.render()` in RssFeedWebPart.ts
+- **Preset buttons not working**: Fixed by adding `this.render()` after preset selection
+- **Norwegian character encoding (æ, ø, å)**: Fixed by creating `encodingUtils.ts` with proper ISO-8859-1 support
+
+**New Feature Added (Session 14):**
+- **Hide Images option**: Toggle in Images settings to hide all images across layouts
+
 **Test Matrix:**
 
 | Device | Browser | Screen Size | Status |
 |--------|---------|-------------|--------|
+| Desktop | Chrome | 1440px | [x] Tested - bugs fixed |
 | iPhone SE | Safari | 375px | [ ] |
 | iPhone 14 | Safari | 390px | [ ] |
 | iPad | Safari | 768px | [ ] |
 | Android Phone | Chrome | 360px | [ ] |
 | Android Tablet | Chrome | 800px | [ ] |
 | Desktop | Edge | 1920px | [ ] |
-| Desktop | Chrome | 1440px | [ ] |
+
+**Remaining Tests:**
+- Test Norwegian encoding with Retriever feed (clear cache + reload)
+- Test Hide Images toggle in all three layouts
+- Browser compatibility testing (Firefox, Safari, Edge)
+- Mobile/tablet responsive testing
+- Touch interaction testing on touch devices
 
 **Acceptance Criteria:**
+- [x] Layout buttons work correctly
+- [x] Preset buttons work correctly
+- [ ] Norwegian characters display correctly
+- [ ] Hide Images feature works in all layouts
 - [ ] All layouts work on all devices
 - [ ] No horizontal scrolling
 - [ ] Touch interactions work

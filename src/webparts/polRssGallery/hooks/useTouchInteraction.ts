@@ -373,7 +373,7 @@ export function useSwipeGesture(options: SwipeGestureOptions = {}): SwipeGesture
   );
 
   const handleTouchEnd = useCallback(
-    (e: React.TouchEvent): void => {
+    (_e: React.TouchEvent): void => {
       if (!touchStartRef.current || !touchCurrentRef.current) {
         setIsSwiping(false);
         setSwipeDirection(null);

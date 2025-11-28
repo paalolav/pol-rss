@@ -5,20 +5,20 @@ export interface IRssFeedWebPartProps {
     feedUrl: string;
     autoRefresh: boolean;
     refreshInterval: number;
-    layout: 'banner' | 'card' | 'list';
+    layout: 'banner' | 'card' | 'list' | 'minimal' | 'gallery';
     autoscroll: boolean;
     interval: number;
+    showPagination: boolean;
     forceFallbackImage: boolean;
     fallbackImageUrl: string;
     maxItems: number;
     showPubDate: boolean;
     showDescription: boolean;
-    filterByKeywords: boolean;
-    filterKeywords: string;
-    filterMode: 'include' | 'exclude';
-    showCategories: boolean;
-    filterByCategory: boolean;
-    categoryFilterMode: 'include' | 'exclude';
+    proxyUrl: string;
+    galleryColumns: 'auto' | 2 | 3 | 4;
+    galleryTitlePosition: 'hover' | 'below' | 'none';
+    galleryAspectRatio: '1:1' | '4:3' | '16:9';
+    galleryGap: 'sm' | 'md' | 'lg';
 }
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
     private _themeProvider;
@@ -27,7 +27,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     private _handleThemeChanged;
     render(): void;
     protected onDispose(): void;
-    protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void;
+    protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: unknown, newValue: unknown): void;
     protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration;
 }
 //# sourceMappingURL=RssFeedWebPart.d.ts.map

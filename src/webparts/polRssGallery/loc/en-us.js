@@ -64,6 +64,28 @@ define([], function() {
     "TestingConnectionLabel": "Testing...",
     "ConnectionSuccessLabel": "Connection successful",
     "ConnectionFailedLabel": "Connection failed",
-    "ProxyHelpLinkText": "Learn how to set up your own proxy"
+    "ProxyHelpLinkText": "Learn how to set up your own proxy",
+    // Gallery layout strings
+    "LayoutGalleryLabel": "Gallery",
+    "LayoutGalleryDescription": "Image grid with titles on hover",
+    "GallerySettingsGroupName": "Gallery Settings",
+    "GalleryColumnsLabel": "Columns",
+    "GalleryColumnsAuto": "Auto (responsive)",
+    "GalleryTitlePositionLabel": "Title display",
+    "GalleryTitleHover": "Show on hover",
+    "GalleryTitleBelow": "Show below image",
+    "GalleryTitleNone": "Hide titles",
+    "GalleryAspectRatioLabel": "Image aspect ratio",
+    "AspectRatio1x1": "Square (1:1)",
+    "AspectRatio4x3": "Standard (4:3)",
+    "AspectRatio16x9": "Widescreen (16:9)",
+    "GalleryGapLabel": "Spacing between items",
+    "GapSmall": "Small",
+    "GapMedium": "Medium",
+    "GapLarge": "Large",
+    "GalleryNoImages": "No items with images to display",
+    // Gallery preset
+    "PresetPhotoGallery": "Photo Gallery",
+    "PresetPhotoGalleryDescription": "Image grid with hover titles"
   }
 });

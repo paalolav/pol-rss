@@ -5,6 +5,8 @@ import {
   PropertyPaneTextField,
   PropertyPaneToggle,
   PropertyPaneSlider,
+  PropertyPaneDropdown,
+  PropertyPaneChoiceGroup,
   IPropertyPaneGroup
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -24,7 +26,7 @@ export interface IRssFeedWebPartProps {
   feedUrl: string;
   autoRefresh: boolean;
   refreshInterval: number;
-  layout: 'banner' | 'card' | 'list' | 'minimal';
+  layout: 'banner' | 'card' | 'list' | 'minimal' | 'gallery';
   autoscroll: boolean;
   interval: number;
   showPagination: boolean;
@@ -34,6 +36,11 @@ export interface IRssFeedWebPartProps {
   showPubDate: boolean;
   showDescription: boolean;
   proxyUrl: string;
+  // Gallery-specific properties
+  galleryColumns: 'auto' | 2 | 3 | 4;
+  galleryTitlePosition: 'hover' | 'below' | 'none';
+  galleryAspectRatio: '1:1' | '4:3' | '16:9';
+  galleryGap: 'sm' | 'md' | 'lg';
 }
 
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
@@ -74,7 +81,11 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showPubDate,
       showDescription,
       autoRefresh,
-      refreshInterval
+      refreshInterval,
+      galleryColumns,
+      galleryTitlePosition,
+      galleryAspectRatio,
+      galleryGap
     } = this.properties;
 
     // Minimal layout always hides images
@@ -95,7 +106,12 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       showDescription,
       autoRefresh,
       refreshInterval: (refreshInterval || 5) * 60,
-      themeVariant: this._themeVariant
+      themeVariant: this._themeVariant,
+      // Gallery-specific props
+      galleryColumns: galleryColumns || 'auto',
+      galleryTitlePosition: galleryTitlePosition || 'below',
+      galleryAspectRatio: galleryAspectRatio || '4:3',
+      galleryGap: galleryGap || 'md'
     });
 
     ReactDom.render(element, this.domElement);
@@ -153,10 +169,11 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
               { key: 'card', text: strings.LayoutCardLabel, description: strings.LayoutCardDescription },
               { key: 'list', text: strings.LayoutListLabel, description: strings.LayoutListDescription },
               { key: 'minimal', text: strings.LayoutMinimalLabel, description: strings.LayoutMinimalDescription },
-              { key: 'banner', text: strings.LayoutBannerLabel, description: strings.LayoutBannerDescription }
+              { key: 'banner', text: strings.LayoutBannerLabel, description: strings.LayoutBannerDescription },
+              { key: 'gallery', text: strings.LayoutGalleryLabel, description: strings.LayoutGalleryDescription }
             ],
             onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
-              this.properties.layout = newValue as 'banner' | 'card' | 'list' | 'minimal';
+              this.properties.layout = newValue as 'banner' | 'card' | 'list' | 'minimal' | 'gallery';
               this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
               this.render(); // Trigger immediate re-render for custom controls
             }
@@ -231,6 +248,52 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             label: strings.ShowPaginationFieldLabel,
             onText: strings.ShowPaginationOnLabel,
             offText: strings.ShowPaginationOffLabel
+          })
+        ]
+      });
+    }
+
+    // Gallery Settings Group (only shown for gallery layout)
+    if (this.properties.layout === 'gallery') {
+      groups.push({
+        groupName: strings.GallerySettingsGroupName,
+        isCollapsed: false,
+        groupFields: [
+          PropertyPaneDropdown('galleryColumns', {
+            label: strings.GalleryColumnsLabel,
+            options: [
+              { key: 'auto', text: strings.GalleryColumnsAuto },
+              { key: 2, text: '2' },
+              { key: 3, text: '3' },
+              { key: 4, text: '4' }
+            ],
+            selectedKey: this.properties.galleryColumns || 'auto'
+          }),
+          PropertyPaneChoiceGroup('galleryTitlePosition', {
+            label: strings.GalleryTitlePositionLabel,
+            options: [
+              { key: 'hover', text: strings.GalleryTitleHover },
+              { key: 'below', text: strings.GalleryTitleBelow },
+              { key: 'none', text: strings.GalleryTitleNone }
+            ]
+          }),
+          PropertyPaneDropdown('galleryAspectRatio', {
+            label: strings.GalleryAspectRatioLabel,
+            options: [
+              { key: '1:1', text: strings.AspectRatio1x1 },
+              { key: '4:3', text: strings.AspectRatio4x3 },
+              { key: '16:9', text: strings.AspectRatio16x9 }
+            ],
+            selectedKey: this.properties.galleryAspectRatio || '4:3'
+          }),
+          PropertyPaneDropdown('galleryGap', {
+            label: strings.GalleryGapLabel,
+            options: [
+              { key: 'sm', text: strings.GapSmall },
+              { key: 'md', text: strings.GapMedium },
+              { key: 'lg', text: strings.GapLarge }
+            ],
+            selectedKey: this.properties.galleryGap || 'md'
           })
         ]
       });

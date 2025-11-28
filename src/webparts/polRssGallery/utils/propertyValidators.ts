@@ -18,9 +18,33 @@ const MAX_LENGTHS = {
 };
 
 /**
+ * Input props for validateAll
+ */
+interface ValidateAllProps {
+  feedUrl?: string;
+  webPartTitle?: string;
+  fallbackImageUrl?: string;
+  filterKeywords?: string;
+  maxItems?: number;
+  refreshInterval?: number;
+  interval?: number;
+}
+
+/**
  * Property validators for the RSS Feed web part
  */
-export const PropertyValidators = {
+export const PropertyValidators: {
+  feedUrl(value: string): string | undefined;
+  fallbackImageUrl(value: string): string | undefined;
+  webPartTitle(value: string): string | undefined;
+  filterKeywords(value: string): string | undefined;
+  itemCount(value: number): string | undefined;
+  refreshInterval(value: number): string | undefined;
+  carouselInterval(value: number): string | undefined;
+  sanitizeText(value: string): string;
+  validateAll(props: ValidateAllProps): Record<string, string | undefined>;
+  isAllValid(props: ValidateAllProps): boolean;
+} = {
   /**
    * Validates the feed URL property
    *
@@ -230,15 +254,7 @@ export const PropertyValidators = {
    * @param props The web part properties
    * @returns Object with property names as keys and error messages as values
    */
-  validateAll(props: {
-    feedUrl?: string;
-    webPartTitle?: string;
-    fallbackImageUrl?: string;
-    filterKeywords?: string;
-    maxItems?: number;
-    refreshInterval?: number;
-    interval?: number;
-  }): Record<string, string | undefined> {
+  validateAll(props: ValidateAllProps): Record<string, string | undefined> {
     return {
       feedUrl: props.feedUrl !== undefined ? this.feedUrl(props.feedUrl) : undefined,
       webPartTitle: props.webPartTitle !== undefined ? this.webPartTitle(props.webPartTitle) : undefined,
@@ -256,7 +272,7 @@ export const PropertyValidators = {
    * @param props The web part properties
    * @returns True if all properties are valid
    */
-  isAllValid(props: Parameters<typeof PropertyValidators.validateAll>[0]): boolean {
+  isAllValid(props: ValidateAllProps): boolean {
     const errors = this.validateAll(props);
     return Object.values(errors).every((error) => error === undefined);
   },

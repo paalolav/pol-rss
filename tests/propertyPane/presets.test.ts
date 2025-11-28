@@ -31,8 +31,8 @@ describe('Property Pane Presets', () => {
   } as IRssFeedWebPartProps);
 
   describe('presets array', () => {
-    it('should have 4 presets defined', () => {
-      expect(presets).toHaveLength(4);
+    it('should have 5 presets defined', () => {
+      expect(presets).toHaveLength(5);
     });
 
     it('should have news-banner preset', () => {
@@ -57,6 +57,15 @@ describe('Property Pane Presets', () => {
       expect(preset?.labelKey).toBe('PresetCompactList');
       expect(preset?.config.layout).toBe('list');
       expect(preset?.config.maxItems).toBe(10);
+    });
+
+    it('should have photo-gallery preset', () => {
+      const preset = presets.find(p => p.key === 'photo-gallery');
+      expect(preset).toBeDefined();
+      expect(preset?.labelKey).toBe('PresetPhotoGallery');
+      expect(preset?.config.layout).toBe('gallery');
+      expect(preset?.config.maxItems).toBe(12);
+      expect(preset?.config.galleryTitlePosition).toBe('hover');
     });
 
     it('should have custom preset with empty config', () => {

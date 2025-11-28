@@ -4,7 +4,7 @@
  * Re-exports all layout components for easier importing.
  *
  * Usage:
- *   import { BannerCarousel, CardLayout, ListLayout } from './layouts';
+ *   import { BannerCarousel, CardLayout, ListLayout, GalleryLayout } from './layouts';
  */
 
 // BannerCarousel
@@ -15,3 +15,6 @@ export * from './CardLayout';
 
 // ListLayout
 export * from './ListLayout';
+
+// GalleryLayout
+export * from './GalleryLayout';

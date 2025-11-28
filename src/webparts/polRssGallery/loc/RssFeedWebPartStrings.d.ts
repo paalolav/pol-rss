@@ -135,6 +135,30 @@ declare module 'RssFeedWebPartStrings' {
     ClearFiltersButton: string;
     OfflineEmptyTitle: string;
     OfflineEmptyMessage: string;
+
+    // Gallery Layout
+    LayoutGalleryLabel: string;
+    LayoutGalleryDescription: string;
+    GallerySettingsGroupName: string;
+    GalleryColumnsLabel: string;
+    GalleryColumnsAuto: string;
+    GalleryTitlePositionLabel: string;
+    GalleryTitleHover: string;
+    GalleryTitleBelow: string;
+    GalleryTitleNone: string;
+    GalleryAspectRatioLabel: string;
+    AspectRatio1x1: string;
+    AspectRatio4x3: string;
+    AspectRatio16x9: string;
+    GalleryGapLabel: string;
+    GapSmall: string;
+    GapMedium: string;
+    GapLarge: string;
+    GalleryNoImages: string;
+
+    // Gallery Preset
+    PresetPhotoGallery: string;
+    PresetPhotoGalleryDescription: string;
   }
 
   const strings: IRssFeedWebPartStrings;

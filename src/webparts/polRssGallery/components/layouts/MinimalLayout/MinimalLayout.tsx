@@ -1,21 +1,20 @@
 /**
  * MinimalLayout Component
  *
- * A compact text-only layout for displaying RSS feed items.
- * No images, just headline, short description, and date.
- * Perfect for sidebar (1/3 column) views.
+ * Ultra-compact text-only layout for displaying RSS feed items.
+ * Perfect for sidebar (1/3 column) views and narrow spaces.
  *
  * Features:
  * - No images (text-only)
- * - Compact spacing
- * - Short description (100 chars max)
+ * - Minimal spacing and padding
+ * - Efficient use of vertical space
+ * - Clean, professional design
  * - Optimized for narrow columns
  */
 
 import * as React from 'react';
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import { IRssItem } from '../../IRssItem';
-import { FeedItem } from '../../shared/FeedItem';
 import { SkeletonGrid } from '../../shared/Skeleton';
 import { NoItemsEmptyState } from '../../shared/EmptyState';
 import styles from './MinimalLayout.module.scss';
@@ -35,12 +34,12 @@ export interface IMinimalLayoutProps {
   showPubDate?: boolean;
   /**
    * Whether to show description
-   * @default true
+   * @default false - minimal layout typically hides description for compactness
    */
   showDescription?: boolean;
   /**
    * Maximum characters for description truncation
-   * @default 100
+   * @default 80
    */
   truncateDescription?: number;
   /**
@@ -68,25 +67,55 @@ export interface IMinimalLayoutProps {
 }
 
 /**
+ * Format date for Norwegian locale
+ */
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    // Relative time for recent items
+    if (diffHours < 1) return 'Akkurat nå';
+    if (diffHours < 24) return `${diffHours} t siden`;
+    if (diffDays < 7) return `${diffDays} d siden`;
+
+    // Short date format
+    return date.toLocaleDateString('nb-NO', {
+      day: 'numeric',
+      month: 'short'
+    });
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Truncate text to a maximum length
+ */
+const truncateText = (text: string, maxLength: number): string => {
+  if (!text || text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + '…';
+};
+
+/**
  * MinimalLayout component
  */
 export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
   items,
   showPubDate = true,
-  showDescription = true,
-  truncateDescription = 100,
+  showDescription = false,
+  truncateDescription = 80,
   isLoading = false,
   skeletonCount = 5,
   onItemClick,
   className = '',
   testId = 'minimal-layout'
 }) => {
-  // Key for forcing re-render
-  const [layoutKey, setLayoutKey] = useState(0);
-  useEffect(() => {
-    setLayoutKey(prev => prev + 1);
-  }, []);
-
   // Handle item click
   const handleItemClick = useCallback((item: IRssItem, event: React.MouseEvent) => {
     event.preventDefault();
@@ -94,6 +123,18 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
       onItemClick(item);
     } else {
       window.open(item.link, '_blank', 'noopener,noreferrer');
+    }
+  }, [onItemClick]);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((item: IRssItem, event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      if (onItemClick) {
+        onItemClick(item);
+      } else {
+        window.open(item.link, '_blank', 'noopener,noreferrer');
+      }
     }
   }, [onItemClick]);
 
@@ -112,7 +153,7 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
           type="list"
           itemProps={{
             showThumbnail: false,
-            showDescription
+            showDescription: false
           }}
           testId={`${testId}-skeleton`}
         />
@@ -130,35 +171,46 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
   }
 
   return (
-    <div
+    <nav
       className={containerClasses}
       data-testid={testId}
-      key={layoutKey}
-      role="list"
-      aria-label="Nyhetsliste (minimal visning)"
+      role="navigation"
+      aria-label="Nyhetsliste"
     >
       {items.map((item, index) => (
-        <div
+        <article
           key={`${item.link}-${index}`}
           className={styles.minimalItem}
-          role="listitem"
+          data-testid={`${testId}-item-${index}`}
         >
-          <FeedItem
-            item={item}
-            variant="list"
-            showImage={false}
-            showDescription={showDescription}
-            showDate={showPubDate}
-            onItemClick={handleItemClick}
-            descriptionTruncation={{
-              maxChars: truncateDescription,
-              maxLines: 2
-            }}
-            testId={`${testId}-item-${index}`}
-          />
-        </div>
+          <a
+            href={item.link}
+            className={styles.itemLink}
+            onClick={(e) => handleItemClick(item, e)}
+            onKeyDown={(e) => handleKeyDown(item, e)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={item.title}
+          >
+            <h3 className={styles.itemTitle}>
+              {item.title}
+            </h3>
+            {showDescription && item.description && (
+              <p className={styles.itemDescription}>
+                {truncateText(item.description.replace(/<[^>]*>/g, ''), truncateDescription)}
+              </p>
+            )}
+            {showPubDate && item.pubDate && (
+              <div className={styles.itemMeta}>
+                <time className={styles.itemDate} dateTime={item.pubDate}>
+                  {formatDate(item.pubDate)}
+                </time>
+              </div>
+            )}
+          </a>
+        </article>
       ))}
-    </div>
+    </nav>
   );
 };
 

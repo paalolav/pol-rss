@@ -6,6 +6,6 @@ export interface IRssItem {
     imageUrl?: string;
     author?: string;
     categories?: string[];
-    feedType?: 'rss' | 'atom';
+    feedType?: 'rss' | 'atom' | 'json';
 }
 //# sourceMappingURL=IRssItem.d.ts.map

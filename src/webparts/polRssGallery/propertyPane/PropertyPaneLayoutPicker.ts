@@ -10,10 +10,15 @@ import {
 } from '@microsoft/sp-property-pane';
 
 /**
+ * Layout types
+ */
+export type LayoutType = 'banner' | 'card' | 'list' | 'minimal' | 'gallery';
+
+/**
  * Layout option definition
  */
 export interface ILayoutOption {
-  key: 'banner' | 'card' | 'list';
+  key: LayoutType;
   labelKey: string;
   descriptionKey: string;
   icon: string;
@@ -40,6 +45,12 @@ export const layoutOptions: ILayoutOption[] = [
     labelKey: 'LayoutListLabel',
     descriptionKey: 'LayoutListDescription',
     icon: 'BulletedList'
+  },
+  {
+    key: 'minimal',
+    labelKey: 'LayoutMinimalLabel',
+    descriptionKey: 'LayoutMinimalDescription',
+    icon: 'AlignLeft'
   }
 ];
 
@@ -49,7 +60,7 @@ export const layoutOptions: ILayoutOption[] = [
 export interface IPropertyPaneLayoutPickerProps {
   key: string;
   label: string;
-  value: 'banner' | 'card' | 'list';
+  value: LayoutType;
   options: Array<{ key: string; text: string; description?: string }>;
   onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => void;
 }
@@ -57,7 +68,7 @@ export interface IPropertyPaneLayoutPickerProps {
 /**
  * Custom property pane field for layout selection with visual previews
  */
-class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneLayoutPickerProps> {
+class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   public type: PropertyPaneFieldType = PropertyPaneFieldType.Custom;
   public targetProperty: string;
   public properties: IPropertyPaneCustomFieldProps;
@@ -124,7 +135,7 @@ class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneL
     buttons.forEach(btn => {
       btn.addEventListener('click', (e) => {
         const target = e.currentTarget as HTMLElement;
-        const layout = target.dataset.layout as 'banner' | 'card' | 'list';
+        const layout = target.dataset.layout as LayoutType;
         if (layout && layout !== this._props.value) {
           this._props.onPropertyChange(this._props.key, this._props.value, layout);
           this._updateSelection(layout);
@@ -163,7 +174,9 @@ class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneL
     const icons: Record<string, string> = {
       'banner': 'PictureStretch',
       'card': 'GridViewSmall',
-      'list': 'BulletedList'
+      'list': 'BulletedList',
+      'minimal': 'AlignLeft',
+      'gallery': 'PhotoCollection'
     };
     return icons[layoutKey] || 'ViewAll';
   }
@@ -210,6 +223,28 @@ class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneL
           <rect x="2" y="28" width="10" height="10" rx="2" fill="#d2d0ce"/>
           <rect x="15" y="29" width="28" height="3" rx="1" fill="#8a8886"/>
           <rect x="15" y="34" width="40" height="2" rx="1" fill="#c8c6c4"/>
+        </svg>
+      `,
+      'minimal': `
+        <svg viewBox="0 0 60 40" fill="currentColor">
+          <rect x="2" y="3" width="35" height="3" rx="1" fill="#8a8886"/>
+          <rect x="2" y="8" width="50" height="2" rx="1" fill="#c8c6c4"/>
+          <rect x="2" y="12" width="20" height="2" rx="1" fill="#d2d0ce"/>
+          <rect x="2" y="18" width="32" height="3" rx="1" fill="#8a8886"/>
+          <rect x="2" y="23" width="48" height="2" rx="1" fill="#c8c6c4"/>
+          <rect x="2" y="27" width="20" height="2" rx="1" fill="#d2d0ce"/>
+          <rect x="2" y="33" width="38" height="3" rx="1" fill="#8a8886"/>
+          <rect x="2" y="38" width="45" height="2" rx="1" fill="#c8c6c4"/>
+        </svg>
+      `,
+      'gallery': `
+        <svg viewBox="0 0 60 40" fill="currentColor">
+          <rect x="2" y="2" width="17" height="17" rx="2" fill="#d2d0ce"/>
+          <rect x="21" y="2" width="17" height="17" rx="2" fill="#d2d0ce"/>
+          <rect x="40" y="2" width="17" height="17" rx="2" fill="#d2d0ce"/>
+          <rect x="2" y="21" width="17" height="17" rx="2" fill="#d2d0ce"/>
+          <rect x="21" y="21" width="17" height="17" rx="2" fill="#d2d0ce"/>
+          <rect x="40" y="21" width="17" height="17" rx="2" fill="#d2d0ce"/>
         </svg>
       `
     };
@@ -310,6 +345,6 @@ class PropertyPaneLayoutPickerField implements IPropertyPaneField<IPropertyPaneL
 /**
  * Factory function to create the property pane layout picker
  */
-export function PropertyPaneLayoutPicker(props: IPropertyPaneLayoutPickerProps): IPropertyPaneField<IPropertyPaneLayoutPickerProps> {
+export function PropertyPaneLayoutPicker(props: IPropertyPaneLayoutPickerProps): IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   return new PropertyPaneLayoutPickerField(props);
 }

@@ -19,6 +19,10 @@ const MinimalLayout = React.lazy(() =>
   import(/* webpackChunkName: "layout-minimal" */ './layouts/MinimalLayout')
     .then(module => ({ default: module.MinimalLayout }))
 );
+const GalleryLayout = React.lazy(() =>
+  import(/* webpackChunkName: "layout-gallery" */ './layouts/GalleryLayout')
+    .then(module => ({ default: module.GalleryLayout }))
+);
 
 // Fallback component for lazy loading
 const LayoutFallback: React.FC = () => (
@@ -48,7 +52,7 @@ export interface IRssFeedProps {
   feedUrl: string;
   autoRefresh: boolean;
   refreshInterval: number;
-  layout: 'banner' | 'card' | 'list' | 'minimal';
+  layout: 'banner' | 'card' | 'list' | 'minimal' | 'gallery';
   autoscroll: boolean;
   interval: number;
   showPagination: boolean;
@@ -59,6 +63,11 @@ export interface IRssFeedProps {
   showDescription: boolean;
   maxItems: number;
   themeVariant?: IReadonlyTheme;
+  // Gallery-specific props
+  galleryColumns?: 'auto' | 2 | 3 | 4;
+  galleryTitlePosition?: 'hover' | 'below' | 'none';
+  galleryAspectRatio?: '1:1' | '4:3' | '16:9';
+  galleryGap?: 'sm' | 'md' | 'lg';
 }
 
 const RssFeed: React.FC<IRssFeedProps> = (props) => {
@@ -372,6 +381,24 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
                 showPubDate={props.showPubDate}
                 showDescription={props.showDescription}
                 truncateDescription={100}
+                isLoading={isLoading}
+              />
+            </React.Suspense>
+          </RssErrorBoundary>
+        );
+
+      case 'gallery':
+        return (
+          <RssErrorBoundary>
+            <React.Suspense fallback={<LayoutFallback />}>
+              <GalleryLayout
+                items={filteredItems}
+                columns={props.galleryColumns || 'auto'}
+                gap={props.galleryGap || 'md'}
+                showTitles={props.galleryTitlePosition || 'below'}
+                aspectRatio={props.galleryAspectRatio || '4:3'}
+                fallbackImageUrl={props.fallbackImageUrl}
+                forceFallback={props.forceFallbackImage}
                 isLoading={isLoading}
               />
             </React.Suspense>

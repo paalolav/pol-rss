@@ -26,7 +26,7 @@ export interface IPropertyPanePresetsProps {
 /**
  * Custom property pane field for preset selection
  */
-class PropertyPanePresetsField implements IPropertyPaneField<IPropertyPanePresetsProps> {
+class PropertyPanePresetsField implements IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   public type: PropertyPaneFieldType = PropertyPaneFieldType.Custom;
   public targetProperty: string;
   public properties: IPropertyPaneCustomFieldProps;
@@ -235,6 +235,6 @@ class PropertyPanePresetsField implements IPropertyPaneField<IPropertyPanePreset
 /**
  * Factory function to create the property pane presets picker
  */
-export function PropertyPanePresets(props: IPropertyPanePresetsProps): IPropertyPaneField<IPropertyPanePresetsProps> {
+export function PropertyPanePresets(props: IPropertyPanePresetsProps): IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   return new PropertyPanePresetsField(props);
 }

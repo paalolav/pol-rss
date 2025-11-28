@@ -56,6 +56,11 @@
 // Thumbnail Position
 // ============================================================
 
+// Thumbnail on the left (default)
+.thumbnailLeft {
+  // Default layout - no changes needed
+}
+
 // Thumbnail on the right
 .thumbnailRight {
   // FeedItem handles this - we need to override for RTL-like layout

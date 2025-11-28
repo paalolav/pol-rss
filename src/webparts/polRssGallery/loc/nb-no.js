@@ -134,6 +134,29 @@ define([], function() {
     "FilteredEmptyMessage": "Ingen elementer matcher de aktive filtrene",
     "ClearFiltersButton": "Fjern filtre",
     "OfflineEmptyTitle": "Du er frakoblet",
-    "OfflineEmptyMessage": "Koble til internett for å laste feeden"
+    "OfflineEmptyMessage": "Koble til internett for å laste feeden",
+
+    // Gallery layout strings
+    "LayoutGalleryLabel": "Galleri",
+    "LayoutGalleryDescription": "Bilderutenett med titler ved pekerfokus",
+    "GallerySettingsGroupName": "Galleriinnstillinger",
+    "GalleryColumnsLabel": "Kolonner",
+    "GalleryColumnsAuto": "Automatisk (responsiv)",
+    "GalleryTitlePositionLabel": "Tittelvisning",
+    "GalleryTitleHover": "Vis ved pekerfokus",
+    "GalleryTitleBelow": "Vis under bilde",
+    "GalleryTitleNone": "Skjul titler",
+    "GalleryAspectRatioLabel": "Bildeforhold",
+    "AspectRatio1x1": "Kvadratisk (1:1)",
+    "AspectRatio4x3": "Standard (4:3)",
+    "AspectRatio16x9": "Bredformat (16:9)",
+    "GalleryGapLabel": "Avstand mellom elementer",
+    "GapSmall": "Liten",
+    "GapMedium": "Middels",
+    "GapLarge": "Stor",
+    "GalleryNoImages": "Ingen elementer med bilder å vise",
+    // Gallery preset
+    "PresetPhotoGallery": "Fotogalleri",
+    "PresetPhotoGalleryDescription": "Bilderutenett med titler ved pekerfokus"
   }
 });

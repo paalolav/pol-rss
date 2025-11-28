@@ -1,0 +1,386 @@
+/**
+ * GalleryLayout Styles
+ *
+ * Masonry-style image grid with responsive columns.
+ * Uses container queries for SharePoint column responsiveness.
+ */
+
+@import '../../../styles/index';
+
+// ============================================================
+// Gallery Container
+// ============================================================
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(var(--gallery-columns, auto-fill), minmax(180px, 1fr));
+  gap: var(--gallery-gap, 16px);
+  width: 100%;
+
+  // Container query support
+  container-type: inline-size;
+}
+
+// Fixed column counts (override auto-fill)
+.columns-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.columns-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.columns-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+// ============================================================
+// Responsive Columns (Container Queries)
+// ============================================================
+
+// Narrow container (1/3 column in SharePoint)
+@container (max-width: 350px) {
+  .gallery:not(.columns-2):not(.columns-3):not(.columns-4) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Small container
+@container (min-width: 351px) and (max-width: 550px) {
+  .gallery:not(.columns-2):not(.columns-3):not(.columns-4) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// Medium container (1/2 column)
+@container (min-width: 551px) and (max-width: 800px) {
+  .gallery:not(.columns-2):not(.columns-3):not(.columns-4) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Large container (full width)
+@container (min-width: 801px) {
+  .gallery:not(.columns-2):not(.columns-3):not(.columns-4) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ============================================================
+// Gallery Item
+// ============================================================
+
+.galleryItem {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--neutralLighter, #f3f2f1);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--themePrimary, #0078d4);
+    outline-offset: 2px;
+  }
+
+  &:active {
+    transform: translateY(-2px);
+  }
+}
+
+// ============================================================
+// Image Wrapper
+// ============================================================
+
+.imageWrapper {
+  position: relative;
+  aspect-ratio: var(--aspect-ratio, 4/3);
+  overflow: hidden;
+  background: var(--neutralLighter, #f3f2f1);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 300ms ease;
+
+  .galleryItem:hover &,
+  .galleryItem:focus-visible & {
+    transform: scale(1.05);
+  }
+}
+
+// No image placeholder
+.noImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--neutralLight, #edebe9);
+  color: var(--neutralSecondary, #605e5c);
+}
+
+.noImageIcon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.5;
+}
+
+// ============================================================
+// Hover Overlay
+// ============================================================
+
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.5) 50%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 200ms ease;
+
+  .galleryItem:hover &,
+  .galleryItem:focus-visible & {
+    opacity: 1;
+  }
+
+  .title {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .date {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+}
+
+// ============================================================
+// Title Below
+// ============================================================
+
+.titleBelow {
+  padding: 12px 4px;
+
+  .title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--neutralPrimary, #323130);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// Title mode variations
+.title-none {
+  .imageWrapper {
+    border-radius: 8px;
+  }
+}
+
+.title-hover {
+  .imageWrapper {
+    border-radius: 8px;
+  }
+}
+
+// ============================================================
+// Skeleton Loading
+// ============================================================
+
+.skeletonItem {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.skeletonImage {
+  aspect-ratio: var(--aspect-ratio, 4/3);
+  background: linear-gradient(
+    90deg,
+    var(--neutralLighter, #f3f2f1) 25%,
+    var(--neutralLight, #edebe9) 50%,
+    var(--neutralLighter, #f3f2f1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonTitle {
+  height: 16px;
+  margin: 12px 4px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--neutralLighter, #f3f2f1) 25%,
+    var(--neutralLight, #edebe9) 50%,
+    var(--neutralLighter, #f3f2f1) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  animation-delay: 0.1s;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// ============================================================
+// Touch Devices
+// ============================================================
+
+@media (pointer: coarse) {
+  .galleryItem {
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    &:hover .image {
+      transform: none;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  // Always show hover overlay on touch devices
+  .title-hover .hoverOverlay {
+    opacity: 1;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.75) 0%,
+      rgba(0, 0, 0, 0.3) 40%,
+      transparent 80%
+    );
+  }
+}
+
+// ============================================================
+// Reduced Motion
+// ============================================================
+
+@media (prefers-reduced-motion: reduce) {
+  .galleryItem,
+  .image,
+  .hoverOverlay {
+    transition: none;
+  }
+
+  .galleryItem:hover .image {
+    transform: none;
+  }
+
+  .skeletonImage,
+  .skeletonTitle {
+    animation: none;
+    background: var(--neutralLight, #edebe9);
+  }
+}
+
+// ============================================================
+// High Contrast Mode
+// ============================================================
+
+@media (forced-colors: active) {
+  .galleryItem {
+    border: 1px solid CanvasText;
+
+    &:focus-visible {
+      outline: 2px solid Highlight;
+    }
+  }
+
+  .hoverOverlay {
+    background: Canvas;
+    opacity: 1;
+    border-top: 1px solid CanvasText;
+
+    .title {
+      color: CanvasText;
+    }
+
+    .date {
+      color: GrayText;
+    }
+  }
+
+  .titleBelow .title {
+    color: CanvasText;
+  }
+
+  .noImage {
+    border: 1px dashed GrayText;
+  }
+}
+
+// ============================================================
+// Print Styles
+// ============================================================
+
+@media print {
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .galleryItem {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  .hoverOverlay {
+    display: none;
+  }
+
+  // Always show title below when printing
+  .title-hover .titleBelow,
+  .title-none .titleBelow {
+    display: block;
+  }
+
+  .image {
+    &:hover {
+      transform: none;
+    }
+  }
+}

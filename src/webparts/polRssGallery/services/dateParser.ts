@@ -556,7 +556,10 @@ export function formatRelativeDate(date: Date, locale: string = 'nb-NO'): string
   const diffDays = Math.floor(diffHours / 24);
 
   try {
-    const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const RelativeTimeFormat = (Intl as any).RelativeTimeFormat;
+    if (!RelativeTimeFormat) throw new Error('Not supported');
+    const rtf = new RelativeTimeFormat(locale, { numeric: 'auto' });
 
     if (diffDays > 30) {
       return formatDate(date, locale);

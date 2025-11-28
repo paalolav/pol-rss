@@ -57,6 +57,21 @@ export const presets: IPreset[] = [
     }
   },
   {
+    key: 'photo-gallery',
+    labelKey: 'PresetPhotoGallery',
+    descriptionKey: 'PresetPhotoGalleryDescription',
+    config: {
+      layout: 'gallery',
+      maxItems: 12,
+      showDescription: false,
+      showPubDate: false,
+      galleryColumns: 'auto',
+      galleryTitlePosition: 'hover',
+      galleryAspectRatio: '4:3',
+      galleryGap: 'md'
+    }
+  },
+  {
     key: 'custom',
     labelKey: 'PresetCustom',
     descriptionKey: 'PresetCustomDescription',

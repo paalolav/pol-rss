@@ -32,7 +32,7 @@ export interface IPropertyPaneProxyConfigProps {
 /**
  * Custom property pane field for proxy configuration
  */
-class PropertyPaneProxyConfigField implements IPropertyPaneField<IPropertyPaneProxyConfigProps> {
+class PropertyPaneProxyConfigField implements IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   public type: PropertyPaneFieldType = PropertyPaneFieldType.Custom;
   public targetProperty: string;
   public properties: IPropertyPaneCustomFieldProps;
@@ -324,6 +324,6 @@ class PropertyPaneProxyConfigField implements IPropertyPaneField<IPropertyPanePr
 /**
  * Factory function to create the property pane proxy config control
  */
-export function PropertyPaneProxyConfig(props: IPropertyPaneProxyConfigProps): IPropertyPaneField<IPropertyPaneProxyConfigProps> {
+export function PropertyPaneProxyConfig(props: IPropertyPaneProxyConfigProps): IPropertyPaneField<IPropertyPaneCustomFieldProps> {
   return new PropertyPaneProxyConfigField(props);
 }
