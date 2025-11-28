@@ -4,7 +4,7 @@ define([], function() {
     "PropertyPaneDescription": "Konfigurer innstillinger for RSS-visning",
 
     // Group names
-    "BasicGroupName": "Grunnleggende",
+    "LayoutGroupName": "Visningsoppsett",
     "DisplayGroupName": "Visningsinnstillinger",
     "ImagesGroupName": "Bildeinnstillinger",
     "FilterGroupName": "Innholdsfilter",
@@ -21,9 +21,11 @@ define([], function() {
     "LayoutBannerLabel": "Banner",
     "LayoutCardLabel": "Kortvisning",
     "LayoutListLabel": "Liste",
+    "LayoutMinimalLabel": "Minimal",
     "LayoutBannerDescription": "Fullbredde rotererende banner for nyheter",
     "LayoutCardDescription": "Rutenett av kort med bilder",
     "LayoutListDescription": "Kompakt liste for sidefelter",
+    "LayoutMinimalDescription": "Ren tekst uten bilder, perfekt for smale kolonner",
 
     // Display Settings
     "MaxItemsFieldLabel": "Maksimalt antall elementer",
@@ -51,6 +53,9 @@ define([], function() {
     "AutoscrollOffLabel": "Av",
     "IntervalFieldLabel": "Rulleintervall (sekunder)",
     "BannerHeightFieldLabel": "Bannerhøyde",
+    "ShowPaginationFieldLabel": "Vis navigasjonsprikker",
+    "ShowPaginationOnLabel": "Vis",
+    "ShowPaginationOffLabel": "Skjul",
 
     // Filter Settings
     "FilterByKeywordsFieldLabel": "Filtrer etter nøkkelord",

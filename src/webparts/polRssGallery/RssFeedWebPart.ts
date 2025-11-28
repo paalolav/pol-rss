@@ -15,10 +15,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import {
   PropertyPaneFeedUrl,
   PropertyPaneLayoutPicker,
-  PropertyPanePresets,
   PropertyPaneProxyConfig,
-  applyPreset,
-  detectCurrentPreset,
   isFieldDisabled
 } from './propertyPane';
 
@@ -30,14 +27,13 @@ export interface IRssFeedWebPartProps {
   layout: 'banner' | 'card' | 'list' | 'minimal';
   autoscroll: boolean;
   interval: number;
-  hideImages: boolean;
+  showPagination: boolean;
   forceFallbackImage: boolean;
   fallbackImageUrl: string;
   maxItems: number;
   showPubDate: boolean;
   showDescription: boolean;
   proxyUrl: string;
-  selectedPreset: string;
 }
 
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
@@ -71,6 +67,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       layout,
       autoscroll,
       interval,
+      showPagination,
       forceFallbackImage,
       fallbackImageUrl,
       maxItems,
@@ -89,6 +86,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
       layout,
       autoscroll,
       interval,
+      showPagination: showPagination !== false, // default true
       hideImages,
       forceFallbackImage,
       fallbackImageUrl,
@@ -109,15 +107,6 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
   }
 
   protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: unknown, newValue: unknown): void {
-    // Handle preset selection
-    if (propertyPath === 'selectedPreset' && oldValue !== newValue) {
-      const presetConfig = applyPreset(this.properties, newValue as string);
-      Object.keys(presetConfig).forEach(key => {
-        (this.properties as unknown as Record<string, unknown>)[key] = (presetConfig as unknown as Record<string, unknown>)[key];
-      });
-      this.context.propertyPane.refresh();
-    }
-
     // Refresh property pane when layout changes (shows/hides banner settings)
     if (propertyPath === 'layout' && oldValue !== newValue) {
       this.context.propertyPane.refresh();
@@ -132,44 +121,14 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
   }
 
-  /**
-   * Get all localized strings for property pane controls
-   */
-  private _getLocalizedStrings(): Record<string, string> {
-    return {
-      PresetNewsBanner: strings.PresetNewsBanner,
-      PresetNewsBannerDescription: strings.PresetNewsBannerDescription,
-      PresetBlogCards: strings.PresetBlogCards,
-      PresetBlogCardsDescription: strings.PresetBlogCardsDescription,
-      PresetCompactList: strings.PresetCompactList,
-      PresetCompactListDescription: strings.PresetCompactListDescription,
-      PresetCustom: strings.PresetCustom,
-      PresetCustomDescription: strings.PresetCustomDescription
-    };
-  }
-
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
-    // Detect current preset based on properties
-    const currentPreset = detectCurrentPreset(this.properties);
-
     // Build property groups
     const groups: IPropertyPaneGroup[] = [
-      // Basic Settings Group
+      // Layout Settings Group
       {
-        groupName: strings.BasicGroupName,
+        groupName: strings.LayoutGroupName,
         isCollapsed: false,
         groupFields: [
-          PropertyPanePresets({
-            key: 'selectedPreset',
-            label: strings.PresetsFieldLabel,
-            value: currentPreset,
-            strings: this._getLocalizedStrings(),
-            onPresetSelect: (presetKey: string) => {
-              this.properties.selectedPreset = presetKey;
-              this.onPropertyPaneFieldChanged('selectedPreset', currentPreset, presetKey);
-              this.render(); // Trigger immediate re-render for custom controls
-            }
-          }),
           PropertyPaneTextField('webPartTitle', {
             label: strings.TitleFieldLabel
           }),
@@ -191,10 +150,10 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             label: strings.LayoutFieldLabel,
             value: this.properties.layout || 'card',
             options: [
-              { key: 'banner', text: strings.LayoutBannerLabel, description: strings.LayoutBannerDescription },
               { key: 'card', text: strings.LayoutCardLabel, description: strings.LayoutCardDescription },
               { key: 'list', text: strings.LayoutListLabel, description: strings.LayoutListDescription },
-              { key: 'minimal', text: strings.LayoutMinimalLabel, description: strings.LayoutMinimalDescription }
+              { key: 'minimal', text: strings.LayoutMinimalLabel, description: strings.LayoutMinimalDescription },
+              { key: 'banner', text: strings.LayoutBannerLabel, description: strings.LayoutBannerDescription }
             ],
             onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
               this.properties.layout = newValue as 'banner' | 'card' | 'list' | 'minimal';
@@ -267,6 +226,11 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             max: 30,
             step: 1,
             disabled: isFieldDisabled('interval', this.properties)
+          }),
+          PropertyPaneToggle('showPagination', {
+            label: strings.ShowPaginationFieldLabel,
+            onText: strings.ShowPaginationOnLabel,
+            offText: strings.ShowPaginationOffLabel
           })
         ]
       });
@@ -303,7 +267,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             failed: strings.ConnectionFailedLabel,
             helpLink: strings.ProxyHelpLinkText
           },
-          helpUrl: 'https://github.com/pnp/sp-dev-fx-webparts/wiki/RSS-Feed-WebPart-Proxy-Setup',
+          helpUrl: 'https://github.com/paalolav/pol-rss/blob/main/docs/PROXY_SETUP.md',
           onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
             this.properties.proxyUrl = newValue;
             this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);

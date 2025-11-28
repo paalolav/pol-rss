@@ -4,7 +4,7 @@ declare module 'RssFeedWebPartStrings' {
     PropertyPaneDescription: string;
 
     // Group names
-    BasicGroupName: string;
+    LayoutGroupName: string;
     DisplayGroupName: string;
     ImagesGroupName: string;
     FilterGroupName: string;
@@ -21,9 +21,11 @@ declare module 'RssFeedWebPartStrings' {
     LayoutBannerLabel: string;
     LayoutCardLabel: string;
     LayoutListLabel: string;
+    LayoutMinimalLabel: string;
     LayoutBannerDescription: string;
     LayoutCardDescription: string;
     LayoutListDescription: string;
+    LayoutMinimalDescription: string;
 
     // Display Settings
     MaxItemsFieldLabel: string;
@@ -51,6 +53,9 @@ declare module 'RssFeedWebPartStrings' {
     AutoscrollOffLabel: string;
     IntervalFieldLabel: string;
     BannerHeightFieldLabel: string;
+    ShowPaginationFieldLabel: string;
+    ShowPaginationOnLabel: string;
+    ShowPaginationOffLabel: string;
 
     // Filter Settings
     FilterByKeywordsFieldLabel: string;

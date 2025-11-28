@@ -92,13 +92,13 @@ Improve caching with IndexedDB persistence and smarter invalidation.
 ## Phase 3: UI/UX Improvements
 
 ### REF-006-RESPONSIVE-DESIGN
-**Status:** `[~]` In Progress
+**Status:** `[x]` Completed
 **Priority:** Medium
 **Reference:** [REF-006-RESPONSIVE-DESIGN.md](refs/REF-006-RESPONSIVE-DESIGN.md)
 
 Mobile-first responsive layouts with WCAG 2.1 AA accessibility. Includes SharePoint theme integration, high contrast mode, and print styles.
 
-**Sub-tasks:** 11 | **Completed:** 10/11 (ST-006-08 in progress - bugs fixed, testing continues)
+**Sub-tasks:** 11 | **Completed:** 11/11
 
 ---
 
@@ -178,10 +178,10 @@ Comprehensive documentation for admins and users.
 |-------|-------|-----------|----------|
 | Phase 1: Foundation | 3 | 3 | 100% |
 | Phase 2: Core Reliability | 3 | 3 | 100% |
-| Phase 3: UI/UX | 4 | 3.9 | ~98% |
+| Phase 3: UI/UX | 4 | 4 | 100% |
 | Phase 4: Features | 2 | 0 | 0% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **13** | **9.9** | **~76%** |
+| **Total** | **13** | **10** | **77%** |
 
 ---
 
@@ -210,6 +210,23 @@ All Tasks ──────────────> REF-011 (Documentation)
 ---
 
 ## Changelog
+
+### 2025-11-28 (Session 21) - Manual Testing & Cleanup
+- REF-006: Responsive Design COMPLETED (11/11 sub-tasks)
+  - **ST-006-08: Manual Device/Browser Testing** - COMPLETED
+    - Tested Norwegian character encoding with Retriever feed - working correctly
+    - Tested in Chrome and Edge browsers - layouts render correctly
+    - Mobile responsive verified (limited workbench testing)
+- **Bug Fixes:**
+  - Fixed "undefined" labels in proxy config field (missing English locale strings)
+  - Added missing strings to en-us.js: ProxyUrlFieldLabel, ProxyUrlDescription, etc.
+- **Code Cleanup:**
+  - Removed `hideImages` from `IRssFeedWebPartProps` interface (now derived from layout)
+  - Removed unused HideImages localization strings from nb-no.js, nn-no.js, RssFeedWebPartStrings.d.ts
+  - The `hideImages` prop is now automatically set when `layout === 'minimal'`
+  - Fixed proxy help URL to point to correct repo (paalolav/pol-rss)
+- All 1638 tests passing
+- **Phase 3: UI/UX now 100% complete**
 
 ### 2025-11-28 (Session 20) - Bundle Optimization
 - REF-013: Bundle Optimization COMPLETED (7/7 sub-tasks)

@@ -1,7 +1,7 @@
 define([], function() {
   return {
     "PropertyPaneDescription": "Configure your RSS feed display settings",
-    "BasicGroupName": "Feed Settings",
+    "LayoutGroupName": "Layout Settings",
     "TitleFieldLabel": "Web Part Title",
     "FeedUrlFieldLabel": "RSS Feed URL",
     "MaxItemsFieldLabel": "Maximum number of items to display",
@@ -13,6 +13,8 @@ define([], function() {
     "LayoutBannerLabel": "Banner",
     "LayoutCardLabel": "Card Grid",
     "LayoutListLabel": "List",
+    "LayoutMinimalLabel": "Minimal",
+    "LayoutMinimalDescription": "Text only without images, perfect for narrow columns",
     "ForceFallbackFieldLabel": "Always use fallback image",
     "ForceFallbackOnLabel": "Yes",
     "ForceFallbackOffLabel": "No",
@@ -43,6 +45,25 @@ define([], function() {
     "RetryButtonText": "Try Again",
     "LoadingMessage": "Loading RSS feed...",
     "NoItemsMessage": "No items to display",
-    "NoMatchingItemsMessage": "No items match your filter criteria"
+    "NoMatchingItemsMessage": "No items match your filter criteria",
+    "DisplayGroupName": "Display Settings",
+    "ImagesGroupName": "Images",
+    "AdvancedGroupName": "Advanced Settings",
+    "FeedUrlDescription": "Enter the URL of your RSS or Atom feed",
+    "FeedUrlPlaceholder": "https://example.com/feed.rss",
+    "LayoutBannerDescription": "Full-width rotating carousel",
+    "LayoutCardDescription": "Grid of cards with images",
+    "LayoutListDescription": "Compact list with thumbnails",
+    "ShowPaginationFieldLabel": "Show navigation dots",
+    "ShowPaginationOnLabel": "Show",
+    "ShowPaginationOffLabel": "Hide",
+    "ProxyUrlFieldLabel": "Proxy URL",
+    "ProxyUrlDescription": "Optional: Configure a CORS proxy for reliable feed access",
+    "ProxyUrlPlaceholder": "https://your-proxy.azurewebsites.net/api/proxy",
+    "TestConnectionLabel": "Test connection",
+    "TestingConnectionLabel": "Testing...",
+    "ConnectionSuccessLabel": "Connection successful",
+    "ConnectionFailedLabel": "Connection failed",
+    "ProxyHelpLinkText": "Learn how to set up your own proxy"
   }
 });
