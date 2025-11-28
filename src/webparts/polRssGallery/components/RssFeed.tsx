@@ -286,6 +286,9 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   // Items are used directly without filtering (filter feature removed)
   const filteredItems = items;
 
+  // Determine if we're on a strong background (inverted theme)
+  const isInverted = props.themeVariant?.isInverted ?? false;
+
   if (isLoading && !filteredItems && !error) {
   return (
     <div className={extendedStyles.loading}>
@@ -345,7 +348,8 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
       showSource: props.showSource,
       fallbackImageUrl: props.fallbackImageUrl,
       forceFallback: props.forceFallbackImage,
-      hideImages: props.hideImages
+      hideImages: props.hideImages,
+      isInverted: isInverted
     };
 
     const bannerProps = {
@@ -385,6 +389,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
                 showSource={props.showSource}
                 truncateDescription={100}
                 isLoading={isLoading}
+                isInverted={isInverted}
               />
             </React.Suspense>
           </RssErrorBoundary>
@@ -406,6 +411,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
                 showDescription={props.showDescription}
                 showSource={props.showSource}
                 isLoading={isLoading}
+                isInverted={isInverted}
               />
             </React.Suspense>
           </RssErrorBoundary>
@@ -424,7 +430,11 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   })();
 
   return (
-    <div className={extendedStyles.rssFeed}>
+    <div
+      className={`${extendedStyles.rssFeed}${isInverted ? ` ${extendedStyles.inverted}` : ''}`}
+      data-testid="rss-feed-container"
+      data-inverted={isInverted.toString()}
+    >
       {props.webPartTitle && (
         <div className={extendedStyles.webPartTitle}>
           {props.webPartTitle}

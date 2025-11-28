@@ -1054,3 +1054,54 @@
   margin-top: 4px;
 }
 
+/* RSS Feed container */
+.rssFeed {
+  display: block;
+}
+
+/* Strong/Inverted background theme support */
+.inverted {
+  // Text colors for inverted theme (white on dark background)
+  .webPartTitle {
+    color: var(--white, #ffffff);
+  }
+
+  .cardTitle,
+  .title {
+    color: var(--white, #ffffff);
+  }
+
+  .pubDate,
+  .cardDescription,
+  .description {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .noItems {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  // Card and list hover states for inverted theme
+  .card {
+    background-color: rgba(255, 255, 255, 0.1);
+
+    @media (hover: hover) {
+      &:hover:not(:active) {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+    }
+  }
+
+  .listItem {
+    &:active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (hover: hover) {
+      &:hover:not(:active) {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+    }
+  }
+}
+
