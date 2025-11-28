@@ -1,102 +1,167 @@
-# pol-rss-gallery
+# POL RSS Gallery
 
-## Summary
+A modern RSS feed web part for SharePoint Online with multiple layouts, caching, and enterprise-ready security.
 
-The pol-rss-gallery is a SharePoint Framework (SPFx) web part that displays RSS feeds in various layouts. It supports multiple display formats, filtering, and enhanced capabilities for handling a wide variety of RSS feed formats, including non-standard and authenticated feeds.
-
-Key features:
-- Multiple layout options: Banner carousel, card layout, and list layout
-- Support for authenticated feeds (including Meltwater)
-- Enhanced RSS parser that handles non-standard feeds (including Nettavisen)
-- Category-based and keyword-based filtering
-- Configurable auto-refresh
-- Debug mode for troubleshooting feed issues
-
-## Recent Improvements
-
-
-### Codebase Cleanup and TypeScript Strictness (v1.2.0)
-- Removed dead code, unused files, and unnecessary comments for a leaner codebase
-- Enforced TypeScript strictness for improved type safety and maintainability
-- Automated and documented cleaning of build artifacts
-- Improved maintainability and developer experience
-
-### Enhanced RSS Feed Handling
-- Added support for authenticated feeds like Meltwater
-- Improved handling of non-standard RSS feeds like Nettavisen
-- Implemented better image extraction from various feed formats
-- Added debugging tools for diagnosing problematic feeds
-
-### CORS Handling and Proxy Support
-- Improved proxy service for handling CORS restrictions
-- Added multiple fallback options for feed retrieval
-- Better error reporting for network-related issues
-
-See [RSS Feed Improvements](./docs/rss-feed-improvements.md) and [Parser Improvements](./docs/parser-improvements.md) for more details.
-
-## Used SharePoint Framework Version
-
-![version](https://img.shields.io/badge/version-1.2.0-green.svg)
-
-## Applies to
-
-- [SharePoint Framework](https://aka.ms/spfx)
-- [Microsoft 365 tenant](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-developer-tenant)
-
-> Get your own free development tenant by subscribing to [Microsoft 365 developer program](http://aka.ms/o365devprogram)
-
-## Prerequisites
-
-> Any special pre-requisites?
-
-## Solution
-
-| Solution    | Author(s)                                               |
-| ----------- | ------------------------------------------------------- |
-| folder name | Author details (name, company, twitter alias with link) |
-
-## Version history
-
-| Version | Date             | Comments        |
-| ------- | ---------------- | --------------- |
-| 1.2     | June 2024        | Codebase cleanup, TypeScript strictness, maintainability improvements |
-| 1.1     | March 10, 2021   | Update comment  |
-| 1.0     | January 29, 2021 | Initial release |
-
-## Disclaimer
-
-**THIS CODE IS PROVIDED _AS IS_ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
-
----
-
-## Minimal Path to Awesome
-
-- Clone this repository
-- Ensure that you are at the solution folder
-- in the command-line run:
-  - **npm install**
-  - **gulp serve**
-
-> Include any additional steps as needed.
+![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![SPFx](https://img.shields.io/badge/SPFx-1.21-green)
+![Node](https://img.shields.io/badge/node-%3E%3D22.14.0-brightgreen)
+![Tests](https://img.shields.io/badge/tests-1685%20passing-success)
 
 ## Features
 
-Description of the extension that expands upon high-level summary above.
+- **5 Layout Options**: Banner carousel, cards, list, minimal, and gallery (masonry)
+- **Multi-Format Support**: RSS 2.0, RSS 1.0, Atom 1.0, JSON Feed
+- **Source Display**: Show publication names for aggregated feeds
+- **Responsive Design**: Mobile-first with container queries
+- **Two-Tier Caching**: Memory + IndexedDB with stale-while-revalidate
+- **Security Hardened**: DOMPurify sanitization, SSRF protection
+- **WCAG 2.1 AA**: Full keyboard and screen reader support
+- **Norwegian Localization**: Full support for nb-NO and nn-NO
 
-This extension illustrates the following concepts:
+## Quick Start
 
-- topic 1
-- topic 2
-- topic 3
+### Installation
 
-> Notice that better pictures and documentation will increase the sample usage and the value you are providing for others. Thanks for your submissions advance.
+1. Download `pol-rss-gallery.sppkg` from [Releases](#)
+2. Upload to your SharePoint App Catalog
+3. Trust and deploy the package
+4. Add "POL RSS Gallery" to any page
 
-> Share your web part with others through Microsoft 365 Patterns and Practices program to get visibility and exposure. More details on the community, open-source projects and other activities from http://aka.ms/m365pnp.
+### Configuration
 
-## References
+1. Edit the page containing the web part
+2. Select a **preset** for quick setup:
+   - News Banner (carousel)
+   - Blog Grid (cards)
+   - Compact List
+   - Photo Gallery
+3. Enter your **Feed URL**
+4. Customize display options as needed
+5. Publish the page
 
-- [Getting started with SharePoint Framework](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/set-up-your-developer-tenant)
-- [Building for Microsoft teams](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/build-for-teams-overview)
-- [Use Microsoft Graph in your solution](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/web-parts/get-started/using-microsoft-graph-apis)
-- [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/en-us/sharepoint/dev/spfx/publish-to-marketplace-overview)
-- [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
+## Layouts
+
+| Layout | Best For | Description |
+|--------|----------|-------------|
+| **Banner** | Hero sections | Full-width rotating carousel |
+| **Cards** | Main content | Responsive grid with images |
+| **List** | Sidebars | Compact list with thumbnails |
+| **Minimal** | Narrow columns | Text-only, maximum density |
+| **Gallery** | Visual feeds | Masonry grid, images as hero |
+
+## Documentation
+
+- [User Guide](docs/user-guide.md) - Configuration and usage
+- [Admin Guide](docs/admin-guide.md) - Deployment and proxy setup
+- [Developer Docs](docs/developer.md) - Architecture and APIs
+- [Changelog](CHANGELOG.md) - Version history
+
+## Development
+
+### Prerequisites
+
+- Node.js >= 22.14.0 < 23.0.0
+- npm or yarn
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/paalolav/pol-rss.git
+cd pol-rss
+
+# Install dependencies
+npm install
+
+# Start development server
+gulp serve
+```
+
+### Build
+
+```bash
+# Bundle for production
+gulp bundle --ship
+
+# Create .sppkg package
+gulp package-solution --ship
+```
+
+### Testing
+
+```bash
+# Run unit tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run E2E tests
+npm run test:e2e
+```
+
+## CORS Proxy (Optional)
+
+For feeds that don't support CORS, deploy the included Azure Function proxy:
+
+```bash
+cd CORS-Proxy/scripts
+./deploy.sh -g "rg-rss-proxy" -n "fn-rss-proxy-yourorg"
+```
+
+See [CORS-Proxy/README.md](CORS-Proxy/README.md) for detailed setup.
+
+## Architecture
+
+```
+┌────────────────┐     ┌──────────────┐     ┌──────────────┐
+│  SharePoint    │────>│  Azure Fn    │────>│  RSS Feed    │
+│  (Web Part)    │<────│  CORS Proxy  │<────│  (External)  │
+└────────────────┘     └──────────────┘     └──────────────┘
+        │
+        ▼
+┌────────────────┐
+│  Two-Tier      │
+│  Cache         │
+│  (Memory +     │
+│   IndexedDB)   │
+└────────────────┘
+```
+
+## Supported Feed Formats
+
+| Format | Support |
+|--------|---------|
+| RSS 2.0 | Full |
+| RSS 1.0 (RDF) | Full |
+| Atom 1.0 | Full |
+| JSON Feed 1.0/1.1 | Full |
+| Malformed XML | Recovery mode |
+
+## Browser Support
+
+- Microsoft Edge (Chromium)
+- Google Chrome
+- Mozilla Firefox
+- Safari (macOS/iOS)
+
+## License
+
+MIT License - See [LICENSE](LICENSE) for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for new features
+4. Ensure all tests pass
+5. Submit a pull request
+
+## Support
+
+- [Open an issue](https://github.com/paalolav/pol-rss/issues)
+- Check [Troubleshooting](docs/admin-guide.md#troubleshooting)
+
+---
+
+Made with SharePoint Framework 1.21

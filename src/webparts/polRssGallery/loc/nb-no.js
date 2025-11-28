@@ -29,6 +29,7 @@ define([], function() {
 
     // Display Settings
     "MaxItemsFieldLabel": "Maksimalt antall elementer",
+    "MaxItemsDescription": "Høyere verdier kan påvirke lastetiden",
     "ShowPubDateFieldLabel": "Vis publiseringsdato",
     "ShowPubDateOnLabel": "Vis",
     "ShowPubDateOffLabel": "Skjul",
@@ -38,6 +39,7 @@ define([], function() {
     "ShowSourceFieldLabel": "Vis kilde",
     "ShowSourceOnLabel": "Vis",
     "ShowSourceOffLabel": "Skjul",
+    "ShowSourceDescription": "Vis publiseringsnavnet for aggregerte feeder (Retriever, Meltwater)",
     "ShowCategoriesFieldLabel": "Vis kategorier",
     "ShowCategoriesOnLabel": "Vis",
     "ShowCategoriesOffLabel": "Skjul",
@@ -78,6 +80,7 @@ define([], function() {
 
     // Advanced Settings
     "AutoRefreshFieldLabel": "Automatisk oppdatering",
+    "AutoRefreshDescription": "Oppdater feeden automatisk med jevne mellomrom",
     "AutoRefreshOnLabel": "På",
     "AutoRefreshOffLabel": "Av",
     "RefreshIntervalFieldLabel": "Oppdateringsintervall (minutter)",
@@ -145,7 +148,9 @@ define([], function() {
     "GallerySettingsGroupName": "Galleriinnstillinger",
     "GalleryColumnsLabel": "Kolonner",
     "GalleryColumnsAuto": "Automatisk (responsiv)",
+    "GalleryColumnsDescription": "Automatisk justerer basert på containerbredde",
     "GalleryTitlePositionLabel": "Tittelvisning",
+    "GalleryTitlePositionDescription": "Hvor titler skal vises",
     "GalleryTitleHover": "Vis ved pekerfokus",
     "GalleryTitleBelow": "Vis under bilde",
     "GalleryTitleNone": "Skjul titler",

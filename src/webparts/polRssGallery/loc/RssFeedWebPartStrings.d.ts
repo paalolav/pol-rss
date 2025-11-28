@@ -29,6 +29,7 @@ declare module 'RssFeedWebPartStrings' {
 
     // Display Settings
     MaxItemsFieldLabel: string;
+    MaxItemsDescription: string;
     ShowPubDateFieldLabel: string;
     ShowPubDateOnLabel: string;
     ShowPubDateOffLabel: string;
@@ -38,6 +39,7 @@ declare module 'RssFeedWebPartStrings' {
     ShowSourceFieldLabel: string;
     ShowSourceOnLabel: string;
     ShowSourceOffLabel: string;
+    ShowSourceDescription: string;
     ShowCategoriesFieldLabel: string;
     ShowCategoriesOnLabel: string;
     ShowCategoriesOffLabel: string;
@@ -78,6 +80,7 @@ declare module 'RssFeedWebPartStrings' {
 
     // Advanced Settings
     AutoRefreshFieldLabel: string;
+    AutoRefreshDescription: string;
     AutoRefreshOnLabel: string;
     AutoRefreshOffLabel: string;
     RefreshIntervalFieldLabel: string;
@@ -145,7 +148,9 @@ declare module 'RssFeedWebPartStrings' {
     GallerySettingsGroupName: string;
     GalleryColumnsLabel: string;
     GalleryColumnsAuto: string;
+    GalleryColumnsDescription: string;
     GalleryTitlePositionLabel: string;
+    GalleryTitlePositionDescription: string;
     GalleryTitleHover: string;
     GalleryTitleBelow: string;
     GalleryTitleNone: string;
