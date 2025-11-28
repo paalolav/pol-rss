@@ -137,6 +137,17 @@ Optimize bundle size for faster loading. Includes Swiper optimization, code spli
 
 ## Phase 4: New Features
 
+### REF-014-GALLERY-LAYOUT ⭐ NEW
+**Status:** `[ ]` Not Started
+**Priority:** High
+**Reference:** [REF-014-GALLERY-LAYOUT.md](refs/REF-014-GALLERY-LAYOUT.md)
+
+New "Gallery" layout showcasing images as the primary content. Masonry-style grid with images as hero, differentiating from text-heavy RSS solutions. Titles on hover or below - direct link to article.
+
+**Sub-tasks:** 10 | **Completed:** 0/10
+
+---
+
 ### REF-009-FEED-AGGREGATION
 **Status:** `[ ]` Not Started
 **Priority:** Medium
@@ -149,11 +160,11 @@ Support multiple RSS feeds merged into a single view. Includes duplicate detecti
 ---
 
 ### REF-010-ENHANCED-FILTERING
-**Status:** `[ ]` Not Started
+**Status:** `[—]` Deferred
 **Priority:** Low
 **Reference:** [REF-010-ENHANCED-FILTERING.md](refs/REF-010-ENHANCED-FILTERING.md)
 
-Advanced filtering with date ranges, full-text search, presets, and shareable URL state.
+~~Advanced filtering with date ranges, full-text search, presets, and shareable URL state.~~ Deferred - original filtering removed in Session 15 due to poor UX.
 
 **Sub-tasks:** 8 | **Completed:** 0/8
 
@@ -179,9 +190,11 @@ Comprehensive documentation for admins and users.
 | Phase 1: Foundation | 3 | 3 | 100% |
 | Phase 2: Core Reliability | 3 | 3 | 100% |
 | Phase 3: UI/UX | 4 | 4 | 100% |
-| Phase 4: Features | 2 | 0 | 0% |
+| Phase 4: Features | 3 | 0 | 0% |
 | Phase 5: Documentation | 1 | 0 | 0% |
-| **Total** | **13** | **10** | **77%** |
+| **Total** | **14** | **10** | **71%** |
+
+**Note:** REF-010 (Enhanced Filtering) is deferred - not counted as active task.
 
 ---
 
@@ -202,7 +215,8 @@ REF-003 + REF-004 ──────> REF-009 (Aggregation)
 REF-006 (Responsive) ───> REF-007 (Layouts)
 
 REF-007 (Layouts) ──┬──> REF-008 (Property Pane)
-                    └──> REF-013 (Bundle Opt) [Carousel optimization]
+                    ├──> REF-013 (Bundle Opt) [Carousel optimization]
+                    └──> REF-014 (Gallery) [New layout] ⭐
 
 All Tasks ──────────────> REF-011 (Documentation)
 ```
@@ -210,6 +224,17 @@ All Tasks ──────────────> REF-011 (Documentation)
 ---
 
 ## Changelog
+
+### 2025-11-28 (Session 22) - Gallery Layout Task
+- Created REF-014-GALLERY-LAYOUT (10 sub-tasks)
+  - New masonry-style image grid layout
+  - Images as hero content (differentiator from text-heavy RSS solutions)
+  - Configurable: columns, aspect ratio, title position (hover/below/none)
+  - Direct link to article (no extra clicks)
+- Deferred REF-010-ENHANCED-FILTERING (filtering removed in Session 15)
+- Updated task summary and dependencies
+
+---
 
 ### 2025-11-28 (Session 21) - Manual Testing & Cleanup
 - REF-006: Responsive Design COMPLETED (11/11 sub-tasks)
