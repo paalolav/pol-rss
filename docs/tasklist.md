@@ -240,6 +240,19 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
+### 2025-11-28 (Session 28) - Strong Background Theme Support
+- **Strong Background Support** (TDD approach)
+  - Added support for SharePoint's fourth background option (strong/dark)
+  - When section uses strong background, text inverts to white automatically
+  - Implementation using `themeVariant.isInverted` from SPFx theme provider
+  - Added `isInverted` prop to all layout components (Banner, Card, List, Minimal, Gallery)
+  - Added `data-testid="rss-feed-container"` and `data-inverted` attribute for testing
+  - Added `.inverted` CSS class with white text styling for dark backgrounds
+  - 10 new TDD tests for strong background support
+- All 275 tests passing
+
+---
+
 ### 2025-11-28 (Session 27) - Documentation Complete
 - REF-011: Documentation COMPLETED (6/6 sub-tasks)
   - **ST-011-01: Admin Deployment Guide** - Created `docs/admin-guide.md`
