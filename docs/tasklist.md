@@ -221,6 +221,27 @@ Advanced filtering with date ranges, full-text search, presets, and shareable UR
 
 ---
 
+### REF-018-PARSER-RECOVERY-ENHANCEMENT
+**Priority:** Medium
+**Reference:** To be created
+
+Enhance feed parser recovery to handle feeds like sentralregisteret.no/feed that currently fail with "unexpected close tag" errors despite having valid content wrapped in CDATA sections.
+
+**Known Issue:**
+- Feed URL: https://www.sentralregisteret.no/feed
+- Feed has 10 items with wp-block-image figures containing images
+- Parser fails at line 42, column 28 (start of `content:encoded` CDATA)
+- Recovery mode attempts but also fails
+- Alternative regex extraction works for basic data but doesn't extract images
+
+**Required Fixes:**
+- [ ] Improve CDATA section handling in XML preprocessing
+- [ ] Handle HTML5 attributes (fetchpriority, decoding) inside content
+- [ ] Enhance alternative extraction to include image URLs from wp-block-image
+- [ ] Add specific test case that must pass when fixed
+
+---
+
 ## Dependencies
 
 ```
@@ -253,6 +274,30 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 ---
 
 ## Changelog
+
+### 2025-11-29 (Session 31) - Gallery Strong Background Fix & Feed Testing
+
+- **Gallery Layout Strong Background Fix**
+  - **Problem**: Gallery items had bright light gray background (`#f3f2f1`) on dark SharePoint sections, making white text unreadable
+  - **Fix**: Made `.galleryItem.inverted` background transparent
+  - Also fixed `.imageWrapper` and `.noImage` backgrounds for inverted theme
+  - Added `background: rgba(255, 255, 255, 0.1)` for subtle effect on dark backgrounds
+
+- **Sentralregisteret.no Feed Testing**
+  - Created `tests/integration/sentralregisteret.test.ts` with 6 tests
+  - **Issue Identified**: Feed fails to parse due to "42:28: unexpected close tag" error
+  - Feed has 10 valid items with wp-block-image figures containing images
+  - Norwegian characters (ø in "Drøbak") display correctly
+  - Recovery mode attempts but still fails - needs parser enhancement
+  - Created REF-018 task to track parsing fix
+
+- **E2E Tests Enhanced**
+  - Created `tests/e2e/strong-background.spo.spec.ts` - 6 tests for text readability on strong backgrounds
+  - Verified Gallery view now shows white text (rgb(255, 255, 255)) on inverted backgrounds
+
+- All 1753 tests passing
+
+---
 
 ### 2025-11-29 (Session 30) - ProxyService Feed Validation Fix
 - REF-017: ProxyService Validation COMPLETED (4/4 sub-tasks)

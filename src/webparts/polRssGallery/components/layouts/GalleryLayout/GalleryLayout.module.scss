@@ -262,6 +262,51 @@
   }
 }
 
+// Inverted theme (strong background)
+.inverted {
+  // Make gallery item background transparent on strong backgrounds
+  background: transparent;
+
+  // Image wrapper should also be transparent (no placeholder background showing through)
+  .imageWrapper {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  // No image placeholder should be subtle on dark background
+  .noImage {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  &.title-below {
+    .titleBelow {
+      .title {
+        color: #fff;
+      }
+
+      .meta {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .date {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .separator {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      .source {
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      .description {
+        color: rgba(255, 255, 255, 0.85);
+      }
+    }
+  }
+}
+
 // ============================================================
 // Skeleton Loading
 // ============================================================
