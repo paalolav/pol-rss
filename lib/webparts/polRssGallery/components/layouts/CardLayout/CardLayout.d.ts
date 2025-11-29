@@ -103,6 +103,11 @@ export interface ICardLayoutProps {
      * Test ID for testing
      */
     testId?: string;
+    /**
+     * Whether the theme is inverted (strong background)
+     * @default false
+     */
+    isInverted?: boolean;
 }
 /**
  * CardLayout component

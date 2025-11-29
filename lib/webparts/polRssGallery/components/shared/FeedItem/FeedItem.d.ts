@@ -112,6 +112,12 @@ export interface IFeedItemProps {
      * @default true
      */
     imageAsLink?: boolean;
+    /**
+     * Whether the theme is inverted (strong background)
+     * When true, text colors will be white for visibility on dark backgrounds
+     * @default false
+     */
+    isInverted?: boolean;
 }
 /**
  * FeedItem component for rendering RSS feed items

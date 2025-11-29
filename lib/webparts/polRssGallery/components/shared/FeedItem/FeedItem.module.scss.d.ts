@@ -59,6 +59,7 @@ declare const styles: {
     description: string;
     categories: string;
     category: string;
+    inverted: string;
     card: string;
     list: string;
     banner: string;

@@ -80,6 +80,8 @@ export declare function extractItemsAlternative(xml: string): Array<{
 export declare function attemptRecovery(xml: string, options?: RecoveryOptions): RecoveryResult;
 /**
  * Quick check if content might need recovery
+ * NOTE: This is a heuristic check - some triggers may be false positives
+ * (e.g., unescaped ampersands inside CDATA sections are actually valid)
  */
 export declare function needsRecovery(xml: string): boolean;
 /**

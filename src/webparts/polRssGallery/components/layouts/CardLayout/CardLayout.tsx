@@ -111,6 +111,11 @@ export interface ICardLayoutProps {
    * Test ID for testing
    */
   testId?: string;
+  /**
+   * Whether the theme is inverted (strong background)
+   * @default false
+   */
+  isInverted?: boolean;
 }
 
 /**
@@ -142,7 +147,8 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
   skeletonCount = 6,
   onItemClick,
   className = '',
-  testId = 'card-layout'
+  testId = 'card-layout',
+  isInverted = false
 }) => {
   // Key for forcing re-render when forceFallback changes
   const [layoutKey, setLayoutKey] = useState(0);
@@ -231,6 +237,7 @@ export const CardLayout: React.FC<ICardLayoutProps> = ({
             }}
             className={styles.card}
             testId={`${testId}-item-${index}`}
+            isInverted={isInverted}
           />
         ))}
       </ResponsiveGrid>

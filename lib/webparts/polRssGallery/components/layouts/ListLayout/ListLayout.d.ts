@@ -105,6 +105,11 @@ export interface IListLayoutProps {
      * Test ID for testing
      */
     testId?: string;
+    /**
+     * Whether the theme is inverted (strong background)
+     * @default false
+     */
+    isInverted?: boolean;
 }
 /**
  * ListLayout component

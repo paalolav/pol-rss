@@ -117,6 +117,31 @@
   overflow: hidden;
 }
 
+// Inverted theme (strong background)
+.inverted {
+  .minimalItem {
+    border-bottom-color: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  .itemTitle {
+    color: #fff;
+  }
+
+  .itemDate,
+  .itemSource,
+  .itemDescription {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .minimalItem:hover .itemTitle {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
 // Alternative compact numbered style
 .minimalLayoutNumbered {
   counter-reset: item-counter;

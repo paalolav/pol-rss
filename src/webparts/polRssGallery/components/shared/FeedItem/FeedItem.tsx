@@ -119,6 +119,12 @@ export interface IFeedItemProps {
    * @default true
    */
   imageAsLink?: boolean;
+  /**
+   * Whether the theme is inverted (strong background)
+   * When true, text colors will be white for visibility on dark backgrounds
+   * @default false
+   */
+  isInverted?: boolean;
 }
 
 /**
@@ -181,7 +187,8 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   className = '',
   testId = 'feed-item',
   locale = 'nb-NO',
-  imageAsLink = true
+  imageAsLink = true,
+  isInverted = false
 }) => {
   const handleClick = useCallback((event: React.MouseEvent) => {
     if (onItemClick) {
@@ -226,6 +233,7 @@ export const FeedItem: React.FC<IFeedItemProps> = ({
   const containerClasses = [
     styles.feedItem,
     styles[variant],
+    isInverted ? styles.inverted : '',
     className
   ].filter(Boolean).join(' ');
 

@@ -115,6 +115,11 @@ export interface IListLayoutProps {
    * Test ID for testing
    */
   testId?: string;
+  /**
+   * Whether the theme is inverted (strong background)
+   * @default false
+   */
+  isInverted?: boolean;
 }
 
 /**
@@ -146,7 +151,8 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
   skeletonCount = 5,
   onItemClick,
   className = '',
-  testId = 'list-layout'
+  testId = 'list-layout',
+  isInverted = false
 }) => {
   // Key for forcing re-render when forceFallback changes
   const [layoutKey, setLayoutKey] = useState(0);
@@ -247,6 +253,7 @@ export const ListLayout: React.FC<IListLayoutProps> = ({
               maxLines: compact ? 2 : 3
             }}
             testId={`${testId}-item-${index}`}
+            isInverted={isInverted}
           />
         </div>
       ))}

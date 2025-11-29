@@ -66,6 +66,21 @@ export interface IGalleryLayoutProps {
      */
     filterNoImages?: boolean;
     /**
+     * Whether to show the publication date
+     * @default true
+     */
+    showDate?: boolean;
+    /**
+     * Whether to show the description
+     * @default false
+     */
+    showDescription?: boolean;
+    /**
+     * Whether to show the source/publication name
+     * @default false
+     */
+    showSource?: boolean;
+    /**
      * Whether the component is loading
      * @default false
      */
@@ -87,6 +102,11 @@ export interface IGalleryLayoutProps {
      * Test ID for testing
      */
     testId?: string;
+    /**
+     * Whether the theme is inverted (strong background)
+     * @default false
+     */
+    isInverted?: boolean;
 }
 /**
  * GalleryLayout component

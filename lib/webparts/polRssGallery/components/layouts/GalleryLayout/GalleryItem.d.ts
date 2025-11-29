@@ -48,6 +48,21 @@ export interface IGalleryItemProps {
      */
     forceFallback?: boolean;
     /**
+     * Whether to show the publication date
+     * @default true
+     */
+    showDate?: boolean;
+    /**
+     * Whether to show the description
+     * @default false
+     */
+    showDescription?: boolean;
+    /**
+     * Whether to show the source/publication name
+     * @default false
+     */
+    showSource?: boolean;
+    /**
      * Callback when item is clicked
      */
     onClick?: (item: IRssItem) => void;
@@ -59,6 +74,11 @@ export interface IGalleryItemProps {
      * Test ID for testing
      */
     testId?: string;
+    /**
+     * Whether the theme is inverted (strong background)
+     * @default false
+     */
+    isInverted?: boolean;
 }
 /**
  * GalleryItem component

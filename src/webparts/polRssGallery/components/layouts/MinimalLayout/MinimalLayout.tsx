@@ -125,7 +125,8 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
   skeletonCount = 5,
   onItemClick,
   className = '',
-  testId = 'minimal-layout'
+  testId = 'minimal-layout',
+  isInverted = false
 }) => {
   // Handle item click
   const handleItemClick = useCallback((item: IRssItem, event: React.MouseEvent) => {
@@ -152,6 +153,7 @@ export const MinimalLayout: React.FC<IMinimalLayoutProps> = ({
   // Container classes
   const containerClasses = [
     styles.minimalLayout,
+    isInverted ? styles.inverted : '',
     className
   ].filter(Boolean).join(' ');
 

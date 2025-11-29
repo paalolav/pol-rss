@@ -82,6 +82,8 @@ declare const styles: {
     feedMeta: string;
     warningList: string;
     errorSuggestion: string;
+    rssFeed: string;
+    inverted: string;
 };
 export default styles;
 //# sourceMappingURL=RssFeed.module.scss.d.ts.map

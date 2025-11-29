@@ -34,7 +34,8 @@ export class ProxyService {
   private static readonly LOG_SOURCE = 'ProxyService';
   private static readonly DEFAULT_PROXIES = [
     'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?'
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy/?quest='
   ];
 
   private static _proxyUrls: string[] = [...ProxyService.DEFAULT_PROXIES];

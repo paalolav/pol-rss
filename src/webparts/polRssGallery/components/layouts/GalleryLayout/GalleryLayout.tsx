@@ -145,7 +145,8 @@ export const GalleryLayout: React.FC<IGalleryLayoutProps> = ({
   skeletonCount = 8,
   onItemClick,
   className = '',
-  testId = 'gallery-layout'
+  testId = 'gallery-layout',
+  isInverted = false
 }) => {
   // Key for forcing re-render when forceFallback changes
   const [layoutKey, setLayoutKey] = useState(0);
@@ -233,6 +234,7 @@ export const GalleryLayout: React.FC<IGalleryLayoutProps> = ({
           showSource={showSource}
           onClick={onItemClick ? handleItemClick : undefined}
           testId={`${testId}-item-${index}`}
+          isInverted={isInverted}
         />
       ))}
     </div>

@@ -58,9 +58,15 @@ declare const styles: {
     hoverOverlay: string;
     title: string;
     date: string;
+    source: string;
+    description: string;
     titleBelow: string;
+    meta: string;
+    separator: string;
     'title-none': string;
     'title-hover': string;
+    inverted: string;
+    'title-below': string;
     skeletonItem: string;
     skeletonImage: string;
     shimmer: string;

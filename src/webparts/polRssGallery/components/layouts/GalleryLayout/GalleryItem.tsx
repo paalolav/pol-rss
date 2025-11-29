@@ -80,6 +80,11 @@ export interface IGalleryItemProps {
    * Test ID for testing
    */
   testId?: string;
+  /**
+   * Whether the theme is inverted (strong background)
+   * @default false
+   */
+  isInverted?: boolean;
 }
 
 /**
@@ -145,7 +150,8 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
   showSource = false,
   onClick,
   className = '',
-  testId = 'gallery-item'
+  testId = 'gallery-item',
+  isInverted = false
 }) => {
   // Get image URL with fallback - if forceFallback is true, use fallbackImageUrl
   const imageUrl = forceFallback && fallbackImageUrl
@@ -174,6 +180,7 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
   const itemClasses = [
     styles.galleryItem,
     (styles as Record<string, string>)[titleClass],
+    isInverted ? styles.inverted : '',
     className
   ].filter(Boolean).join(' ');
 

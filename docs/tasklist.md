@@ -221,24 +221,23 @@ Advanced filtering with date ranges, full-text search, presets, and shareable UR
 
 ---
 
-### REF-018-PARSER-RECOVERY-ENHANCEMENT
+### REF-018-PARSER-RECOVERY-ENHANCEMENT ✅ COMPLETED
 **Priority:** Medium
-**Reference:** To be created
+**Reference:** Session 31 (2025-11-29)
 
-Enhance feed parser recovery to handle feeds like sentralregisteret.no/feed that currently fail with "unexpected close tag" errors despite having valid content wrapped in CDATA sections.
+~~Enhance feed parser recovery to handle feeds like sentralregisteret.no/feed that currently fail with "unexpected close tag" errors despite having valid content wrapped in CDATA sections.~~
 
-**Known Issue:**
-- Feed URL: https://www.sentralregisteret.no/feed
-- Feed has 10 items with wp-block-image figures containing images
-- Parser fails at line 42, column 28 (start of `content:encoded` CDATA)
-- Recovery mode attempts but also fails
-- Alternative regex extraction works for basic data but doesn't extract images
+**FIXED in Session 31:**
 
-**Required Fixes:**
-- [ ] Improve CDATA section handling in XML preprocessing
-- [ ] Handle HTML5 attributes (fetchpriority, decoding) inside content
-- [ ] Enhance alternative extraction to include image URLs from wp-block-image
-- [ ] Add specific test case that must pass when fixed
+**Root Cause:** The `stripInvalidXml()` function was escaping ampersands (`&`) inside CDATA sections, converting valid `&nbsp;` to `&amp;nbsp;`, which broke XML parsing.
+
+**Solution:**
+- [x] Updated `stripInvalidXml()` to preserve CDATA sections using placeholder technique
+- [x] Updated `needsRecovery()` to exclude CDATA content when checking for unescaped ampersands
+- [x] Created test fixture `tests/fixtures/sentralregisteret-feed.xml` (47KB, 10 items)
+- [x] Updated `tests/integration/sentralregisteret.test.ts` - 8 tests all passing
+
+**Result:** All 10 items parse correctly with images, Norwegian characters (Drøbak), and dates.
 
 ---
 
@@ -275,7 +274,7 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
-### 2025-11-29 (Session 31) - Gallery Strong Background Fix & Feed Testing
+### 2025-11-29 (Session 31) - Gallery Strong Background Fix & Feed Parsing Fix
 
 - **Gallery Layout Strong Background Fix**
   - **Problem**: Gallery items had bright light gray background (`#f3f2f1`) on dark SharePoint sections, making white text unreadable
@@ -283,19 +282,20 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
   - Also fixed `.imageWrapper` and `.noImage` backgrounds for inverted theme
   - Added `background: rgba(255, 255, 255, 0.1)` for subtle effect on dark backgrounds
 
-- **Sentralregisteret.no Feed Testing**
-  - Created `tests/integration/sentralregisteret.test.ts` with 6 tests
-  - **Issue Identified**: Feed fails to parse due to "42:28: unexpected close tag" error
-  - Feed has 10 valid items with wp-block-image figures containing images
-  - Norwegian characters (ø in "Drøbak") display correctly
-  - Recovery mode attempts but still fails - needs parser enhancement
-  - Created REF-018 task to track parsing fix
+- **Sentralregisteret.no Feed Parsing Fix (REF-018 COMPLETED)**
+  - **Problem**: Feed failed to parse with "42:28: unexpected close tag" error
+  - **Root Cause**: `&nbsp;` entities inside CDATA sections were being incorrectly escaped to `&amp;nbsp;`
+  - **Fix 1**: Updated `stripInvalidXml()` in `feedRecovery.ts` to preserve CDATA sections using placeholder technique
+  - **Fix 2**: Updated `needsRecovery()` to exclude CDATA content when checking for unescaped ampersands
+  - **Result**: All 10 items now parse correctly with images, Norwegian characters (Drøbak), and dates
+  - Created `tests/fixtures/sentralregisteret-feed.xml` fixture file (47KB)
+  - Updated `tests/integration/sentralregisteret.test.ts` - 8 tests all passing
 
 - **E2E Tests Enhanced**
   - Created `tests/e2e/strong-background.spo.spec.ts` - 6 tests for text readability on strong backgrounds
   - Verified Gallery view now shows white text (rgb(255, 255, 255)) on inverted backgrounds
 
-- All 1753 tests passing
+- All 1756 tests passing
 
 ---
 

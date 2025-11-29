@@ -1,23 +1,22 @@
 /**
  * Sentralregisteret.no Feed Tests
  *
- * This feed has been reported to have issues:
- * - Returns only 1 item when there should be 10
- * - Crashes/errors during parsing
- * - Images not extracted from wp-block-image figures
+ * This feed is protected by Cloudflare and cannot be accessed via public
+ * CORS proxies. We use a saved fixture file for testing.
  *
  * Feed URL: https://www.sentralregisteret.no/feed
+ *
+ * Feed characteristics:
+ * - WordPress-generated RSS feed
+ * - Contains wp-block-image figures with images
+ * - Uses CDATA sections for description and content:encoded
+ * - Norwegian characters (æ, ø, å)
  */
 
-import 'whatwg-fetch';
-import { ProxyService } from '../../src/webparts/polRssGallery/services/proxyService';
+import * as fs from 'fs';
+import * as path from 'path';
 import { ImprovedFeedParser } from '../../src/webparts/polRssGallery/services/ImprovedFeedParser';
 import { IRssItem } from '../../src/webparts/polRssGallery/components/IRssItem';
-
-// Mock the SharePoint HttpClient
-const mockHttpClient = {
-  fetch: jest.fn()
-};
 
 // Mock RssDebugUtils
 jest.mock('../../src/webparts/polRssGallery/utils/rssDebugUtils', () => ({
@@ -26,27 +25,9 @@ jest.mock('../../src/webparts/polRssGallery/utils/rssDebugUtils', () => ({
     warn: jest.fn(),
     error: jest.fn(),
     isEnabled: () => false,
-    isDebugEnabled: () => true,
+    isDebugEnabled: () => false,
     setDebugMode: jest.fn(),
     analyzeRssFeed: jest.fn(() => ''),
-  }
-}));
-
-// Mock sp-core-library Log
-jest.mock('@microsoft/sp-core-library', () => ({
-  Log: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn()
-  }
-}));
-
-// Mock sp-http
-jest.mock('@microsoft/sp-http', () => ({
-  HttpClient: {
-    configurations: {
-      v1: {}
-    }
   }
 }));
 
@@ -56,18 +37,7 @@ jest.mock('RssFeedWebPartStrings', () => ({
   ErrorFetchingFeed: 'Error fetching feed',
 }), { virtual: true });
 
-const FEED_URL = 'https://www.sentralregisteret.no/feed';
-
-/**
- * Helper function to fetch feed content via proxy
- */
-async function fetchFeedContent(url: string): Promise<string> {
-  const response = await ProxyService.fetch(url);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-  }
-  return await response.text();
-}
+const FIXTURE_PATH = path.join(__dirname, '../fixtures/sentralregisteret-feed.xml');
 
 /**
  * Helper to parse feed with recovery mode
@@ -81,40 +51,25 @@ function parseFeedWithRecovery(xmlContent: string, fallbackImageUrl: string = ''
     fallbackImageUrl,
     maxItems: 20,
     enableRecovery: true,
-    enableDebug: true,
+    enableDebug: false,
   });
 }
 
-describe('Sentralregisteret.no Feed Tests', () => {
-  jest.setTimeout(60000);
-
+describe('Sentralregisteret.no Feed Tests (Fixture)', () => {
   let feedContent: string;
 
-  beforeAll(async () => {
-    // Initialize ProxyService with mock client
-    ProxyService.init(mockHttpClient as never);
-    ProxyService.setDebugMode(false); // Must be false to avoid Log.warn issues
-
-    // Fetch the feed once for all tests
+  beforeAll(() => {
+    // Load the feed from fixture file
     try {
-      feedContent = await fetchFeedContent(FEED_URL);
+      feedContent = fs.readFileSync(FIXTURE_PATH, 'utf8');
+      console.log(`Loaded fixture: ${feedContent.length} bytes`);
     } catch (error) {
-      console.log('Failed to fetch feed - tests will be skipped:', error);
+      console.log('Failed to load fixture file:', error);
       feedContent = '';
     }
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should fetch sentralregisteret feed successfully', async () => {
-    // Skip if fetch failed
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
-
+  test('fixture file contains valid RSS feed', () => {
     expect(feedContent).toBeTruthy();
     expect(feedContent.length).toBeGreaterThan(1000);
 
@@ -126,141 +81,115 @@ describe('Sentralregisteret.no Feed Tests', () => {
     // Count items in raw XML
     const itemMatches = feedContent.match(/<item>/g);
     const itemCount = itemMatches ? itemMatches.length : 0;
-    console.log(`Raw XML contains ${itemCount} <item> tags`);
+    console.log(`Fixture contains ${itemCount} <item> tags`);
 
-    expect(itemCount).toBeGreaterThanOrEqual(10);
+    expect(itemCount).toBe(10);
   });
 
-  test('should parse ALL items from sentralregisteret feed (not just 1)', async () => {
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
+  test('native DOMParser should parse all items', () => {
+    // First verify the native DOMParser works
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(feedContent, 'application/xml');
 
-    let result;
-    let parseError: Error | undefined;
-    try {
-      result = parseFeedWithRecovery(feedContent);
-    } catch (e) {
-      parseError = e as Error;
-      console.log('Parse failed with error:', parseError.message);
-    }
-
+    const parseError = doc.querySelector('parsererror');
     if (parseError) {
-      // Document the issue - feed fails to parse due to XML parsing error
-      // This is a known issue that needs to be fixed in the parser
-      console.log('Known issue: Parser fails on this feed');
-      console.log('Error:', parseError.message);
-
-      // Count items in raw XML to verify feed has content
-      const itemMatches = feedContent.match(/<item>/g);
-      const rawItemCount = itemMatches ? itemMatches.length : 0;
-      console.log(`Raw XML has ${rawItemCount} items that should be parsed`);
-
-      // Skip for now but document expected behavior
-      console.log('TODO: Fix parser to handle this feed - it has 10 items with images');
-      return;
+      console.log('Native DOMParser error:', parseError.textContent?.substring(0, 200));
     }
+
+    const items = doc.querySelectorAll('item');
+    console.log(`Native DOMParser found ${items.length} items`);
+    expect(items.length).toBe(10);
+  });
+
+  test('should parse ALL 10 items from sentralregisteret feed', () => {
+    const result = parseFeedWithRecovery(feedContent);
 
     console.log(`Parsed ${result.items.length} items`);
     console.log(`Recovery used: ${result.recoveryUsed}`);
-    console.log(`Warnings: ${result.warnings.length}`);
 
-    if (result.warnings.length > 0) {
-      console.log('Warnings:', result.warnings);
-    }
+    // Should parse all 10 items
+    expect(result.items.length).toBe(10);
 
-    // Should parse at least 5 items (feed has 10)
-    expect(result.items.length).toBeGreaterThanOrEqual(5);
-
-    // Log all items for debugging
+    // Log all items
     result.items.forEach((item, i) => {
-      console.log(`Item ${i + 1}: "${item.title}" - ${item.imageUrl ? 'has image' : 'NO IMAGE'}`);
+      console.log(`Item ${i + 1}: "${item.title.substring(0, 50)}..." - ${item.imageUrl ? 'has image' : 'NO IMAGE'}`);
     });
   });
 
-  test('documents image extraction requirements', async () => {
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
+  test('should extract images from wp-block-image figures', () => {
+    const result = parseFeedWithRecovery(feedContent, 'https://fallback.example.com/image.jpg');
 
-    // Document what images should be extracted from this feed
-    // The feed contains wp-block-image figures with img tags
-    const hasWpBlockImage = feedContent.includes('wp-block-image');
-    const hasImgTags = feedContent.includes('<img');
+    // Check which items have images (not using fallback)
+    const itemsWithImages = result.items.filter(item =>
+      item.imageUrl && !item.imageUrl.includes('fallback.example.com')
+    );
 
-    console.log(`Feed contains wp-block-image: ${hasWpBlockImage}`);
-    console.log(`Feed contains img tags: ${hasImgTags}`);
+    console.log(`Items with extracted images: ${itemsWithImages.length}/${result.items.length}`);
 
-    // Extract first image URL directly from content for verification
-    const imgMatch = feedContent.match(/src="([^"]*sentralregisteret\.no[^"]+\.jpg)"/);
-    if (imgMatch) {
-      console.log(`First image URL found: ${imgMatch[1]}`);
-    }
+    // Log images found
+    result.items.slice(0, 5).forEach((item, i) => {
+      console.log(`Item ${i + 1} image: ${item.imageUrl || 'none'}`);
+    });
 
-    expect(hasWpBlockImage).toBe(true);
-    expect(hasImgTags).toBe(true);
+    // Most items should have images extracted from wp-block-image
+    expect(itemsWithImages.length).toBeGreaterThanOrEqual(5);
   });
 
-  test('documents current parsing status', async () => {
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
+  test('should handle Norwegian characters correctly', () => {
+    const result = parseFeedWithRecovery(feedContent);
 
-    let result;
-    let parseError: Error | undefined;
+    // Check for Norwegian characters in parsed content
+    const allText = result.items.map(i => `${i.title} ${i.description}`).join(' ');
 
-    try {
-      result = parseFeedWithRecovery(feedContent);
-    } catch (e) {
-      parseError = e as Error;
-    }
-
-    if (parseError) {
-      console.log('Current status: Parser fails on this feed');
-      console.log('Error:', parseError.message);
-      console.log('');
-      console.log('Expected: Parser should recover and extract items');
-      console.log('Issue: XML parser encounters "unexpected close tag" error');
-    } else {
-      console.log(`Current status: Parsed ${result?.items.length} items`);
-      if (result?.recoveryUsed) {
-        console.log('Recovery mode was used');
-      }
-    }
-
-    // This test documents status, not enforces success
-    expect(true).toBe(true);
-  });
-
-  test('verifies Norwegian characters in raw feed content', async () => {
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
-
-    // Check Norwegian characters directly in raw content
     // The feed has "Drøbak" which contains ø
-    const hasNorwegianChars = /[æøåÆØÅ]/.test(feedContent);
-    console.log(`Norwegian characters in raw feed: ${hasNorwegianChars}`);
+    const hasNorwegianChars = /[æøåÆØÅ]/.test(allText);
+    console.log(`Norwegian characters found: ${hasNorwegianChars}`);
 
-    // Check for encoding issues
-    const hasCorruptedChars = /Ã¦|Ã¸|Ã¥/.test(feedContent);
-    if (hasCorruptedChars) {
-      console.log('WARNING: Found corrupted Norwegian characters in raw feed');
-    }
-
+    // Check for encoding issues (garbled characters)
+    const hasCorruptedChars = /Ã¦|Ã¸|Ã¥/.test(allText);
     expect(hasCorruptedChars).toBe(false);
+
+    // Specifically check for "Drøbak" being correctly preserved
+    const hasDrobak = allText.includes('Drøbak');
+    console.log(`"Drøbak" found correctly: ${hasDrobak}`);
+    expect(hasDrobak).toBe(true);
   });
 
-  test('documents feed structure for debugging', async () => {
-    if (!feedContent) {
-      console.log('Skipping test - feed could not be fetched');
-      return;
-    }
+  test('should parse dates correctly', () => {
+    const result = parseFeedWithRecovery(feedContent);
 
+    let validDates = 0;
+    result.items.forEach((item, i) => {
+      if (item.pubDate) {
+        const date = new Date(item.pubDate);
+        const isValid = date.toString() !== 'Invalid Date';
+        if (isValid) validDates++;
+        if (i < 3) {
+          console.log(`Item ${i + 1} date: "${item.pubDate}" -> ${isValid ? date.toISOString() : 'INVALID'}`);
+        }
+      }
+    });
+
+    expect(validDates).toBe(result.items.length);
+  });
+
+  test('should extract links correctly', () => {
+    const result = parseFeedWithRecovery(feedContent);
+
+    const itemsWithLinks = result.items.filter(item =>
+      item.link && item.link.startsWith('https://sentralregisteret.no/')
+    );
+
+    console.log(`Items with valid links: ${itemsWithLinks.length}/${result.items.length}`);
+
+    // All items should have valid links
+    expect(itemsWithLinks.length).toBe(result.items.length);
+
+    // Check first item link
+    expect(result.items[0].link).toContain('sentralregisteret.no');
+  });
+
+  test('feed structure analysis', () => {
     console.log('\n=== Feed Structure Analysis ===');
     console.log(`Content length: ${feedContent.length} bytes`);
     console.log(`Contains <rss>: ${feedContent.includes('<rss')}`);
@@ -269,7 +198,7 @@ describe('Sentralregisteret.no Feed Tests', () => {
     console.log(`Contains wp-block-image: ${feedContent.includes('wp-block-image')}`);
     console.log(`Contains CDATA: ${feedContent.includes('CDATA')}`);
 
-    // Count items
+    // Count elements
     const itemCount = (feedContent.match(/<item>/g) || []).length;
     const contentEncodedCount = (feedContent.match(/<content:encoded>/g) || []).length;
     const figureCount = (feedContent.match(/<figure/g) || []).length;
@@ -280,9 +209,7 @@ describe('Sentralregisteret.no Feed Tests', () => {
     console.log(`<figure> count: ${figureCount}`);
     console.log(`CDATA sections: ${cdataCount}`);
 
-    // Document expected behavior
-    console.log(`\nExpected: Parser should extract ${itemCount} items with images`);
-
-    expect(itemCount).toBeGreaterThanOrEqual(10);
+    expect(itemCount).toBe(10);
+    expect(contentEncodedCount).toBe(10);
   });
 });

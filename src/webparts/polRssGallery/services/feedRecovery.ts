@@ -280,10 +280,18 @@ function fixMissingNamespaces(xml: string): { content: string; fixes: number } {
 
 /**
  * Strip invalid XML characters and sequences
+ * IMPORTANT: Preserves CDATA sections - content inside CDATA should not be modified
  */
 function stripInvalidXml(xml: string): { content: string; fixes: number } {
-  let content = xml;
   let fixes = 0;
+
+  // Extract CDATA sections and replace with placeholders
+  const cdataPlaceholders: string[] = [];
+  let content = xml.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, (match) => {
+    const placeholder = `__CDATA_PLACEHOLDER_${cdataPlaceholders.length}__`;
+    cdataPlaceholders.push(match);
+    return placeholder;
+  });
 
   // Remove control characters (except tab, newline, carriage return)
   const beforeCtrl = content.length;
@@ -298,6 +306,7 @@ function stripInvalidXml(xml: string): { content: string; fixes: number } {
   if (content.length !== beforeInvalid) fixes++;
 
   // Fix unescaped ampersands (but not already escaped ones)
+  // Only apply to non-CDATA content
   const beforeAmp = content;
   content = content.replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/gi, '&amp;');
   if (content !== beforeAmp) fixes++;
@@ -307,6 +316,11 @@ function stripInvalidXml(xml: string): { content: string; fixes: number } {
   const beforeLt = content;
   content = content.replace(/>([^<]*)<([^a-zA-Z/!?])/g, '>$1&lt;$2');
   if (content !== beforeLt) fixes++;
+
+  // Restore CDATA sections
+  cdataPlaceholders.forEach((cdata, i) => {
+    content = content.replace(`__CDATA_PLACEHOLDER_${i}__`, cdata);
+  });
 
   return { content, fixes };
 }
@@ -701,9 +715,16 @@ export function attemptRecovery(
 
 /**
  * Quick check if content might need recovery
+ * NOTE: This is a heuristic check - some triggers may be false positives
+ * (e.g., unescaped ampersands inside CDATA sections are actually valid)
  */
 export function needsRecovery(xml: string): boolean {
   if (!xml || typeof xml !== 'string') return true;
+
+  // For unescaped ampersand check, we need to exclude CDATA content
+  // since ampersands inside CDATA are valid and don't need escaping
+  const xmlWithoutCdata = xml.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '');
+  const hasUnescapedAmpOutsideCdata = /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/i.test(xmlWithoutCdata);
 
   // Check for common issues
   const issues = [
@@ -720,8 +741,8 @@ export function needsRecovery(xml: string): boolean {
     (xml.match(/<\?xml/g) || []).length > 1,
     // BOM character
     xml.charCodeAt(0) === 0xFEFF,
-    // Unescaped ampersands (rough check)
-    /&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/i.test(xml),
+    // Unescaped ampersands (only outside CDATA sections)
+    hasUnescapedAmpOutsideCdata,
   ];
 
   return issues.some(Boolean);

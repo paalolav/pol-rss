@@ -34,6 +34,7 @@ declare const styles: {
     itemDate: string;
     itemSource: string;
     itemDescription: string;
+    inverted: string;
     minimalLayoutNumbered: string;
     minimalLayoutBulleted: string;
     scaleOut: string;
