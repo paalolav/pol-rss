@@ -2,7 +2,7 @@
 
 > Version: 1.3.0
 > Last Updated: 2025-11-29
-> Status: 100% Complete (13/13 tasks) - Documentation completed
+> Status: 100% Complete (14/14 tasks) - Bug fixes completed
 
 ## Overview
 
@@ -172,6 +172,19 @@ Comprehensive documentation for admins and users.
 
 ---
 
+## Phase 6: Bug Fixes
+
+### REF-017-PROXYSERVICE-VALIDATION
+**Status:** `[x]` Completed
+**Priority:** High
+**Reference:** [REF-017-PROXYSERVICE-VALIDATION.md](refs/REF-017-PROXYSERVICE-VALIDATION.md)
+
+Fix property pane feed URL validation to use ProxyService for CORS fallback. Without this fix, feeds like sentralregisteret.no/feed and nrk.no/rss failed validation due to CORS errors.
+
+**Sub-tasks:** 4 | **Completed:** 4/4
+
+---
+
 ## Summary (Active Tasks)
 
 | Phase | Tasks | Completed | Progress |
@@ -181,7 +194,8 @@ Comprehensive documentation for admins and users.
 | Phase 3: UI/UX | 4 | 4 | 100% |
 | Phase 4: Features | 2 | 2 | 100% |
 | Phase 5: Documentation | 1 | 1 | 100% |
-| **Total** | **13** | **13** | **100%** |
+| Phase 6: Bug Fixes | 1 | 1 | 100% |
+| **Total** | **14** | **14** | **100%** |
 
 ---
 
@@ -239,6 +253,34 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 ---
 
 ## Changelog
+
+### 2025-11-29 (Session 30) - ProxyService Feed Validation Fix
+- REF-017: ProxyService Validation COMPLETED (4/4 sub-tasks)
+  - **Problem**: Feed URL validation in property pane failed with CORS errors for feeds like sentralregisteret.no/feed and nrk.no/rss
+  - **Root Cause**: PropertyPaneFeedUrl._validateFeed() used direct fetch() without CORS proxy fallback
+  - **Fix**: Refactored to use ProxyService.fetch() which handles full CORS fallback chain:
+    - Direct fetch → Tenant proxy → Public proxies (allorigins.win, corsproxy.io) → SPHttpClient
+  - **Tests Added**:
+    - `tests/services/proxyService.test.ts` - 13 tests for proxy fallback chain
+    - `tests/propertyPane/PropertyPaneFeedUrl.test.ts` - 8 tests for validation
+  - **Infrastructure Updates**:
+    - Renamed `tests/mocks/spfxMocks.ts` → `.tsx` for JSX support
+    - Added `PropertyPaneFieldType` enum mock
+    - Updated `jest.config.js` moduleNameMapper paths
+- All 1724 tests passing
+- **Project Progress: 100% (14/14 active tasks completed)**
+
+---
+
+### 2025-11-29 (Session 29) - Strong Background Theme CSS Fix
+- REF-016: Strong Background Theme Support COMPLETED
+  - **Problem**: Cards had white background on dark SharePoint sections
+  - **Fix**: Added transparent background for `.inverted.card` variant
+  - Added CSS module mocks for FeedItem tests
+  - Added WordPress wp-block-image test coverage
+- All 1703 tests passing
+
+---
 
 ### 2025-11-28 (Session 28) - Strong Background Theme Support
 - **Strong Background Support** (TDD approach)
