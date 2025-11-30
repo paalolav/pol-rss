@@ -274,7 +274,7 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
-### 2025-11-30 (Session 34) - REF-021-04 Performance Optimization
+### 2025-11-30 (Session 34) - REF-021-04 Performance Optimization & Documentation
 
 - **REF-021-04: Optimize `debugRssItem()` Performance** ✅
   - **Problem**: `debugRssItem()` in `rssDebugUtils.ts` called `getElementsByTagName('*')` twice
@@ -287,6 +287,15 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
     - Tests verify correct output with cached elements
     - Performance benchmark test
   - **Reference:** [REF-021-REMOVE-HARDCODED-DOMAINS.md](refs/REF-021-REMOVE-HARDCODED-DOMAINS.md)
+
+- **Documentation: PROXY_SETUP.md** ✅
+  - Created comprehensive Azure Function CORS proxy setup guide
+  - Includes: Quick start, detailed deployment, configuration options
+  - Security hardening section (domain allowlist, Azure AD, SSRF protection)
+  - Troubleshooting and cost estimation
+  - **File:** [docs/PROXY_SETUP.md](PROXY_SETUP.md)
+
+- **Test Results:** All 1837 tests passing, 14 E2E tests passing
 
 ---
 
