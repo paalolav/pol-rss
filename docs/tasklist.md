@@ -1,8 +1,8 @@
 # POL RSS Gallery WebPart - Task List
 
 > Version: 1.3.0
-> Last Updated: 2025-11-29
-> Status: 100% Complete (14/14 tasks) - Norwegian feeds testing added
+> Last Updated: 2025-11-30
+> Status: 100% Complete (14/14 tasks) - Security & performance hardening added
 
 ## Overview
 
@@ -273,6 +273,73 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 ---
 
 ## Changelog
+
+### 2025-11-30 (Session 34) - REF-021-04 Performance Optimization
+
+- **REF-021-04: Optimize `debugRssItem()` Performance** ✅
+  - **Problem**: `debugRssItem()` in `rssDebugUtils.ts` called `getElementsByTagName('*')` twice
+  - **Solution**: Cached the DOM query result and reused for both operations
+  - **Performance Improvement**: ~43% faster (232ms → 132ms in benchmark)
+  - **Files Modified:**
+    - `src/webparts/polRssGallery/utils/rssDebugUtils.ts`: Cached allElements array
+  - **Tests Added:** 7 new tests in `tests/utils/rssDebugUtils.test.ts`
+    - Tests verify single DOM query call
+    - Tests verify correct output with cached elements
+    - Performance benchmark test
+  - **Reference:** [REF-021-REMOVE-HARDCODED-DOMAINS.md](refs/REF-021-REMOVE-HARDCODED-DOMAINS.md)
+
+---
+
+### 2025-11-30 (Session 33) - Remove Hardcoded Domain References
+
+- **REF-021: Remove Hardcoded Domain References** (Sub-tasks 01-03 completed)
+  - **Problem**: `RssSpecialFeedsHandler` had hardcoded domain checks for `meltwater.com`, `mwapi`, and `nettavisen.no`
+  - **Solution**: Refactored to use intelligent pattern-based detection
+  - **Changes:**
+    - `rssSpecialFeedsHandler.ts`:
+      - Added `isApiFeed()` method detecting API-style paths (`/api/`, `/v1/`, `/v2/`, `/newsletters/`)
+      - Removed hardcoded domain checks from `isAuthenticatedFeed()`
+      - Simplified `getPreProcessingHints()` to return universal fixes (no domain-specific logic)
+      - Deprecated `isMeltwaterFeed()` → now delegates to `isApiFeed()`
+    - `RssFeed.tsx`: Changed `isMeltwater` → `isApiFeed`, updated debug/error messages
+    - `proxyService.ts`: Changed `isMeltwaterFeed` → `isApiFeed` for retry logic
+  - **Tests Added:** 40 new tests in `tests/services/rssSpecialFeedsHandler.test.ts`
+    - Tests for `isAuthenticatedFeed()`, `isApiFeed()`, `isMeltwaterFeed()` (deprecated)
+    - Verifies standard RSS feeds (nrk.no, vg.no, e24.no) are NOT detected as API feeds
+    - Verifies API feeds with auth params ARE detected correctly
+  - **Test Results:** All 1830 tests passing (+40 new)
+
+---
+
+### 2025-11-30 (Session 32) - Security & Performance Hardening
+
+- **REF-019: Security Hardening Fixes**
+  - **REF-019-01: Fixed innerHTML XSS vulnerabilities (3 locations)** ✅
+    - `PropertyPaneProxyConfig.ts`: Replaced innerHTML with safe DOM manipulation
+    - `rssDebugUtils.ts`: Updated `logToDebugConsole()` to use textContent
+  - **REF-019-02: Sanitized proxy URL logging** ✅
+    - Created `sanitizeUrlForLogging()` method in ProxyService
+    - Masks sensitive parameters: `code`, `apiKey`, `api_key`, `key`, `token`, `access_token`, `auth`, `secret`, `password`
+    - Updated 10+ logging locations to prevent credential exposure
+    - Added 14 new tests for URL sanitization
+
+- **REF-020: Performance & Memory Leak Fixes**
+  - **REF-020-01: Deleted legacy CacheService** ✅
+    - Replaced with simple in-memory Map cache in RssFeed.tsx
+    - Removed all CacheService dependencies
+    - Added `clearFeedCache()` export for testing
+  - **REF-020-02: Fixed timer/memory leaks** ✅
+    - `feedPreloader.ts`: Added `fallbackTimeoutId` tracking for setTimeout in `scheduleIdlePreload()`
+    - `feedPreloader.ts`: Added `activeTimeouts` Set to track executePreload timeouts with proper cleanup
+    - `feedPreloader.ts`: Enhanced `dispose()` to clear all active timeouts
+    - `RssFeed.tsx`: Fixed debug console setTimeout leak with proper cleanup in useEffect return
+    - `useOnlineStatus.ts`: Already had proper cleanup (verified)
+
+- **Test Results:**
+  - All 1790 tests passing
+  - TypeScript compiles without errors
+
+---
 
 ### 2025-11-29 (Session 31) - Gallery Strong Background Fix & Feed Parsing Fix
 

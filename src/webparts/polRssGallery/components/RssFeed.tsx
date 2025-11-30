@@ -40,12 +40,47 @@ const LayoutFallback: React.FC = () => (
 const extendedStyles: any = styles;
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import { RssErrorBoundary } from './ErrorBoundary';
-import { CacheService } from '../services/cacheService';
 import { ImprovedFeedParser } from '../services/improvedFeedParser';
 import { RssSpecialFeedsHandler } from '../services/rssSpecialFeedsHandler';
 import { RssDebugUtils } from '../utils/rssDebugUtils';
 import { decodeResponseText } from '../services/encodingUtils';
 import { IRssItem } from './IRssItem';
+
+// Simple in-memory cache for feed data (replaces legacy CacheService)
+interface FeedCacheEntry {
+  data: IRssItem[];
+  timestamp: number;
+  staleAfter: number;
+}
+const feedCache = new Map<string, FeedCacheEntry>();
+
+function getCachedFeed(key: string, maxAge: number): IRssItem[] | null {
+  const entry = feedCache.get(key);
+  if (!entry) return null;
+  const age = Date.now() - entry.timestamp;
+  if (age >= maxAge) {
+    feedCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCachedFeed(key: string, data: IRssItem[], staleAfter: number): void {
+  feedCache.set(key, {
+    data,
+    timestamp: Date.now(),
+    staleAfter
+  });
+}
+
+function deleteCachedFeed(key: string): void {
+  feedCache.delete(key);
+}
+
+// Export for testing purposes only
+export function clearFeedCache(): void {
+  feedCache.clear();
+}
 
 export interface IRssFeedProps {
   webPartTitle: string;
@@ -76,7 +111,6 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [retryCount, setRetryCount] = React.useState<number>(0);
-  const cacheService = React.useMemo(() => CacheService.getInstance(), []);
 
   const isDebugMode = React.useMemo(() => {
     try {
@@ -107,107 +141,116 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
         RssDebugUtils.log(`Loading RSS feed: ${url}`);
       }
       
-      const isMeltwater = RssSpecialFeedsHandler.isMeltwaterFeed(url);
-      if (isMeltwater && isDebugMode) {
-        RssDebugUtils.log(`Detected Meltwater feed, applying special handling: ${url}`);
+      const isApiFeed = RssSpecialFeedsHandler.isApiFeed(url);
+      if (isApiFeed && isDebugMode) {
+        RssDebugUtils.log(`Detected API-based feed, applying special handling: ${url}`);
       }
-      
-      // Get feed data from cache or fetch it
-      const cachedItems = await cacheService.get<IRssItem[]>(
-        url,
-        async () => {
-          const controller = new AbortController();
-          const timeoutMs = isMeltwater ? 30000 : 15000;
-          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-          try {
-            let response: Response | undefined;
-            let usingProxy = false;
-            let specialHandling = false;
-            
-            if (RssSpecialFeedsHandler.isAuthenticatedFeed(url)) {
-              try {
-                if (isDebugMode) {
-                  RssDebugUtils.log(`Using authentication handler for ${url}`);
-                }
-                
-                response = await RssSpecialFeedsHandler.fetchAuthenticatedFeed(url);
-                specialHandling = true;
-              } catch (specialError) {
-                if (isDebugMode) {
-                  RssDebugUtils.warn(`Authentication handler failed: ${specialError instanceof Error ? specialError.message : 'Unknown error'}`);
-                }
-              }
-            }
-            
-            if (!specialHandling || !response) {
-              const { ProxyService } = await import('../services/proxyService');
-              
+      // Check cache first (unless force reload)
+      let cachedItems: IRssItem[] | null = null;
+      if (!_forceReload) {
+        cachedItems = getCachedFeed(url, refreshTime);
+        if (cachedItems && isDebugMode) {
+          RssDebugUtils.log(`Using cached data for ${url} (${cachedItems.length} items)`);
+        }
+      }
+
+      // If no cached data, fetch from network
+      if (!cachedItems) {
+        const controller = new AbortController();
+        // API feeds may need longer timeout due to auth negotiation
+        const timeoutMs = isApiFeed ? 30000 : 15000;
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+        try {
+          let response: Response | undefined;
+          let usingProxy = false;
+          let specialHandling = false;
+
+          if (RssSpecialFeedsHandler.isAuthenticatedFeed(url)) {
+            try {
               if (isDebugMode) {
-                ProxyService.setDebugMode(true);
+                RssDebugUtils.log(`Using authentication handler for ${url}`);
               }
-              
-              try {
-                response = await fetch(url, { signal: controller.signal });
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP ${response.status} - ${response.statusText || 'Error'} (direct)`);
-                }
-                
-                if (isDebugMode) {
-                  RssDebugUtils.log(`Direct fetch succeeded for ${url}`);
-                }
-              } catch (directError) {
-                if (isDebugMode) {
-                  RssDebugUtils.warn(`Direct fetch failed: ${directError instanceof Error ? directError.message : 'Unknown error'}`);
-                }
-                
-                try {
-                  response = await ProxyService.fetchWithFirstProxy(url, { signal: controller.signal });
-                  usingProxy = true;
-                  
-                  if (isDebugMode) {
-                    RssDebugUtils.log(`Automatic proxy fallback succeeded for ${url}`);
-                  }
-                } catch (proxyError) {
-                  if (isDebugMode) {
-                    RssDebugUtils.warn(`Automatic proxy fallback failed: ${proxyError instanceof Error ? proxyError.message : 'Unknown error'}`);
-                  }
-                  
-                  throw directError;
-                }
+
+              response = await RssSpecialFeedsHandler.fetchAuthenticatedFeed(url);
+              specialHandling = true;
+            } catch (specialError) {
+              if (isDebugMode) {
+                RssDebugUtils.warn(`Authentication handler failed: ${specialError instanceof Error ? specialError.message : 'Unknown error'}`);
               }
             }
+          }
 
-            if (!response || !response.ok) {
-              throw new Error(`HTTP ${response?.status} - ${response?.statusText || 'Error'} ${usingProxy ? '(via proxy)' : specialHandling ? '(via special handler)' : '(direct)'}`);
-            }
-
-            // Use encoding-aware text decoder for proper ISO-8859-1 support (Norwegian chars)
-            const feedContent = await decodeResponseText(response);
-            if (!feedContent || feedContent.trim().length === 0) {
-              throw new Error('Feed returned empty content');
-            }
+          if (!specialHandling || !response) {
+            const { ProxyService } = await import('../services/proxyService');
 
             if (isDebugMode) {
-              RssDebugUtils.log(`Feed content length: ${feedContent.length} characters`);
-              RssDebugUtils.log(`Feed content starts with: ${feedContent.substring(0, 200)}`);
+              ProxyService.setDebugMode(true);
             }
-            
-            const preprocessingHints = RssSpecialFeedsHandler.getPreProcessingHints(url);
-            
-            return ImprovedFeedParser.parse(feedContent, {
-              fallbackImageUrl: props.fallbackImageUrl,
-              maxItems: props.maxItems,
-              enableDebug: isDebugMode,
-              preprocessingHints: preprocessingHints
-            });
-          } finally {
-            clearTimeout(timeoutId);
+
+            try {
+              response = await fetch(url, { signal: controller.signal });
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status} - ${response.statusText || 'Error'} (direct)`);
+              }
+
+              if (isDebugMode) {
+                RssDebugUtils.log(`Direct fetch succeeded for ${url}`);
+              }
+            } catch (directError) {
+              if (isDebugMode) {
+                RssDebugUtils.warn(`Direct fetch failed: ${directError instanceof Error ? directError.message : 'Unknown error'}`);
+              }
+
+              try {
+                response = await ProxyService.fetchWithFirstProxy(url, { signal: controller.signal });
+                usingProxy = true;
+
+                if (isDebugMode) {
+                  RssDebugUtils.log(`Automatic proxy fallback succeeded for ${url}`);
+                }
+              } catch (proxyError) {
+                if (isDebugMode) {
+                  RssDebugUtils.warn(`Automatic proxy fallback failed: ${proxyError instanceof Error ? proxyError.message : 'Unknown error'}`);
+                }
+
+                throw directError;
+              }
+            }
           }
-        },
-        refreshTime
-      );
+
+          if (!response || !response.ok) {
+            throw new Error(`HTTP ${response?.status} - ${response?.statusText || 'Error'} ${usingProxy ? '(via proxy)' : specialHandling ? '(via special handler)' : '(direct)'}`);
+          }
+
+          // Use encoding-aware text decoder for proper ISO-8859-1 support (Norwegian chars)
+          const feedContent = await decodeResponseText(response);
+          if (!feedContent || feedContent.trim().length === 0) {
+            throw new Error('Feed returned empty content');
+          }
+
+          if (isDebugMode) {
+            RssDebugUtils.log(`Feed content length: ${feedContent.length} characters`);
+            RssDebugUtils.log(`Feed content starts with: ${feedContent.substring(0, 200)}`);
+          }
+
+          const preprocessingHints = RssSpecialFeedsHandler.getPreProcessingHints(url);
+
+          cachedItems = ImprovedFeedParser.parse(feedContent, {
+            fallbackImageUrl: props.fallbackImageUrl,
+            maxItems: props.maxItems,
+            enableDebug: isDebugMode,
+            preprocessingHints: preprocessingHints
+          });
+
+          // Store in cache
+          setCachedFeed(url, cachedItems, refreshTime);
+        } finally {
+          clearTimeout(timeoutId);
+        }
+      }
       
       if (props.feedUrl === url) {
         if (isDebugMode) {
@@ -226,7 +269,7 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
       setItems([]);
       setIsLoading(false);
     }
-  }, [props.feedUrl, props.refreshInterval, props.fallbackImageUrl, props.maxItems, isDebugMode, cacheService]);
+  }, [props.feedUrl, props.refreshInterval, props.fallbackImageUrl, props.maxItems, isDebugMode]);
 
   const loadFeedRef = React.useRef(loadFeed);
   
@@ -254,18 +297,20 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
 
   const handleRetry = React.useCallback(() => {
     setRetryCount(prev => prev + 1);
-    cacheService.delete(props.feedUrl);
+    deleteCachedFeed(props.feedUrl);
     loadFeed(true);
-}, [props.feedUrl, loadFeed, cacheService]);
+  }, [props.feedUrl, loadFeed]);
 
   React.useEffect(() => {
+    let debugTimeoutId: ReturnType<typeof setTimeout> | undefined;
+
     if (isDebugMode && items && items.length > 0) {
-      setTimeout(() => {
+      debugTimeoutId = setTimeout(() => {
         const container = document.querySelector('.ms-Fabric') as HTMLElement;
         if (container) {
           RssDebugUtils.createDebugConsole(container);
           RssDebugUtils.logToDebugConsole(`Loaded ${items.length} RSS items from ${props.feedUrl}`);
-          
+
           if (items[0]) {
             RssDebugUtils.logToDebugConsole(`First item: ${items[0].title}`);
             RssDebugUtils.logToDebugConsole(`Image URL: ${items[0].imageUrl || '(none)'}`);
@@ -273,15 +318,21 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
         }
       }, 500);
     }
+
+    return () => {
+      if (debugTimeoutId) {
+        clearTimeout(debugTimeoutId);
+      }
+    };
   }, [isDebugMode, items, props.feedUrl]);
   
   React.useEffect(() => {
     if (props.feedUrl) {
-      cacheService.delete(props.feedUrl);
+      deleteCachedFeed(props.feedUrl);
       setRetryCount(0);
       loadFeedRef.current(true);
     }
-  }, [props.feedUrl, props.maxItems, props.fallbackImageUrl, props.forceFallbackImage, cacheService]);
+  }, [props.feedUrl, props.maxItems, props.fallbackImageUrl, props.forceFallbackImage]);
   
   // Items are used directly without filtering (filter feature removed)
   const filteredItems = items;
@@ -303,8 +354,8 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     
     if (error.includes('403')) {
       errorDisplay = 'Access denied (403 Forbidden)';
-      retryHint = RssSpecialFeedsHandler.isMeltwaterFeed(props.feedUrl)
-        ? 'This Meltwater feed may require updated authentication.'
+      retryHint = RssSpecialFeedsHandler.isApiFeed(props.feedUrl)
+        ? 'This API feed may require updated authentication credentials.'
         : 'This feed may require authentication or have access restrictions.';
     } else if (error.includes('404')) {
       errorDisplay = 'Feed not found (404 Not Found)';

@@ -54,70 +54,111 @@ class PropertyPaneProxyConfigField implements IPropertyPaneField<IPropertyPaneCu
 
   /**
    * Render the control
+   * Uses safe DOM manipulation to prevent XSS attacks
    */
   private _onRender(element: HTMLElement): void {
     this._element = element;
 
-    element.innerHTML = `
-      <div class="ms-PropertyPaneProxyConfig">
-        <label class="ms-PropertyPaneProxyConfig-label" for="proxyUrl-${this._props.key}">${this._props.label}</label>
-        <div class="ms-PropertyPaneProxyConfig-inputWrapper">
-          <input
-            type="url"
-            id="proxyUrl-${this._props.key}"
-            class="ms-PropertyPaneProxyConfig-input"
-            value="${this._escapeHtml(this._props.value || '')}"
-            placeholder="${this._props.placeholder || ''}"
-          />
-        </div>
-        ${this._props.description ? `<span class="ms-PropertyPaneProxyConfig-description">${this._props.description}</span>` : ''}
-        <div class="ms-PropertyPaneProxyConfig-actions">
-          <button
-            type="button"
-            class="ms-PropertyPaneProxyConfig-testBtn"
-            ${!this._props.value ? 'disabled' : ''}
-          >
-            <i class="ms-Icon ms-Icon--PlugConnected"></i>
-            <span class="ms-PropertyPaneProxyConfig-testBtnText">${this._props.strings.testConnection}</span>
-          </button>
-          ${this._props.helpUrl ? `
-            <a href="${this._props.helpUrl}" target="_blank" rel="noopener" class="ms-PropertyPaneProxyConfig-helpLink">
-              <i class="ms-Icon ms-Icon--Help"></i>
-              ${this._props.strings.helpLink}
-            </a>
-          ` : ''}
-        </div>
-        <div class="ms-PropertyPaneProxyConfig-status"></div>
-      </div>
-    `;
+    // Build DOM safely to prevent XSS
+    const container = document.createElement('div');
+    container.className = 'ms-PropertyPaneProxyConfig';
+
+    // Label
+    const label = document.createElement('label');
+    label.className = 'ms-PropertyPaneProxyConfig-label';
+    label.setAttribute('for', `proxyUrl-${this._props.key}`);
+    label.textContent = this._props.label;
+    container.appendChild(label);
+
+    // Input wrapper
+    const inputWrapper = document.createElement('div');
+    inputWrapper.className = 'ms-PropertyPaneProxyConfig-inputWrapper';
+
+    const input = document.createElement('input');
+    input.type = 'url';
+    input.id = `proxyUrl-${this._props.key}`;
+    input.className = 'ms-PropertyPaneProxyConfig-input';
+    input.value = this._props.value || '';
+    if (this._props.placeholder) {
+      input.placeholder = this._props.placeholder;
+    }
+    inputWrapper.appendChild(input);
+    container.appendChild(inputWrapper);
+
+    // Description (optional)
+    if (this._props.description) {
+      const description = document.createElement('span');
+      description.className = 'ms-PropertyPaneProxyConfig-description';
+      description.textContent = this._props.description;
+      container.appendChild(description);
+    }
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'ms-PropertyPaneProxyConfig-actions';
+
+    // Test button
+    const testBtn = document.createElement('button');
+    testBtn.type = 'button';
+    testBtn.className = 'ms-PropertyPaneProxyConfig-testBtn';
+    testBtn.disabled = !this._props.value;
+
+    const plugIcon = document.createElement('i');
+    plugIcon.className = 'ms-Icon ms-Icon--PlugConnected';
+    testBtn.appendChild(plugIcon);
+
+    const testBtnText = document.createElement('span');
+    testBtnText.className = 'ms-PropertyPaneProxyConfig-testBtnText';
+    testBtnText.textContent = this._props.strings.testConnection;
+    testBtn.appendChild(testBtnText);
+
+    actions.appendChild(testBtn);
+
+    // Help link (optional)
+    if (this._props.helpUrl) {
+      const helpLink = document.createElement('a');
+      helpLink.href = this._props.helpUrl;
+      helpLink.target = '_blank';
+      helpLink.rel = 'noopener';
+      helpLink.className = 'ms-PropertyPaneProxyConfig-helpLink';
+
+      const helpIcon = document.createElement('i');
+      helpIcon.className = 'ms-Icon ms-Icon--Help';
+      helpLink.appendChild(helpIcon);
+      helpLink.appendChild(document.createTextNode(` ${this._props.strings.helpLink}`));
+
+      actions.appendChild(helpLink);
+    }
+
+    container.appendChild(actions);
+
+    // Status
+    const status = document.createElement('div');
+    status.className = 'ms-PropertyPaneProxyConfig-status';
+    container.appendChild(status);
+
+    // Clear and append
+    element.innerHTML = '';
+    element.appendChild(container);
 
     // Add styles
     this._addStyles();
 
-    // Wire up events
-    const input = element.querySelector('input') as HTMLInputElement;
-    const testBtn = element.querySelector('.ms-PropertyPaneProxyConfig-testBtn') as HTMLButtonElement;
+    // Wire up events (use the elements we created above, not querySelector)
+    input.addEventListener('input', (e) => {
+      const newValue = (e.target as HTMLInputElement).value;
+      this._props.onPropertyChange(this._props.key, this._props.value, newValue);
 
-    if (input) {
-      input.addEventListener('input', (e) => {
-        const newValue = (e.target as HTMLInputElement).value;
-        this._props.onPropertyChange(this._props.key, this._props.value, newValue);
+      // Enable/disable test button
+      testBtn.disabled = !newValue;
 
-        // Enable/disable test button
-        if (testBtn) {
-          testBtn.disabled = !newValue;
-        }
+      // Clear status
+      this._updateStatus('');
+    });
 
-        // Clear status
-        this._updateStatus('');
-      });
-    }
-
-    if (testBtn) {
-      testBtn.addEventListener('click', () => {
-        this._testConnection();
-      });
-    }
+    testBtn.addEventListener('click', () => {
+      this._testConnection();
+    });
   }
 
   /**

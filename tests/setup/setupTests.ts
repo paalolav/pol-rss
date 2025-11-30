@@ -7,6 +7,16 @@
  */
 
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+// Polyfill TextEncoder/TextDecoder for jsdom environment
+// Required for encoding detection in feed parsing
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder;
+}
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+}
 
 // Polyfill structuredClone for Node.js < 17 or jsdom environment
 // Required for fake-indexeddb and other browser APIs

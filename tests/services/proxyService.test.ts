@@ -232,4 +232,104 @@ describe('ProxyService', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('URL sanitization for logging', () => {
+    it('should mask function key code parameter', () => {
+      const url = 'https://proxy.azure.net/api/proxy?code=abc123secret&url=https://feed.com';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      // URL parser properly encodes the url parameter value
+      expect(sanitized).toBe('https://proxy.azure.net/api/proxy?code=***&url=https%3A%2F%2Ffeed.com');
+      expect(sanitized).not.toContain('abc123secret');
+    });
+
+    it('should mask apiKey parameter', () => {
+      const url = 'https://api.meltwater.com/rss?apiKey=mw-secret-key-12345';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.meltwater.com/rss?apiKey=***');
+      expect(sanitized).not.toContain('mw-secret-key-12345');
+    });
+
+    it('should mask api_key parameter (underscore variant)', () => {
+      const url = 'https://api.example.com/feed?api_key=secret123&format=xml';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?api_key=***&format=xml');
+      expect(sanitized).not.toContain('secret123');
+    });
+
+    it('should mask token parameter', () => {
+      const url = 'https://api.example.com/feed?token=bearer-token-xyz&id=123';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?token=***&id=123');
+      expect(sanitized).not.toContain('bearer-token-xyz');
+    });
+
+    it('should mask auth parameter', () => {
+      const url = 'https://api.example.com/feed?auth=authsecret123';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?auth=***');
+      expect(sanitized).not.toContain('authsecret123');
+    });
+
+    it('should mask multiple sensitive parameters', () => {
+      const url = 'https://proxy.azure.net/api/proxy?code=secret1&apiKey=secret2&url=https://feed.com';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      // URL parser properly encodes the url parameter value
+      expect(sanitized).toBe('https://proxy.azure.net/api/proxy?code=***&apiKey=***&url=https%3A%2F%2Ffeed.com');
+      expect(sanitized).not.toContain('secret1');
+      expect(sanitized).not.toContain('secret2');
+    });
+
+    it('should preserve non-sensitive parameters', () => {
+      const url = 'https://api.example.com/feed?format=xml&count=10';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?format=xml&count=10');
+    });
+
+    it('should handle URLs without query parameters', () => {
+      const url = 'https://www.nrk.no/toppsaker.rss';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://www.nrk.no/toppsaker.rss');
+    });
+
+    it('should handle invalid URLs gracefully', () => {
+      const invalidUrl = 'not-a-valid-url';
+      const sanitized = ProxyService.sanitizeUrlForLogging(invalidUrl);
+      // Should return masked version even for invalid URLs
+      expect(sanitized).toBe('not-a-valid-url');
+    });
+
+    it('should be case-insensitive for parameter names', () => {
+      const url = 'https://api.example.com/feed?APIKEY=SECRET&Code=secret2';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?APIKEY=***&Code=***');
+    });
+
+    it('should mask access_token parameter', () => {
+      const url = 'https://api.example.com/feed?access_token=oauth-token-xyz';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?access_token=***');
+      expect(sanitized).not.toContain('oauth-token-xyz');
+    });
+
+    it('should mask key parameter', () => {
+      const url = 'https://api.example.com/feed?key=google-api-key-123';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?key=***');
+      expect(sanitized).not.toContain('google-api-key-123');
+    });
+
+    it('should mask secret parameter', () => {
+      const url = 'https://api.example.com/feed?secret=client-secret-abc';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?secret=***');
+      expect(sanitized).not.toContain('client-secret-abc');
+    });
+
+    it('should mask password parameter', () => {
+      const url = 'https://api.example.com/feed?password=mypassword123';
+      const sanitized = ProxyService.sanitizeUrlForLogging(url);
+      expect(sanitized).toBe('https://api.example.com/feed?password=***');
+      expect(sanitized).not.toContain('mypassword123');
+    });
+  });
 });

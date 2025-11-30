@@ -55,22 +55,46 @@ jest.mock('../../src/webparts/polRssGallery/components/layouts/GalleryLayout', (
   ),
 }));
 
-// Mock services
-jest.mock('../../src/webparts/polRssGallery/services/cacheService', () => ({
-  CacheService: {
-    getInstance: () => ({
-      get: jest.fn().mockResolvedValue([
-        {
-          title: 'Test Item',
-          link: 'https://example.com/test',
-          pubDate: '2024-01-01',
-          description: 'Test description',
-        },
-      ]),
-      delete: jest.fn(),
-    }),
-  },
-}));
+// Mock fetch for feed loading with arrayBuffer support (for encoding detection)
+const mockFeedXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <link>https://example.com</link>
+    <description>Test feed</description>
+    <item>
+      <title>Test Item</title>
+      <link>https://example.com/test</link>
+      <pubDate>Mon, 01 Jan 2024 00:00:00 GMT</pubDate>
+      <description>Test description</description>
+    </item>
+  </channel>
+</rss>`;
+
+function createMockResponse(xmlContent: string): Response {
+  // Create a simple ArrayBuffer from string (UTF-8)
+  const bytes = new Uint8Array(xmlContent.length);
+  for (let i = 0; i < xmlContent.length; i++) {
+    bytes[i] = xmlContent.charCodeAt(i) & 0xff;
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    text: () => Promise.resolve(xmlContent),
+    arrayBuffer: () => Promise.resolve(bytes.buffer),
+    headers: new Headers({ 'content-type': 'application/rss+xml; charset=utf-8' }),
+  } as unknown as Response;
+}
+
+beforeEach(() => {
+  global.fetch = jest.fn().mockResolvedValue(createMockResponse(mockFeedXml));
+});
+
+afterEach(() => {
+  jest.resetAllMocks();
+});
 
 // Create mock theme objects
 const normalTheme = {

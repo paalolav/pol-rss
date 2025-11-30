@@ -38,6 +38,22 @@ export class ProxyService {
     'https://api.codetabs.com/v1/proxy/?quest='
   ];
 
+  /**
+   * Sensitive URL parameter names that should be masked in logs
+   * Includes common patterns for API keys, tokens, and authentication credentials
+   */
+  private static readonly SENSITIVE_PARAMS = [
+    'code',           // Azure Function key
+    'apikey',         // Common API key parameter
+    'api_key',        // Alternative API key format
+    'key',            // Generic key parameter
+    'token',          // Auth tokens
+    'access_token',   // OAuth access tokens
+    'auth',           // Auth credentials
+    'secret',         // Client secrets
+    'password'        // Passwords
+  ];
+
   private static _proxyUrls: string[] = [...ProxyService.DEFAULT_PROXIES];
   private static _httpClient: HttpClient | null = null;
   private static _debugMode = false;
@@ -47,6 +63,33 @@ export class ProxyService {
 
   /** Tenant-specific Azure Function proxy configuration */
   private static _tenantProxy: ITenantProxyConfig | null = null;
+
+  /**
+   * Sanitize a URL for safe logging by masking sensitive parameters
+   * This prevents accidental exposure of API keys, function codes, and tokens
+   * @param url The URL to sanitize
+   * @returns The URL with sensitive parameter values replaced with '***'
+   */
+  public static sanitizeUrlForLogging(url: string): string {
+    try {
+      const parsed = new URL(url);
+      let hasChanges = false;
+
+      // Check each parameter against our sensitive list
+      parsed.searchParams.forEach((value, key) => {
+        const keyLower = key.toLowerCase();
+        if (this.SENSITIVE_PARAMS.includes(keyLower)) {
+          parsed.searchParams.set(key, '***');
+          hasChanges = true;
+        }
+      });
+
+      return hasChanges ? parsed.toString() : url;
+    } catch {
+      // If URL parsing fails, return as-is (might be a partial URL)
+      return url;
+    }
+  }
 
   public static setDebugMode(enable: boolean): void {
     ProxyService._debugMode = enable;
@@ -166,8 +209,9 @@ export class ProxyService {
   private static logError(method: string, error: unknown, url: string): void {
     if (this._debugMode) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Log.warn(this.LOG_SOURCE, `${method} failed for ${url}: ${errorMessage}`);
-      RssDebugUtils.warn(`ProxyService.${method} failed for ${url}: ${errorMessage}`);
+      const safeUrl = this.sanitizeUrlForLogging(url);
+      Log.warn(this.LOG_SOURCE, `${method} failed for ${safeUrl}: ${errorMessage}`);
+      RssDebugUtils.warn(`ProxyService.${method} failed for ${safeUrl}: ${errorMessage}`);
     }
   }
   
@@ -175,7 +219,8 @@ export class ProxyService {
     this._attemptedUrls = new Set<string>();
     this._attemptedUrls.add(url);
 
-    if (RssSpecialFeedsHandler.isMeltwaterFeed(url)) {
+    // API feeds benefit from retry mechanism with different auth strategies
+    if (RssSpecialFeedsHandler.isApiFeed(url)) {
       return this.fetchWithRetry(url, 3, options);
     }
 
@@ -198,7 +243,7 @@ export class ProxyService {
       const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
       if (directResponse.ok) {
         if (this._debugMode) {
-          RssDebugUtils.log(`Direct fetch succeeded for ${url}`);
+          RssDebugUtils.log(`Direct fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
         }
         return directResponse;
       }
@@ -252,7 +297,7 @@ export class ProxyService {
 
         if (this._attemptedUrls.has(proxiedUrl)) {
           if (this._debugMode) {
-            RssDebugUtils.warn(`Skipping already attempted proxy URL: ${proxiedUrl}`);
+            RssDebugUtils.warn(`Skipping already attempted proxy URL: ${this.sanitizeUrlForLogging(proxiedUrl)}`);
           }
           continue;
         }
@@ -291,7 +336,7 @@ export class ProxyService {
         
         if (response.ok) {
           if (this._debugMode) {
-            RssDebugUtils.log(`SP HttpClient fetch succeeded for ${url}`);
+            RssDebugUtils.log(`SP HttpClient fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
           }
           
           // Convert SPHttpClient response to standard Response
@@ -325,7 +370,7 @@ export class ProxyService {
       }
     }
     
-    const errorMsg = `Failed to fetch ${url} after trying direct access and all available proxies`;
+    const errorMsg = `Failed to fetch ${this.sanitizeUrlForLogging(url)} after trying direct access and all available proxies`;
     Log.error(this.LOG_SOURCE, new Error(errorMsg));
     throw new Error(errorMsg);
   }
@@ -355,21 +400,21 @@ export class ProxyService {
       
       if (this._attemptedUrls.has(redirectUrl)) {
         if (this._debugMode) {
-          RssDebugUtils.warn(`Detected redirect loop to already attempted URL: ${redirectUrl}`);
+          RssDebugUtils.warn(`Detected redirect loop to already attempted URL: ${this.sanitizeUrlForLogging(redirectUrl)}`);
         }
         return response;
       }
-      
+
       this._attemptedUrls.add(redirectUrl);
       currentUrl = redirectUrl;
       redirectCount++;
-      
+
       if (this._debugMode) {
-        RssDebugUtils.log(`Following redirect ${redirectCount}/${this.MAX_REDIRECTS} to: ${currentUrl}`);
+        RssDebugUtils.log(`Following redirect ${redirectCount}/${this.MAX_REDIRECTS} to: ${this.sanitizeUrlForLogging(currentUrl)}`);
       }
     }
-    
-    throw new Error(`ERR_TOO_MANY_REDIRECTS: Maximum redirects (${this.MAX_REDIRECTS}) exceeded for ${url}`);
+
+    throw new Error(`ERR_TOO_MANY_REDIRECTS: Maximum redirects (${this.MAX_REDIRECTS}) exceeded for ${this.sanitizeUrlForLogging(url)}`);
   }
   
   private static async fetchWithRetry(
@@ -394,12 +439,14 @@ export class ProxyService {
         headers.set('User-Agent', userAgentVariations[i % userAgentVariations.length]);
         headers.set('Accept', 'application/xml, text/xml, */*');
         
-        if (RssSpecialFeedsHandler.isMeltwaterFeed(url)) {
+        // For API feeds, try different auth header strategies on each retry
+        if (RssSpecialFeedsHandler.isApiFeed(url)) {
           try {
             const urlObj = new URL(url);
-            const apiKey = urlObj.searchParams.get('apiKey') || 
-                          urlObj.searchParams.get('api_key');
-            
+            const apiKey = urlObj.searchParams.get('apiKey') ||
+                          urlObj.searchParams.get('api_key') ||
+                          urlObj.searchParams.get('apikey');
+
             if (apiKey) {
               if (i === 0) {
                 headers.set('Authorization', `Bearer ${apiKey}`);
@@ -422,13 +469,13 @@ export class ProxyService {
         
         if (response.ok) {
           if (this._debugMode) {
-            RssDebugUtils.log(`Direct fetch with retry ${i+1} succeeded for ${url}`);
+            RssDebugUtils.log(`Direct fetch with retry ${i+1} succeeded for ${this.sanitizeUrlForLogging(url)}`);
           }
           return response;
         }
-        
+
         if (this._debugMode) {
-          RssDebugUtils.warn(`Direct fetch with retry ${i+1} returned ${response.status} for ${url}`);
+          RssDebugUtils.warn(`Direct fetch with retry ${i+1} returned ${response.status} for ${this.sanitizeUrlForLogging(url)}`);
         }
         
         lastError = new Error(`HTTP ${response.status} - ${response.statusText || 'Error'}`);
@@ -479,7 +526,7 @@ export class ProxyService {
       lastError = error instanceof Error ? error : new Error(String(error));
     }
     
-    throw lastError || new Error(`Failed to fetch ${url} after ${maxRetries} retries`);
+    throw lastError || new Error(`Failed to fetch ${this.sanitizeUrlForLogging(url)} after ${maxRetries} retries`);
   }
   
   public static async fetchWithFirstProxy(url: string, options: RequestInit = {}): Promise<Response> {

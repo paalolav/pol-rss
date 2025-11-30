@@ -90,6 +90,8 @@ export class FeedPreloader {
   private initPromise: Promise<void> | null = null;
   private isDisposed: boolean = false;
   private idleCallbackId: number | null = null;
+  private fallbackTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private activeTimeouts: Set<ReturnType<typeof setTimeout>> = new Set();
 
   constructor(config: Partial<PreloaderConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -238,8 +240,12 @@ export class FeedPreloader {
         this.preload(feedUrl, fetcher, PreloadPriority.LOW, keyParams);
       }, { timeout: 5000 });
     } else {
-      // Fallback to setTimeout
-      setTimeout(() => {
+      // Fallback to setTimeout - store ID for cleanup
+      if (this.fallbackTimeoutId !== null) {
+        clearTimeout(this.fallbackTimeoutId);
+      }
+      this.fallbackTimeoutId = setTimeout(() => {
+        this.fallbackTimeoutId = null;
         this.preload(feedUrl, fetcher, PreloadPriority.LOW, keyParams);
       }, 1000);
     }
@@ -269,7 +275,19 @@ export class FeedPreloader {
 
     if (this.idleCallbackId !== null && typeof cancelIdleCallback !== 'undefined') {
       cancelIdleCallback(this.idleCallbackId);
+      this.idleCallbackId = null;
     }
+
+    if (this.fallbackTimeoutId !== null) {
+      clearTimeout(this.fallbackTimeoutId);
+      this.fallbackTimeoutId = null;
+    }
+
+    // Clear all active timeouts from executePreload
+    for (const timeoutId of this.activeTimeouts) {
+      clearTimeout(timeoutId);
+    }
+    this.activeTimeouts.clear();
 
     this.initPromise = null;
   }
@@ -306,13 +324,18 @@ export class FeedPreloader {
   private async executePreload(key: string, request: PreloadRequest): Promise<void> {
     this.active.add(key);
     const startTime = Date.now();
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     try {
       await this.ensureInitialized();
 
-      // Create a timeout promise
+      // Create a timeout promise with cleanup tracking
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Preload timeout')), this.config.timeout);
+        timeoutId = setTimeout(() => {
+          this.activeTimeouts.delete(timeoutId!);
+          reject(new Error('Preload timeout'));
+        }, this.config.timeout);
+        this.activeTimeouts.add(timeoutId);
       });
 
       // Race between fetch and timeout
@@ -342,6 +365,11 @@ export class FeedPreloader {
         fromCache: false
       });
     } finally {
+      // Clean up the timeout if the prefetch completed before it fired
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+        this.activeTimeouts.delete(timeoutId);
+      }
       this.active.delete(key);
       this.processQueue(); // Continue processing
     }
