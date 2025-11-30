@@ -264,4 +264,28 @@ test.describe('Gallery Layout - Deployed Page', () => {
 
     console.log('Visual screenshots captured');
   });
+
+  test('descriptions do not contain HTML tags', async ({ page }) => {
+    // Find description elements
+    const descriptions = page.locator(`${SELECTORS.galleryItem} ${SELECTORS.itemDescription}, [class*="card"] ${SELECTORS.itemDescription}`);
+    const descCount = await descriptions.count();
+
+    console.log(`Found ${descCount} description elements`);
+
+    if (descCount > 0) {
+      // Check each description for HTML tags
+      for (let i = 0; i < Math.min(descCount, 5); i++) {
+        const descText = await descriptions.nth(i).textContent();
+        console.log(`Description ${i + 1}: ${descText?.substring(0, 100)}...`);
+
+        // Should NOT contain raw HTML tags like <p>, </p>, <br>, etc.
+        if (descText) {
+          expect(descText).not.toMatch(/<\/?[a-z][^>]*>/i);
+          console.log(`Description ${i + 1} is clean (no HTML tags)`);
+        }
+      }
+    } else {
+      console.log('No descriptions found to check (descriptions may be disabled)');
+    }
+  });
 });

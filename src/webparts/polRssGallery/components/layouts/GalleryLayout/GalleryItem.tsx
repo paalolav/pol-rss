@@ -12,8 +12,9 @@
  */
 
 import * as React from 'react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { IRssItem } from '../../IRssItem';
+import { sanitizer } from '../../../services/contentSanitizer';
 import styles from './GalleryLayout.module.scss';
 
 /**
@@ -137,6 +138,17 @@ const truncateText = (text: string | undefined, maxLength: number): string => {
 };
 
 /**
+ * Strip HTML tags from text
+ */
+const stripHtml = (html: string): string => {
+  // Use sanitizer to clean HTML first, then strip tags
+  const cleaned = sanitizer.sanitize(html);
+  const temp = document.createElement('div');
+  temp.innerHTML = cleaned;
+  return temp.textContent || temp.innerText || '';
+};
+
+/**
  * GalleryItem component
  */
 export const GalleryItem: React.FC<IGalleryItemProps> = ({
@@ -174,6 +186,12 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
       handleClick();
     }
   }, [handleClick]);
+
+  // Process description - strip HTML tags and truncate
+  const processedDescription = useMemo(() => {
+    if (!item.description) return '';
+    return stripHtml(item.description);
+  }, [item.description]);
 
   // Build class names - use type assertion to satisfy TypeScript
   const titleClass = titlePositionClasses[showTitle];
@@ -243,8 +261,8 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
             {showSource && item.author && (
               <span className={styles.source}>{item.author}</span>
             )}
-            {showDescription && item.description && (
-              <p className={styles.description}>{truncateText(item.description, 100)}</p>
+            {showDescription && processedDescription && (
+              <p className={styles.description}>{truncateText(processedDescription, 100)}</p>
             )}
           </div>
         )}
@@ -269,8 +287,8 @@ export const GalleryItem: React.FC<IGalleryItemProps> = ({
               )}
             </div>
           )}
-          {showDescription && item.description && (
-            <p className={styles.description}>{truncateText(item.description, 80)}</p>
+          {showDescription && processedDescription && (
+            <p className={styles.description}>{truncateText(processedDescription, 80)}</p>
           )}
         </div>
       )}

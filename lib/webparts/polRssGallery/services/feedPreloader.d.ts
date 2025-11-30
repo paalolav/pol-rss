@@ -76,6 +76,8 @@ export declare class FeedPreloader {
     private initPromise;
     private isDisposed;
     private idleCallbackId;
+    private fallbackTimeoutId;
+    private activeTimeouts;
     constructor(config?: Partial<PreloaderConfig>);
     /**
      * Initialize the preloader

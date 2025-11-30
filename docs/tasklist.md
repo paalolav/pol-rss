@@ -274,6 +274,20 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
+### 2025-12-01 (Session 35) - Gallery HTML Stripping Fix
+
+- **Bug Fix: Gallery layout showing HTML tags in descriptions**
+  - **Problem**: Gallery view displayed raw HTML tags (like `<p>`) in description text from feeds like sentralregisteret.no/feed
+  - **Root Cause**: `GalleryItem.tsx` didn't strip HTML tags, unlike `FeedItem.tsx` used by other layouts
+  - **Fix**: Added `stripHtml()` function to GalleryItem component using sanitizer service
+  - **Files Modified:**
+    - `src/webparts/polRssGallery/components/layouts/GalleryLayout/GalleryItem.tsx`
+  - **Tests Added:** 7 new tests in `tests/components/layouts/GalleryLayout.test.tsx`
+  - **E2E Test:** Added HTML tag check in `tests/e2e/gallery-page.spo.spec.ts`
+  - **Test Results:** All 1844 tests passing (+7 new)
+
+---
+
 ### 2025-11-30 (Session 34) - REF-021-04 Performance Optimization & Documentation
 
 - **REF-021-04: Optimize `debugRssItem()` Performance** ✅

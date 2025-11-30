@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
+export declare function clearFeedCache(): void;
 export interface IRssFeedProps {
     webPartTitle: string;
     feedUrl: string;

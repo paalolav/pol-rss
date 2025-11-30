@@ -45,7 +45,7 @@
     "scriptResources": {
       "pol-rss-gallery-web-part": {
         "type": "path",
-        "path": "pol-rss-gallery-web-part_a003538497886cf0e7b8.js"
+        "path": "pol-rss-gallery-web-part.js"
       },
       "react": {
         "type": "component",
@@ -70,11 +70,11 @@
       "RssFeedWebPartStrings": {
         "type": "localizedPath",
         "paths": {
-          "en-US": "RssFeedWebPartStrings_en-us_5a145b8f38c2978ae1278e32f6e688cc.js",
-          "nb-NO": "RssFeedWebPartStrings_nb-no_3d1a2bfce7eb40449d7d08f718e30ba0.js",
-          "nn-NO": "RssFeedWebPartStrings_nn-no_1b89bda06e02401a15180ae3e62a5395.js"
+          "en-US": "RssFeedWebPartStrings_en-us.js",
+          "nb-NO": "RssFeedWebPartStrings_nb-no.js",
+          "nn-NO": "RssFeedWebPartStrings_nn-no.js"
         },
-        "defaultPath": "RssFeedWebPartStrings_en-us_5a145b8f38c2978ae1278e32f6e688cc.js"
+        "defaultPath": "RssFeedWebPartStrings_en-us.js"
       },
       "@microsoft/sp-component-base": {
         "type": "component",

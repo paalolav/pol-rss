@@ -21,6 +21,11 @@ export interface IProxyHealthResponse {
 export declare class ProxyService {
     private static readonly LOG_SOURCE;
     private static readonly DEFAULT_PROXIES;
+    /**
+     * Sensitive URL parameter names that should be masked in logs
+     * Includes common patterns for API keys, tokens, and authentication credentials
+     */
+    private static readonly SENSITIVE_PARAMS;
     private static _proxyUrls;
     private static _httpClient;
     private static _debugMode;
@@ -28,6 +33,13 @@ export declare class ProxyService {
     private static _attemptedUrls;
     /** Tenant-specific Azure Function proxy configuration */
     private static _tenantProxy;
+    /**
+     * Sanitize a URL for safe logging by masking sensitive parameters
+     * This prevents accidental exposure of API keys, function codes, and tokens
+     * @param url The URL to sanitize
+     * @returns The URL with sensitive parameter values replaced with '***'
+     */
+    static sanitizeUrlForLogging(url: string): string;
     static setDebugMode(enable: boolean): void;
     static init(httpClient: HttpClient): void;
     /**

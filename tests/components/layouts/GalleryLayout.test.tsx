@@ -41,6 +41,13 @@ jest.mock('../../../src/webparts/polRssGallery/components/shared/EmptyState', ()
   NoItemsEmptyState: () => <div data-testid="empty-state">No items</div>,
 }));
 
+// Mock contentSanitizer
+jest.mock('../../../src/webparts/polRssGallery/services/contentSanitizer', () => ({
+  sanitizer: {
+    sanitize: (html: string) => html.replace(/<script.*?>.*?<\/script>/gi, '')
+  }
+}));
+
 import { GalleryLayout, IGalleryLayoutProps } from '../../../src/webparts/polRssGallery/components/layouts/GalleryLayout';
 import { IRssItem } from '../../../src/webparts/polRssGallery/components/IRssItem';
 
@@ -571,6 +578,179 @@ describe('GalleryLayout', () => {
         expect(screen.queryByText('Test Publication')).not.toBeInTheDocument();
         expect(screen.queryByText(/This is the article description/)).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('HTML Stripping in Description', () => {
+    it('strips HTML paragraph tags from description in hover overlay', () => {
+      const itemsWithHtmlDescription: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          description: '<p>This is paragraph text without HTML tags.</p>',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithHtmlDescription}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      // Should display text content without <p> tags
+      expect(screen.getByText(/This is paragraph text without HTML tags/)).toBeInTheDocument();
+      // Should NOT show raw HTML tags
+      expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
+    });
+
+    it('strips HTML paragraph tags from description below image', () => {
+      const itemsWithHtmlDescription: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          description: '<p>This is paragraph text in below mode.</p>',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithHtmlDescription}
+          showTitles="below"
+          showDescription={true}
+        />
+      );
+
+      // Should display text content without <p> tags
+      expect(screen.getByText(/This is paragraph text in below mode/)).toBeInTheDocument();
+      // Should NOT show raw HTML tags
+      expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
+    });
+
+    it('strips multiple HTML tags from description', () => {
+      const itemsWithMultipleTags: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          description: '<p>First paragraph.</p><p>Second paragraph.</p><br/><strong>Bold text</strong>',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithMultipleTags}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      // Should display concatenated text content
+      expect(screen.getByText(/First paragraph/)).toBeInTheDocument();
+      // Should NOT show raw HTML tags
+      expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/<\/p>/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/<br/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/<strong>/)).not.toBeInTheDocument();
+    });
+
+    it('handles description with only plain text (no HTML)', () => {
+      const itemsWithPlainText: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          description: 'This is just plain text without any HTML tags.',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithPlainText}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      expect(screen.getByText(/This is just plain text without any HTML tags/)).toBeInTheDocument();
+    });
+
+    it('handles empty description', () => {
+      const itemsWithEmptyDescription: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          description: '',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithEmptyDescription}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      // Should render without errors
+      expect(screen.getByTestId('gallery-layout-item-0-hover-overlay')).toBeInTheDocument();
+    });
+
+    it('handles undefined description', () => {
+      const itemsWithNoDescription: IRssItem[] = [
+        {
+          title: 'Test Article',
+          link: 'https://example.com/article',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithNoDescription}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      // Should render without errors
+      expect(screen.getByTestId('gallery-layout-item-0-hover-overlay')).toBeInTheDocument();
+    });
+
+    it('strips HTML from description that matches sentralregisteret.no feed format', () => {
+      // Real-world test case from sentralregisteret.no/feed
+      const itemsWithSentralregisteretFormat: IRssItem[] = [
+        {
+          title: 'Test Article from Sentralregisteret',
+          link: 'https://example.com/article',
+          description: '<p>Konkursåpning i Frogn Drøbak &#8211; Company AS. Bostyrer: Advokat John Doe.</p>',
+          imageUrl: 'https://example.com/image.jpg',
+        },
+      ];
+
+      render(
+        <GalleryLayout
+          {...defaultProps}
+          items={itemsWithSentralregisteretFormat}
+          showTitles="hover"
+          showDescription={true}
+        />
+      );
+
+      // Should display text content without <p> tags
+      expect(screen.getByText(/Konkursåpning i Frogn Drøbak/)).toBeInTheDocument();
+      // Should NOT show raw HTML tags
+      expect(screen.queryByText(/<p>/)).not.toBeInTheDocument();
     });
   });
 });
