@@ -274,7 +274,7 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
-### 2025-12-01 (Session 35) - Gallery HTML Stripping Fix
+### 2025-12-01 (Session 35) - Gallery HTML Stripping Fix & Console Error Investigation
 
 - **Bug Fix: Gallery layout showing HTML tags in descriptions**
   - **Problem**: Gallery view displayed raw HTML tags (like `<p>`) in description text from feeds like sentralregisteret.no/feed
@@ -285,6 +285,17 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
   - **Tests Added:** 7 new tests in `tests/components/layouts/GalleryLayout.test.tsx`
   - **E2E Test:** Added HTML tag check in `tests/e2e/gallery-page.spo.spec.ts`
   - **Test Results:** All 1844 tests passing (+7 new)
+
+- **Console Error Investigation (TDD)**
+  - **Investigation**: Analyzed all 25 console errors on deployed SharePoint page
+  - **Findings**: All errors are from SharePoint/Microsoft infrastructure, NOT our webpart:
+    - 24 errors from SharePoint search component (`sb-cpl-advancedsearchbutton-*.js`)
+    - 1 error from external stylesheet (PolStyler.css MIME type)
+  - **Webpart Status**: Clean - 0 errors, 0 exceptions, 0 memory leaks
+  - **E2E Tests Created:** `tests/e2e/console-errors.spo.spec.ts` with 8 tests:
+    - 3 TDD assertion tests (fail if webpart introduces errors)
+    - 5 diagnostic/investigation tests
+  - **Memory Test**: Confirmed no leaks (43MB → 43MB after 10 interaction cycles)
 
 ---
 
