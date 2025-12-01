@@ -42,6 +42,8 @@ export interface IRssFeedWebPartProps {
   galleryTitlePosition: 'hover' | 'below' | 'none';
   galleryAspectRatio: '1:1' | '4:3' | '16:9';
   galleryGap: 'sm' | 'md' | 'lg';
+  // Performance settings
+  skipDirectFetch: boolean;
 }
 
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
@@ -58,6 +60,10 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     import('./services/proxyService').then(module => {
       const ProxyService = module.ProxyService;
       ProxyService.init(this.context.httpClient);
+      // Apply skipDirectFetch setting if configured
+      if (this.properties.skipDirectFetch) {
+        ProxyService.setSkipDirectFetch(true);
+      }
     });
 
     return super.onInit();
@@ -135,6 +141,13 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     const toggleFields = ['autoRefresh', 'forceFallbackImage', 'autoscroll'];
     if (toggleFields.includes(propertyPath) && oldValue !== newValue) {
       this.context.propertyPane.refresh();
+    }
+
+    // Apply skipDirectFetch setting immediately when changed
+    if (propertyPath === 'skipDirectFetch') {
+      import('./services/proxyService').then(module => {
+        module.ProxyService.setSkipDirectFetch(newValue as boolean);
+      });
     }
 
     super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
@@ -344,6 +357,11 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
             this.render(); // Trigger immediate re-render for custom controls
           }
+        }),
+        PropertyPaneToggle('skipDirectFetch', {
+          label: strings.SkipDirectFetchFieldLabel,
+          onText: strings.SkipDirectFetchOnLabel,
+          offText: strings.SkipDirectFetchOffLabel
         })
       ]
     });

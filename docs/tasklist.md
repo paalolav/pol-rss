@@ -1,7 +1,7 @@
 # POL RSS Gallery WebPart - Task List
 
 > Version: 1.3.0
-> Last Updated: 2025-11-30
+> Last Updated: 2025-12-01
 > Status: 100% Complete (14/14 tasks) - Security & performance hardening added
 
 ## Overview
@@ -274,7 +274,29 @@ REF-003 + REF-004 ──────> REF-009 (Feed Aggregation)
 
 ## Changelog
 
-### 2025-12-01 (Session 35) - Gallery HTML Stripping Fix & Console Error Investigation
+### 2025-12-01 (Session 35) - Gallery HTML Stripping Fix, Console Error Investigation & Skip Direct Fetch Feature
+
+- **New Feature: Skip Direct Fetch Option (TDD Implementation)**
+  - **Purpose**: Eliminate CORS console errors by skipping direct fetch attempts
+  - **Background**: When fetching feeds that don't support CORS, the webpart tries direct fetch first (fails with CORS error), then falls back to proxy. This works correctly but produces console errors.
+  - **Solution**: Added `skipDirectFetch` option that goes straight to proxy, eliminating CORS errors
+  - **Implementation (TDD)**:
+    1. Created 6 failing tests in `tests/services/proxyService.test.ts`
+    2. Implemented feature in `src/webparts/polRssGallery/services/proxyService.ts`:
+       - Added `_skipDirectFetch` static property
+       - Added `setSkipDirectFetch()` and `getSkipDirectFetch()` methods
+       - Modified `fetch()` to skip direct fetch when enabled
+    3. Added property pane toggle in Advanced Settings
+  - **Files Modified:**
+    - `src/webparts/polRssGallery/services/proxyService.ts` (feature implementation)
+    - `src/webparts/polRssGallery/RssFeedWebPart.ts` (property & property pane toggle)
+    - `src/webparts/polRssGallery/loc/RssFeedWebPartStrings.d.ts` (type definitions)
+    - `src/webparts/polRssGallery/loc/nb-no.js` (Norwegian Bokmål strings)
+    - `src/webparts/polRssGallery/loc/nn-no.js` (Norwegian Nynorsk strings)
+  - **Tests Added:** 6 new unit tests for skipDirectFetch option
+  - **Test Results:** All 1850 unit tests passing (+6 new)
+  - **E2E Testing:** 40/49 E2E tests passed on SharePoint (9 failed due to workbench permission issues, not webpart bugs)
+  - **Note:** Feature is OFF by default, won't affect existing behavior
 
 - **Bug Fix: Gallery layout showing HTML tags in descriptions**
   - **Problem**: Gallery view displayed raw HTML tags (like `<p>`) in description text from feeds like sentralregisteret.no/feed

@@ -99,6 +99,11 @@ declare module 'RssFeedWebPartStrings' {
     ConnectionFailedLabel: string;
     ProxyHelpLinkText: string;
 
+    // Performance Settings
+    SkipDirectFetchFieldLabel: string;
+    SkipDirectFetchOnLabel: string;
+    SkipDirectFetchOffLabel: string;
+
     // Preset Templates
     PresetsFieldLabel: string;
     PresetNewsBanner: string;

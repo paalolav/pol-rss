@@ -64,6 +64,9 @@ export class ProxyService {
   /** Tenant-specific Azure Function proxy configuration */
   private static _tenantProxy: ITenantProxyConfig | null = null;
 
+  /** Skip direct fetch and go straight to proxy (eliminates CORS console errors) */
+  private static _skipDirectFetch = false;
+
   /**
    * Sanitize a URL for safe logging by masking sensitive parameters
    * This prevents accidental exposure of API keys, function codes, and tokens
@@ -93,6 +96,25 @@ export class ProxyService {
 
   public static setDebugMode(enable: boolean): void {
     ProxyService._debugMode = enable;
+  }
+
+  /**
+   * Set whether to skip direct fetch attempts and go straight to proxy
+   * When enabled, eliminates CORS console errors from failed direct fetch attempts
+   * @param skip Whether to skip direct fetch
+   */
+  public static setSkipDirectFetch(skip: boolean): void {
+    ProxyService._skipDirectFetch = skip;
+    if (this._debugMode) {
+      RssDebugUtils.log(`Skip direct fetch: ${skip}`);
+    }
+  }
+
+  /**
+   * Get current skip direct fetch setting
+   */
+  public static getSkipDirectFetch(): boolean {
+    return ProxyService._skipDirectFetch;
   }
 
   public static init(httpClient: HttpClient): void {
@@ -238,22 +260,26 @@ export class ProxyService {
       redirect: 'manual' as RequestRedirect
     };
 
-    // 1. Try direct fetch first
-    try {
-      const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
-      if (directResponse.ok) {
-        if (this._debugMode) {
-          RssDebugUtils.log(`Direct fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
+    // 1. Try direct fetch first (unless skipDirectFetch is enabled)
+    if (!ProxyService._skipDirectFetch) {
+      try {
+        const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
+        if (directResponse.ok) {
+          if (this._debugMode) {
+            RssDebugUtils.log(`Direct fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
+          }
+          return directResponse;
         }
-        return directResponse;
-      }
 
-      if (this._debugMode) {
-        Log.info(this.LOG_SOURCE, `Direct fetch returned ${directResponse.status}, trying proxies.`);
-        RssDebugUtils.log(`Direct fetch returned ${directResponse.status}, trying proxies.`);
+        if (this._debugMode) {
+          Log.info(this.LOG_SOURCE, `Direct fetch returned ${directResponse.status}, trying proxies.`);
+          RssDebugUtils.log(`Direct fetch returned ${directResponse.status}, trying proxies.`);
+        }
+      } catch (error) {
+        this.logError('directFetch', error, url);
       }
-    } catch (error) {
-      this.logError('directFetch', error, url);
+    } else if (this._debugMode) {
+      RssDebugUtils.log(`Skipping direct fetch (skipDirectFetch enabled), going straight to proxy`);
     }
 
     // 2. Try tenant proxy if configured (primary proxy)

@@ -332,4 +332,89 @@ describe('ProxyService', () => {
       expect(sanitized).not.toContain('mypassword123');
     });
   });
+
+  describe('skipDirectFetch option', () => {
+    const testUrl = 'https://sentralregisteret.no/feed';
+    const rssContent = '<?xml version="1.0"?><rss><channel><title>Test</title></channel></rss>';
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      ProxyService.setTenantProxy(null);
+      ProxyService.setSkipDirectFetch(false); // Reset to default
+    });
+
+    it('should have skipDirectFetch disabled by default', () => {
+      expect(ProxyService.getSkipDirectFetch()).toBe(false);
+    });
+
+    it('should enable/disable skipDirectFetch', () => {
+      ProxyService.setSkipDirectFetch(true);
+      expect(ProxyService.getSkipDirectFetch()).toBe(true);
+
+      ProxyService.setSkipDirectFetch(false);
+      expect(ProxyService.getSkipDirectFetch()).toBe(false);
+    });
+
+    it('should try direct fetch when skipDirectFetch is false', async () => {
+      ProxyService.setSkipDirectFetch(false);
+
+      const mockResponse = new Response(rssContent, { status: 200 });
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await ProxyService.fetch(testUrl);
+
+      // First call should be direct fetch
+      const firstCallUrl = (global.fetch as jest.Mock).mock.calls[0][0];
+      expect(firstCallUrl).toBe(testUrl);
+    });
+
+    it('should skip direct fetch and go straight to proxy when skipDirectFetch is true', async () => {
+      ProxyService.setSkipDirectFetch(true);
+
+      const mockResponse = new Response(rssContent, { status: 200 });
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await ProxyService.fetch(testUrl);
+
+      // First call should be proxy URL, not direct
+      const firstCallUrl = (global.fetch as jest.Mock).mock.calls[0][0];
+      expect(firstCallUrl).not.toBe(testUrl);
+      expect(firstCallUrl).toContain('api.allorigins.win');
+    });
+
+    it('should skip direct fetch but use tenant proxy first when configured', async () => {
+      ProxyService.setSkipDirectFetch(true);
+      ProxyService.setTenantProxy({
+        proxyUrl: 'https://my-tenant-proxy.azurewebsites.net/api/proxy',
+        functionKey: 'my-key'
+      });
+
+      const mockResponse = new Response(rssContent, { status: 200 });
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await ProxyService.fetch(testUrl);
+
+      // First call should be tenant proxy, not direct
+      const firstCallUrl = (global.fetch as jest.Mock).mock.calls[0][0];
+      expect(firstCallUrl).not.toBe(testUrl);
+      expect(firstCallUrl).toContain('my-tenant-proxy.azurewebsites.net');
+    });
+
+    it('should eliminate CORS errors when skipDirectFetch is true', async () => {
+      ProxyService.setSkipDirectFetch(true);
+
+      // When skipDirectFetch is true, we should never attempt direct fetch
+      // So there should be no CORS error from the first (direct) attempt
+
+      const mockResponse = new Response(rssContent, { status: 200 });
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      await ProxyService.fetch(testUrl);
+
+      // Verify no call was made to the direct URL
+      const calls = (global.fetch as jest.Mock).mock.calls;
+      const directCalls = calls.filter((call: unknown[]) => call[0] === testUrl);
+      expect(directCalls.length).toBe(0);
+    });
+  });
 });
