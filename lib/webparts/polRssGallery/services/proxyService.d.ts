@@ -33,6 +33,8 @@ export declare class ProxyService {
     private static _attemptedUrls;
     /** Tenant-specific Azure Function proxy configuration */
     private static _tenantProxy;
+    /** Skip direct fetch and go straight to proxy (eliminates CORS console errors) */
+    private static _skipDirectFetch;
     /**
      * Sanitize a URL for safe logging by masking sensitive parameters
      * This prevents accidental exposure of API keys, function codes, and tokens
@@ -41,6 +43,16 @@ export declare class ProxyService {
      */
     static sanitizeUrlForLogging(url: string): string;
     static setDebugMode(enable: boolean): void;
+    /**
+     * Set whether to skip direct fetch attempts and go straight to proxy
+     * When enabled, eliminates CORS console errors from failed direct fetch attempts
+     * @param skip Whether to skip direct fetch
+     */
+    static setSkipDirectFetch(skip: boolean): void;
+    /**
+     * Get current skip direct fetch setting
+     */
+    static getSkipDirectFetch(): boolean;
     static init(httpClient: HttpClient): void;
     /**
      * Configure tenant-specific Azure Function proxy

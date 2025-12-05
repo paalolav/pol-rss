@@ -20,6 +20,7 @@ export interface IRssFeedWebPartProps {
     galleryTitlePosition: 'hover' | 'below' | 'none';
     galleryAspectRatio: '1:1' | '4:3' | '16:9';
     galleryGap: 'sm' | 'md' | 'lg';
+    skipDirectFetch: boolean;
 }
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
     private _themeProvider;

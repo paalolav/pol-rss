@@ -99,6 +99,11 @@ define([], function() {
     "ConnectionFailedLabel": "Tilkopling mislukkast",
     "ProxyHelpLinkText": "Lær korleis du set opp din eigen proxy",
 
+    // Performance Settings
+    "SkipDirectFetchFieldLabel": "Hopp over direkte henting",
+    "SkipDirectFetchOnLabel": "På (unngå CORS-feil i konsollen)",
+    "SkipDirectFetchOffLabel": "Av (prøv direkte fyrst)",
+
     // Preset Templates
     "PresetsFieldLabel": "Førehandsinnstillingar",
     "PresetNewsBanner": "Nyheitsbanner",

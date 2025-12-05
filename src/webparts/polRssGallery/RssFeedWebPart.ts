@@ -351,7 +351,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
             failed: strings.ConnectionFailedLabel,
             helpLink: strings.ProxyHelpLinkText
           },
-          helpUrl: 'https://github.com/paalolav/pol-rss/blob/main/docs/PROXY_SETUP.md',
+          helpUrl: 'https://github.com/paalolav/pol-rss/wiki/Proxy-Setup',
           onPropertyChange: (propertyPath: string, oldValue: string, newValue: string) => {
             this.properties.proxyUrl = newValue;
             this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);

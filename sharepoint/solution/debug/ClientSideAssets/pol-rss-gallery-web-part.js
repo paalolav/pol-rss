@@ -6529,6 +6529,23 @@ class ProxyService {
     static setDebugMode(enable) {
         ProxyService._debugMode = enable;
     }
+    /**
+     * Set whether to skip direct fetch attempts and go straight to proxy
+     * When enabled, eliminates CORS console errors from failed direct fetch attempts
+     * @param skip Whether to skip direct fetch
+     */
+    static setSkipDirectFetch(skip) {
+        ProxyService._skipDirectFetch = skip;
+        if (this._debugMode) {
+            _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Skip direct fetch: ${skip}`);
+        }
+    }
+    /**
+     * Get current skip direct fetch setting
+     */
+    static getSkipDirectFetch() {
+        return ProxyService._skipDirectFetch;
+    }
     static init(httpClient) {
         ProxyService._httpClient = httpClient;
     }
@@ -6649,22 +6666,27 @@ class ProxyService {
             headers: headersWithAuth,
             redirect: 'manual'
         };
-        // 1. Try direct fetch first
-        try {
-            const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
-            if (directResponse.ok) {
-                if (this._debugMode) {
-                    _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Direct fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
+        // 1. Try direct fetch first (unless skipDirectFetch is enabled)
+        if (!ProxyService._skipDirectFetch) {
+            try {
+                const directResponse = await this._fetchWithRedirectHandling(url, enhancedOptions);
+                if (directResponse.ok) {
+                    if (this._debugMode) {
+                        _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Direct fetch succeeded for ${this.sanitizeUrlForLogging(url)}`);
+                    }
+                    return directResponse;
                 }
-                return directResponse;
+                if (this._debugMode) {
+                    _microsoft_sp_core_library__WEBPACK_IMPORTED_MODULE_1__.Log.info(this.LOG_SOURCE, `Direct fetch returned ${directResponse.status}, trying proxies.`);
+                    _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Direct fetch returned ${directResponse.status}, trying proxies.`);
+                }
             }
-            if (this._debugMode) {
-                _microsoft_sp_core_library__WEBPACK_IMPORTED_MODULE_1__.Log.info(this.LOG_SOURCE, `Direct fetch returned ${directResponse.status}, trying proxies.`);
-                _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Direct fetch returned ${directResponse.status}, trying proxies.`);
+            catch (error) {
+                this.logError('directFetch', error, url);
             }
         }
-        catch (error) {
-            this.logError('directFetch', error, url);
+        else if (this._debugMode) {
+            _utils_rssDebugUtils__WEBPACK_IMPORTED_MODULE_2__.RssDebugUtils.log(`Skipping direct fetch (skipDirectFetch enabled), going straight to proxy`);
         }
         // 2. Try tenant proxy if configured (primary proxy)
         if (ProxyService._tenantProxy) {
@@ -6956,6 +6978,8 @@ ProxyService.MAX_REDIRECTS = 5;
 ProxyService._attemptedUrls = new Set();
 /** Tenant-specific Azure Function proxy configuration */
 ProxyService._tenantProxy = null;
+/** Skip direct fetch and go straight to proxy (eliminates CORS console errors) */
+ProxyService._skipDirectFetch = false;
 
 
 /***/ }),
@@ -28862,6 +28886,10 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
         Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./services/proxyService */ 5237)).then(module => {
             const ProxyService = module.ProxyService;
             ProxyService.init(this.context.httpClient);
+            // Apply skipDirectFetch setting if configured
+            if (this.properties.skipDirectFetch) {
+                ProxyService.setSkipDirectFetch(true);
+            }
         });
         return super.onInit();
     }
@@ -28911,6 +28939,12 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
         const toggleFields = ['autoRefresh', 'forceFallbackImage', 'autoscroll'];
         if (toggleFields.includes(propertyPath) && oldValue !== newValue) {
             this.context.propertyPane.refresh();
+        }
+        // Apply skipDirectFetch setting immediately when changed
+        if (propertyPath === 'skipDirectFetch') {
+            Promise.resolve(/*! import() */).then(__webpack_require__.bind(__webpack_require__, /*! ./services/proxyService */ 5237)).then(module => {
+                module.ProxyService.setSkipDirectFetch(newValue);
+            });
         }
         super.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
     }
@@ -29113,6 +29147,11 @@ class RssFeedWebPart extends _microsoft_sp_webpart_base__WEBPACK_IMPORTED_MODULE
                         this.onPropertyPaneFieldChanged(propertyPath, oldValue, newValue);
                         this.render(); // Trigger immediate re-render for custom controls
                     }
+                }),
+                (0,_microsoft_sp_property_pane__WEBPACK_IMPORTED_MODULE_2__.PropertyPaneToggle)('skipDirectFetch', {
+                    label: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.SkipDirectFetchFieldLabel,
+                    onText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.SkipDirectFetchOnLabel,
+                    offText: RssFeedWebPartStrings__WEBPACK_IMPORTED_MODULE_4__.SkipDirectFetchOffLabel
                 })
             ]
         });
