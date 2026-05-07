@@ -3,3 +3,4 @@ sonar-project.properties
 .scannerwork
 lib
 tests/**/.auth/
+.claude/settings.local.json
