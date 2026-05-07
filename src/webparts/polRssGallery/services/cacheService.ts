@@ -12,7 +12,7 @@ interface CacheConfig {
 
 export class CacheService {
   private static instance: CacheService;
-  private cache: Map<string, CacheItem<any>>;
+  private readonly cache: Map<string, CacheItem<any>>;
   private config: CacheConfig;
 
   private constructor() {

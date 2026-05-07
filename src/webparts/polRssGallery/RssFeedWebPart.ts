@@ -4,8 +4,7 @@ import { IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneChoiceGr
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'RssFeedWebPartStrings';
 import RssFeed, { IRssFeedProps } from './components/RssFeed';
-import { ThemeProvider, ThemeChangedEventArgs } from '@microsoft/sp-component-base'; // <-- NYTT
-import { IReadonlyTheme } from '@microsoft/sp-component-base'; // <-- NYTT
+import { ThemeProvider, ThemeChangedEventArgs, IReadonlyTheme } from '@microsoft/sp-component-base'; // <-- NYTT
 
 export interface IRssFeedWebPartProps {
   webPartTitle: string;

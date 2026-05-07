@@ -67,11 +67,11 @@ export function findImage(item: Element): string | undefined {
   const enc = item.querySelector('enclosure[type^="image"]')?.getAttribute('url');
   if (enc) return enc;
 
-  const itunes = item.querySelector('itunes\\:image')?.getAttribute('href');
+  const itunes = item.querySelector(String.raw`itunes\:image`)?.getAttribute('href');
   if (itunes) return itunes;
 
   const desc = item.querySelector('description')?.textContent || '';
-  const m = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+  const m = /<img[^>]+src=["']([^"']+)["']/i.exec(desc);
   if (m?.[1]) return m[1];
 
   const bin = Array.from(item.querySelectorAll('[url]'))

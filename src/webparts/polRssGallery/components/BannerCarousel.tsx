@@ -42,7 +42,7 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
         const imgSrc = getImageSrc(item.imageUrl, fallbackImageUrl, forceFallback);
 
         return (
-          <SwiperSlide key={index} className={styles.bannerSlide}>
+          <SwiperSlide key={item.link || item.title} className={styles.bannerSlide}>
             {imgSrc ? (
               <img src={imgSrc} alt={item.title} className={styles.bannerImage} onError={(e) => imgError(e, fallbackImageUrl)} />
             ) : (
