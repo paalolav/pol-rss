@@ -14,3 +14,4 @@ sharepoint/solution/debug
 **/.DS_Store
 tests/**/.auth/
 .claude/settings.local.json
+.playwright-mcp
