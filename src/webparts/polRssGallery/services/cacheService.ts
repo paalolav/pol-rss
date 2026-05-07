@@ -106,7 +106,7 @@ export class CacheService {
     const now = Date.now();
     
     // Remove expired items
-    for (const [key, item] of this.cache.entries()) {
+    for (const [key, item] of Array.from(this.cache.entries())) {
       if (now - item.timestamp > this.config.maxAge) {
         this.cache.delete(key);
       }

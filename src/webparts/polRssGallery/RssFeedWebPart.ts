@@ -23,8 +23,8 @@ export interface IRssFeedWebPartProps {
 
 export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPartProps> {
 
-  private _themeProvider: ThemeProvider; // <-- NYTT
-  private _themeVariant: IReadonlyTheme | undefined; // <-- NYTT
+  private _themeProvider!: ThemeProvider;
+  private _themeVariant: IReadonlyTheme | undefined;
 
   protected get disableReactivePropertyChanges(): boolean {
     return true;

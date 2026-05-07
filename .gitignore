@@ -2,8 +2,15 @@ node_modules
 sonar-project.properties
 .scannerwork
 lib
+lib-dts
+lib-commonjs
+lib-esm
 dist
 release
 temp
+jest-output
+sharepoint/solution/debug
+**/*.sppkg
+**/.DS_Store
 tests/**/.auth/
 .claude/settings.local.json
