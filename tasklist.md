@@ -1,7 +1,19 @@
-# Sikkerheits-tasklist (Dependabot)
+# Sikkerheits-tasklist (Dependabot + Sonar)
 
 Dato: 2026-05-07
-Status: 52 opne Dependabot-alerts (2 critical, 23 high, 19 medium, 8 low)
+Status:
+- Dependabot: 52 opne alerts (2 critical, 23 high, 19 medium, 8 low) — uendra
+- SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein
+
+## Action 0 — gjort 2026-05-07 (SonarQube cleanup)
+
+Sett opp Sonar-prosjekt `pol-rss` på http://192.168.1.133:9100 og rydda alle funn:
+
+- `4b966e1` — herda to ReDoS-merka regex i `rssUtils.ts` (cleanDescription truncation, findImage binary-URL match).
+- `ed5367c` — 6 code smells (cacheService.cache som readonly, BannerCarousel React-key frå index til item.link/title, konsoliderte sp-component-base-import, String.raw + RegExp.exec i rssUtils).
+- `0458840` — gitignore lib/ (build output) og tests/**/.auth/ (Playwright SharePoint-cookies, **må aldri commitast**), avregistrerte 63 build-artefaktar.
+
+Re-scan: `sonar-scanner` i prosjektrot. Token i `~/Docker/.env` som `SONAR_TOKEN_POL_RSS`. Dashboard: http://192.168.1.133:9100/dashboard?id=pol-rss.
 
 ## Bakgrunn
 
