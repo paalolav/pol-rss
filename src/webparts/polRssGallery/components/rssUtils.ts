@@ -26,7 +26,9 @@ export function cleanDescription(raw: string, max = 380): string {
   }
 
   if (desc.length > max) {
-    desc = desc.slice(0, max).replace(/\s+\S*$/, '') + '…';
+    const truncated = desc.slice(0, max);
+    const lastSpace = truncated.lastIndexOf(' ');
+    desc = (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + '…';
   }
 
   return desc;
@@ -74,6 +76,6 @@ export function findImage(item: Element): string | undefined {
 
   const bin = Array.from(item.querySelectorAll('[url]'))
     .map(n => n.getAttribute('url')!)
-    .find(u => /\/binary\/[a-f0-9]{10,}.*image_version=/i.test(u));
+    .find(u => u.includes('image_version=') && /\/binary\/[a-f0-9]{10,}/i.test(u));
   return bin;
 }
