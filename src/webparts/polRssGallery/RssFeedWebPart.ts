@@ -165,6 +165,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
                 PropertyPaneSlider('interval', {
                   label: strings.IntervalFieldLabel,
                   min: 3, max: 30, step: 1,
+                  value: this.properties.interval || 5,
                   disabled: !this.properties.autoscroll
                 })
               ]

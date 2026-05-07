@@ -39,6 +39,7 @@ declare module 'RssFeedWebPartStrings' {
     ErrorFeedNetwork: string;
     ErrorFeedNotFound: string;
     ErrorFeedServer: string;
+    OpensInNewWindow: string;
   }
 
   const strings: IRssFeedWebPartStrings;

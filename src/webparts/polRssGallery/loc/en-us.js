@@ -37,6 +37,7 @@ define([], function() {
     "ErrorFeedServer": "The RSS service is temporarily unavailable. Try again later.",
     "RetryButtonText": "Try Again",
     "LoadingMessage": "Loading RSS feed...",
-    "NoItemsMessage": "No items to display"
+    "NoItemsMessage": "No items to display",
+    "OpensInNewWindow": "Opens in new window"
   }
 });

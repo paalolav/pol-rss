@@ -37,6 +37,7 @@ declare interface IRssFeedWebPartStrings {
   RetryButtonText: string;
   LoadingMessage: string;
   NoItemsMessage: string;
+  OpensInNewWindow: string;
 }
 
 declare module 'RssFeedWebPartStrings' {

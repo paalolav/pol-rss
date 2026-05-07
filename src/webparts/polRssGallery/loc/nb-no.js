@@ -37,6 +37,7 @@ define([], function() {
     "ErrorFeedServer": "RSS-tjenesten er midlertidig utilgjengelig. Prøv igjen senere.",
     "RetryButtonText": "Prøv igjen",
     "LoadingMessage": "Laster RSS-feed...",
-    "NoItemsMessage": "Ingen elementer å vise"
+    "NoItemsMessage": "Ingen elementer å vise",
+    "OpensInNewWindow": "Åpnes i nytt vindu"
   }
 });

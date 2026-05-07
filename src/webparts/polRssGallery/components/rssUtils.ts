@@ -18,6 +18,12 @@ export function imgError(e: React.SyntheticEvent<HTMLImageElement>, fallbackImag
   }
 }
 
+export function formatPubDate(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? undefined : d.toLocaleDateString();
+}
+
 export function cleanDescription(raw: string, max = 380): string {
   if (!raw) return '';
 

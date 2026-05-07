@@ -3,7 +3,8 @@ import { useMemo } from 'react';
 import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
 import { IRssItem } from './IRssItem';
-import { getImageSrc, safeHref } from './rssUtils';
+import * as strings from 'RssFeedWebPartStrings';
+import { formatPubDate, getImageSrc, safeHref } from './rssUtils';
 import { arePropsEqual, useImgErrorHandler, useLayoutRerenderKey } from './useRssLayout';
 
 export interface IListLayoutProps {
@@ -51,13 +52,14 @@ const ListLayout: React.FC<IListLayoutProps> = ({
               rel="noopener noreferrer"
             >
               {item.title}
+              <span className={styles.srOnly}>{strings.OpensInNewWindow}</span>
             </a>
           ) : (
             <span className={styles.title}>{item.title}</span>
           )}
-          {showPubDate && item.pubDate && (
+          {showPubDate && formatPubDate(item.pubDate) && (
             <div className={styles.pubDate}>
-              {new Date(item.pubDate).toLocaleDateString()}
+              {formatPubDate(item.pubDate)}
             </div>
           )}
           {showDescription && item.description && (

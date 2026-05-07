@@ -6,7 +6,8 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 import parse from 'html-react-parser';
-import { getImageSrc, imgError, safeHref } from './rssUtils';
+import * as strings from 'RssFeedWebPartStrings';
+import { formatPubDate, getImageSrc, imgError, safeHref } from './rssUtils';
 
 interface IBannerCarouselProps {
   items: Array<{ title: string; link: string; imageUrl?: string; pubDate?: string; description?: string; }>;
@@ -59,6 +60,8 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
                 src={imgSrc}
                 alt={item.title}
                 className={styles.bannerImage}
+                width={1600}
+                height={900}
                 onError={(e) => imgError(e, fallbackImageUrl)}
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"
@@ -72,13 +75,14 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
               {safeHref(item.link) ? (
                 <a href={safeHref(item.link)} className={styles.bannerTitle} target="_blank" rel="noopener noreferrer">
                   {item.title}
+                  <span className={styles.srOnly}>{strings.OpensInNewWindow}</span>
                 </a>
               ) : (
                 <span className={styles.bannerTitle}>{item.title}</span>
               )}
-              {showPubDate && item.pubDate && (
+              {showPubDate && formatPubDate(item.pubDate) && (
                 <div className={styles.bannerPubDate}>
-                  {new Date(item.pubDate).toLocaleDateString()}
+                  {formatPubDate(item.pubDate)}
                 </div>
               )}
               {showDescription && item.description && (
