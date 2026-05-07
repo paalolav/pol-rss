@@ -31,6 +31,10 @@ define([], function() {
     "IntervalFieldLabel": "Rulleintervall (sekunder)",
     "ErrorLoadingFeed": "Feil ved lasting av RSS-feed",
     "ErrorParsingFeed": "Feil ved tolking av RSS-innhold",
+    "ErrorFeedTimeout": "RSS-feeden svarte ikke i tide. Sjekk tilkoblingen og prøv igjen.",
+    "ErrorFeedNetwork": "Kunne ikke nå RSS-feeden. Sjekk URL og nettverk.",
+    "ErrorFeedNotFound": "Fant ikke RSS-feeden på den angitte adressen.",
+    "ErrorFeedServer": "RSS-tjenesten er midlertidig utilgjengelig. Prøv igjen senere.",
     "RetryButtonText": "Prøv igjen",
     "LoadingMessage": "Laster RSS-feed...",
     "NoItemsMessage": "Ingen elementer å vise"

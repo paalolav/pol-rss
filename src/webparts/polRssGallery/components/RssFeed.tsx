@@ -55,12 +55,21 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    let timedOut = false;
+    const timeoutId = setTimeout(() => { timedOut = true; controller.abort(); }, 10000);
 
     try {
-      const response = await fetch(props.feedUrl, { signal: controller.signal });
+      let response: Response;
+      try {
+        response = await fetch(props.feedUrl, { signal: controller.signal });
+      } catch (e) {
+        if (timedOut) throw new Error(strings.ErrorFeedTimeout);
+        if ((e as Error).name === 'AbortError') throw e;
+        throw new Error(strings.ErrorFeedNetwork);
+      }
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        throw new Error(response.status >= 500 ? strings.ErrorFeedServer : strings.ErrorFeedNotFound);
       }
 
       const str = await response.text();

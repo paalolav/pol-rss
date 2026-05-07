@@ -30,6 +30,10 @@ declare interface IRssFeedWebPartStrings {
   IntervalFieldLabel: string;
   ErrorLoadingFeed: string;
   ErrorParsingFeed: string;
+  ErrorFeedTimeout: string;
+  ErrorFeedNetwork: string;
+  ErrorFeedNotFound: string;
+  ErrorFeedServer: string;
   RetryButtonText: string;
   LoadingMessage: string;
   NoItemsMessage: string;

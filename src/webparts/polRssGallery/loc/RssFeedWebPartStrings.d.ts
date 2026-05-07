@@ -35,6 +35,10 @@ declare module 'RssFeedWebPartStrings' {
     RetryButtonText: string;
     ErrorParsingFeed: string;
     ErrorFetchingFeed: string;
+    ErrorFeedTimeout: string;
+    ErrorFeedNetwork: string;
+    ErrorFeedNotFound: string;
+    ErrorFeedServer: string;
   }
 
   const strings: IRssFeedWebPartStrings;

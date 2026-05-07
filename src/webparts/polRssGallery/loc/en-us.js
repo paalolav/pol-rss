@@ -31,6 +31,10 @@ define([], function() {
     "IntervalFieldLabel": "Scroll interval (seconds)",
     "ErrorLoadingFeed": "Error loading RSS feed",
     "ErrorParsingFeed": "Error parsing RSS feed content",
+    "ErrorFeedTimeout": "The RSS feed did not respond in time. Check your connection and try again.",
+    "ErrorFeedNetwork": "Could not reach the RSS feed. Check the URL and your network.",
+    "ErrorFeedNotFound": "RSS feed not found at the given address.",
+    "ErrorFeedServer": "The RSS service is temporarily unavailable. Try again later.",
     "RetryButtonText": "Try Again",
     "LoadingMessage": "Loading RSS feed...",
     "NoItemsMessage": "No items to display"
