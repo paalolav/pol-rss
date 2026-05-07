@@ -6,7 +6,7 @@ import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 import parse from 'html-react-parser';
-import { getImageSrc, imgError } from './rssUtils';
+import { getImageSrc, imgError, safeHref } from './rssUtils';
 
 interface IBannerCarouselProps {
   items: Array<{ title: string; link: string; imageUrl?: string; pubDate?: string; description?: string; }>;
@@ -69,9 +69,13 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
               </div>
             )}
             <div className={styles.bannerCaption}>
-              <a href={item.link} className={styles.bannerTitle} target="_blank" rel="noopener noreferrer">
-                {item.title}
-              </a>
+              {safeHref(item.link) ? (
+                <a href={safeHref(item.link)} className={styles.bannerTitle} target="_blank" rel="noopener noreferrer">
+                  {item.title}
+                </a>
+              ) : (
+                <span className={styles.bannerTitle}>{item.title}</span>
+              )}
               {showPubDate && item.pubDate && (
                 <div className={styles.bannerPubDate}>
                   {new Date(item.pubDate).toLocaleDateString()}

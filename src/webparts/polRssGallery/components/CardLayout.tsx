@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useMemo } from 'react';
 import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
-import { getImageSrc } from './rssUtils';
+import { getImageSrc, safeHref } from './rssUtils';
 import { arePropsEqual, useImgErrorHandler, useLayoutRerenderKey } from './useRssLayout';
 
 interface ICardLayoutProps {
@@ -36,9 +36,13 @@ const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, force
           </div>
         )}
         <div className={styles.cardBody}>
-          <a href={item.link} className={styles.cardTitle} target="_blank" rel="noopener noreferrer">
-            {item.title}
-          </a>
+          {safeHref(item.link) ? (
+            <a href={safeHref(item.link)} className={styles.cardTitle} target="_blank" rel="noopener noreferrer">
+              {item.title}
+            </a>
+          ) : (
+            <span className={styles.cardTitle}>{item.title}</span>
+          )}
           {showPubDate && item.pubDate && (
             <div className={styles.pubDate}>
               {new Date(item.pubDate).toLocaleDateString()}

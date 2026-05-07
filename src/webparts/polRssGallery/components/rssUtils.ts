@@ -42,6 +42,16 @@ export function cleanDescription(raw: string, max = 380): string {
   return DOMPurify.sanitize(desc, SAFE_HTML_CONFIG);
 }
 
+export function safeHref(rawUrl?: string): string | undefined {
+  if (!rawUrl) return undefined;
+  try {
+    const u = new URL(rawUrl);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? u.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function resolveImageUrl(rawUrl?: string): string | undefined {
   if (!rawUrl?.startsWith('http')) return undefined;
 
