@@ -21,6 +21,7 @@
     "@microsoft/sp-office-ui-fabric-core": "1.21.1",
     "@microsoft/sp-property-pane": "1.21.1",
     "@microsoft/sp-webpart-base": "1.21.1",
+    "dompurify": "^3.4.2",
     "fast-xml-parser": "^5.7.0",
     "html-react-parser": "^5.2.3",
     "react": "17.0.1",
