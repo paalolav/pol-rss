@@ -39,17 +39,25 @@
   bottom: 0;
   left: 0;
   width: 100%;
+  // Hardcoded dark overlay + white text is intentional: caption sits on top
+  // of arbitrary RSS images, so theme tokens cannot guarantee contrast here.
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
   padding: 20px;
   text-align: left;
   box-sizing: border-box;
+
+  @media (forced-colors: active) {
+    background: Canvas;
+    color: CanvasText;
+    border-top: 1px solid CanvasText;
+  }
 }
 
 .bannerTitle {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   font-weight: bold;
-  color: #ffffff;
+  color: inherit;
   text-decoration: none;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -58,13 +66,13 @@
 .bannerPubDate {
   font-size: 0.9rem;
   margin-top: 5px;
-  color: #ffffff;
+  color: inherit;
 }
 
 .bannerDescription {
   font-size: clamp(1rem, 2vw, 1.2rem);
   margin-top: 10px;
-  color: #ffffff;
+  color: inherit;
   line-height: 1.4;
   word-wrap: break-word;
   overflow-wrap: break-word;
