@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
-import { getImageSrc, imgError } from './rssUtils';
+import { getImageSrc } from './rssUtils';
+import { arePropsEqual, useImgErrorHandler, useLayoutRerenderKey } from './useRssLayout';
 
 interface ICardLayoutProps {
   items: Array<{ title: string; link: string; imageUrl?: string; description?: string; pubDate?: string }>;
@@ -12,31 +13,9 @@ interface ICardLayoutProps {
   showPubDate?: boolean;
 }
 
-const arePropsEqual = (prevProps: ICardLayoutProps, nextProps: ICardLayoutProps): boolean => {
-  return (
-    prevProps.forceFallback === nextProps.forceFallback &&
-    prevProps.fallbackImageUrl === nextProps.fallbackImageUrl &&
-    prevProps.showDescription === nextProps.showDescription &&
-    prevProps.showPubDate === nextProps.showPubDate &&
-    prevProps.items.length === nextProps.items.length &&
-    prevProps.items.every((item, index) => 
-      item.title === nextProps.items[index].title &&
-      item.link === nextProps.items[index].link &&
-      item.imageUrl === nextProps.items[index].imageUrl
-    )
-  );
-};
-
 const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, forceFallback, showPubDate, showDescription }) => {
-  const [layoutKey, setLayoutKey] = useState(0);
-
-  useEffect(() => {
-    setLayoutKey((prevKey) => prevKey + 1);
-  }, [forceFallback]);
-
-  const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    imgError(e, fallbackImageUrl);
-  }, [fallbackImageUrl]);
+  const layoutKey = useLayoutRerenderKey(forceFallback);
+  const handleImgError = useImgErrorHandler(fallbackImageUrl);
 
   const memoizedItems = useMemo(() => items.map((item, index) => {
     const imgSrc = getImageSrc(item.imageUrl, fallbackImageUrl, forceFallback);

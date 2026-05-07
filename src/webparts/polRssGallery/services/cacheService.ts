@@ -13,10 +13,12 @@ interface CacheConfig {
 export class CacheService {
   private static instance: CacheService;
   private readonly cache: Map<string, CacheItem<any>>;
+  private readonly inFlight: Map<string, Promise<any>>;
   private config: CacheConfig;
 
   private constructor() {
     this.cache = new Map();
+    this.inFlight = new Map();
     this.config = {
       maxSize: 100,
       defaultStaleAfter: 5 * 60 * 1000, // 5 minutes
@@ -76,16 +78,28 @@ export class CacheService {
     fetchFn: () => Promise<T>,
     staleAfter: number
   ): Promise<T> {
-    const data = await fetchFn();
-    
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      staleAfter
-    });
+    const existing = this.inFlight.get(key);
+    if (existing) {
+      return existing as Promise<T>;
+    }
 
-    this.cleanup();
-    return data;
+    const promise = (async () => {
+      try {
+        const data = await fetchFn();
+        this.cache.set(key, {
+          data,
+          timestamp: Date.now(),
+          staleAfter
+        });
+        this.cleanup();
+        return data;
+      } finally {
+        this.inFlight.delete(key);
+      }
+    })();
+
+    this.inFlight.set(key, promise);
+    return promise;
   }
 
   private cleanup(): void {

@@ -1,9 +1,10 @@
 import * as React from 'react';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import styles from './RssFeed.module.scss';
 import parse from 'html-react-parser';
 import { IRssItem } from './IRssItem';
-import { getImageSrc, imgError } from './rssUtils';
+import { getImageSrc } from './rssUtils';
+import { arePropsEqual, useImgErrorHandler, useLayoutRerenderKey } from './useRssLayout';
 
 export interface IListLayoutProps {
   items: IRssItem[];
@@ -13,37 +14,15 @@ export interface IListLayoutProps {
   forceFallback: boolean;
 }
 
-const arePropsEqual = (prevProps: IListLayoutProps, nextProps: IListLayoutProps): boolean => {
-  return (
-    prevProps.forceFallback === nextProps.forceFallback &&
-    prevProps.fallbackImageUrl === nextProps.fallbackImageUrl &&
-    prevProps.showDescription === nextProps.showDescription &&
-    prevProps.showPubDate === nextProps.showPubDate &&
-    prevProps.items.length === nextProps.items.length &&
-    prevProps.items.every((item, index) => 
-      item.title === nextProps.items[index].title &&
-      item.link === nextProps.items[index].link &&
-      item.imageUrl === nextProps.items[index].imageUrl
-    )
-  );
-};
-
-const ListLayout: React.FC<IListLayoutProps> = ({ 
-  items, 
-  fallbackImageUrl, 
-  forceFallback, 
-  showPubDate, 
-  showDescription 
+const ListLayout: React.FC<IListLayoutProps> = ({
+  items,
+  fallbackImageUrl,
+  forceFallback,
+  showPubDate,
+  showDescription
 }) => {
-  const [layoutKey, setLayoutKey] = useState(0);
-
-  useEffect(() => {
-    setLayoutKey((prevKey) => prevKey + 1);
-  }, [forceFallback]);
-
-  const handleImgError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
-    imgError(e, fallbackImageUrl);
-  }, [fallbackImageUrl]);
+  const layoutKey = useLayoutRerenderKey(forceFallback);
+  const handleImgError = useImgErrorHandler(fallbackImageUrl);
 
   const memoizedItems = useMemo(() => items.map((item, index) => {
     const imgSrc = getImageSrc(item.imageUrl, fallbackImageUrl, forceFallback);

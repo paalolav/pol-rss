@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Spinner, DefaultButton } from '@fluentui/react';
-import BannerCarousel from './BannerCarousel';
 import CardLayout from './CardLayout';
 import ListLayout from './ListLayout';
 import { cleanDescription, resolveImageUrl, findImage } from './rssUtils';
@@ -9,6 +8,10 @@ import styles from './RssFeed.module.scss';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import { RssErrorBoundary } from './ErrorBoundary';
 import { CacheService } from '../services/cacheService';
+
+const BannerCarousel = React.lazy(() =>
+  import(/* webpackChunkName: 'rss-banner-carousel' */ './BannerCarousel')
+);
 
 export interface IRssFeedProps {
   webPartTitle: string;
@@ -38,9 +41,20 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   const [items, setItems] = React.useState<IRssItem[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const cacheService = React.useMemo(() => CacheService.getInstance(), []);
+  const abortRef = React.useRef<AbortController | null>(null);
+  const mountedRef = React.useRef(true);
+
+  React.useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const fetchFeed = async (): Promise<IRssItem[]> => {
+    abortRef.current?.abort();
     const controller = new AbortController();
+    abortRef.current = controller;
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
@@ -85,23 +99,28 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
 
   const loadFeed = async (_forceReload: boolean = false): Promise<void> => {
     if (!props.feedUrl) {
-      setItems([]);
-      setError(null);
+      if (mountedRef.current) {
+        setItems([]);
+        setError(null);
+      }
       return;
     }
 
     try {
-      setError(null);
+      if (mountedRef.current) setError(null);
       const cachedItems = await cacheService.get<IRssItem[]>(
         props.feedUrl,
         fetchFeed,
         props.refreshInterval * 60 * 1000
       );
-      setItems(cachedItems);
+      if (mountedRef.current) setItems(cachedItems);
     } catch (err) {
+      if ((err as Error).name === 'AbortError') return;
       console.error('Failed to load RSS feed:', err);
-      setError(err instanceof Error ? err.message : strings.ErrorLoadingFeed);
-      setItems([]);
+      if (mountedRef.current) {
+        setError(err instanceof Error ? err.message : strings.ErrorLoadingFeed);
+        setItems([]);
+      }
     }
   };
 
@@ -149,15 +168,17 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     switch (props.layout) {
       case 'banner':
         return (
-          <BannerCarousel 
-            items={limitedItems} 
-            autoscroll={props.autoscroll}
-            interval={props.interval}
-            fallbackImageUrl={props.fallbackImageUrl}
-            forceFallback={props.forceFallbackImage}
-            showPubDate={props.showPubDate}
-            showDescription={props.showDescription}
-          />
+          <React.Suspense fallback={<Spinner label={strings.LoadingMessage} ariaLive="polite" />}>
+            <BannerCarousel
+              items={limitedItems}
+              autoscroll={props.autoscroll}
+              interval={props.interval}
+              fallbackImageUrl={props.fallbackImageUrl}
+              forceFallback={props.forceFallbackImage}
+              showPubDate={props.showPubDate}
+              showDescription={props.showDescription}
+            />
+          </React.Suspense>
         );
       case 'card':
         return (
@@ -183,21 +204,15 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
     }
   };
 
+  const themeVars = {
+    '--rss-font-family': props.themeVariant?.fonts?.medium?.fontFamily ?? '"Segoe UI", sans-serif',
+    '--rss-header-font-size': props.themeVariant?.fonts?.xLarge?.fontSize ?? '24px'
+  } as React.CSSProperties;
+
   const content = (
-    <div 
-      className={styles.webpart}
-      style={{ fontFamily: props.themeVariant?.fonts?.medium?.fontFamily ?? '"Segoe UI", sans-serif' }}
-    >
+    <div className={styles.webpart} style={themeVars}>
       {props.webPartTitle && (
-        <h2
-          className={styles.webPartHeader}
-          style={{
-            fontFamily: props.themeVariant?.fonts?.medium?.fontFamily ?? '"Segoe UI", sans-serif',
-            fontSize: props.themeVariant?.fonts?.xLarge?.fontSize ?? '24px'
-          }}
-        >
-          {props.webPartTitle}
-        </h2>
+        <h2 className={styles.webPartHeader}>{props.webPartTitle}</h2>
       )}
       {renderLayout()}
     </div>

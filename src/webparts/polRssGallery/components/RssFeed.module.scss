@@ -5,6 +5,7 @@
   padding: 12px;
   background-color: transparent;
   color: var(--bodyText);
+  font-family: var(--rss-font-family, "Segoe UI", sans-serif);
 }
 
 /* Banner layout stiler */
@@ -269,6 +270,8 @@
 
 /* Webpart header */
 .webPartHeader {
+  font-family: var(--rss-font-family, "Segoe UI", sans-serif);
+  font-size: var(--rss-header-font-size, 24px);
   font-weight: 600;
   margin-bottom: 16px;
   margin-top: 0px;
