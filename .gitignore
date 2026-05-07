@@ -2,5 +2,8 @@ node_modules
 sonar-project.properties
 .scannerwork
 lib
+dist
+release
+temp
 tests/**/.auth/
 .claude/settings.local.json
