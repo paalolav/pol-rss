@@ -1,3 +1,5 @@
 node_modules
 sonar-project.properties
 .scannerwork
+lib
+tests/**/.auth/
