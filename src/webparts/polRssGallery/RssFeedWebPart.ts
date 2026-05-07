@@ -26,6 +26,10 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
   private _themeProvider: ThemeProvider; // <-- NYTT
   private _themeVariant: IReadonlyTheme | undefined; // <-- NYTT
 
+  protected get disableReactivePropertyChanges(): boolean {
+    return true;
+  }
+
   public async onInit(): Promise<void> { // <-- NYTT
     this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
     this._themeVariant = this._themeProvider.tryGetTheme();

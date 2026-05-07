@@ -125,10 +125,10 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
 
   if (error) {
     return (
-      <div className={styles.error}>
+      <div className={styles.error} role="alert" aria-live="assertive">
         <p>{error}</p>
-        <DefaultButton 
-          text={strings.RetryButtonText} 
+        <DefaultButton
+          text={strings.RetryButtonText}
           onClick={() => loadFeed(true)}
         />
       </div>
@@ -136,11 +136,11 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   }
 
   if (items === null) {
-    return <Spinner label={strings.LoadingMessage} />;
+    return <Spinner label={strings.LoadingMessage} ariaLive="polite" />;
   }
 
   if (items.length === 0) {
-    return <div className={styles.noItems}>{strings.NoItemsMessage}</div>;
+    return <div className={styles.noItems} role="status" aria-live="polite">{strings.NoItemsMessage}</div>;
   }
 
   const limitedItems = items.slice(0, props.maxItems);

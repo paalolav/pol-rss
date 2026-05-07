@@ -29,24 +29,42 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
     setCarouselKey((prevKey) => prevKey + 1);
   }, [forceFallback]);
 
+  const totalSlides = items.length;
+
   return (
-    <Swiper 
+    <Swiper
       key={carouselKey} // Use the unique key to force re-render
       modules={[Autoplay]}
-      autoplay={autoscroll ? { delay: delayMs, disableOnInteraction: false } : false}
+      autoplay={autoscroll ? { delay: delayMs, disableOnInteraction: true, pauseOnMouseEnter: true } : false}
       loop={autoscroll}
       slidesPerView={1}
       spaceBetween={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="RSS banner carousel"
     >
       {items.map((item, index) => {
         const imgSrc = getImageSrc(item.imageUrl, fallbackImageUrl, forceFallback);
 
         return (
-          <SwiperSlide key={item.link || item.title} className={styles.bannerSlide}>
+          <SwiperSlide
+            key={item.link || item.title}
+            className={styles.bannerSlide}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${index + 1} of ${totalSlides}`}
+          >
             {imgSrc ? (
-              <img src={imgSrc} alt={item.title} className={styles.bannerImage} onError={(e) => imgError(e, fallbackImageUrl)} />
+              <img
+                src={imgSrc}
+                alt={item.title}
+                className={styles.bannerImage}
+                onError={(e) => imgError(e, fallbackImageUrl)}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+              />
             ) : (
-              <div className={styles.bannerImagePlaceholder}>
+              <div className={styles.bannerImagePlaceholder} role="img" aria-label={item.title}>
                 <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true"></i>
               </div>
             )}

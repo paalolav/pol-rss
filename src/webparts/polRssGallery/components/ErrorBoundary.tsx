@@ -41,7 +41,7 @@ export class RssErrorBoundary extends React.Component<IErrorBoundaryProps, IErro
     const { errorMessage } = this.state;
     
     return (
-      <div className={styles.errorContainer}>
+      <div className={styles.errorContainer} role="alert" aria-live="assertive">
         <div className={styles.errorContent}>
           <i className="ms-Icon ms-Icon--ErrorBadge" aria-hidden="true" />
           <h3>{strings.ErrorLoadingFeed}</h3>
