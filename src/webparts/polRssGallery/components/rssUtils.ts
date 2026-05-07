@@ -39,7 +39,7 @@ export function cleanDescription(raw: string, max = 380): string {
     desc = (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + '…';
   }
 
-  return DOMPurify.sanitize(desc, SAFE_HTML_CONFIG) as string;
+  return DOMPurify.sanitize(desc, SAFE_HTML_CONFIG);
 }
 
 export function resolveImageUrl(rawUrl?: string): string | undefined {
