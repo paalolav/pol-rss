@@ -1,17 +1,35 @@
-# Sikkerheits-tasklist (Dependabot + Sonar)
+# Tasklist — Dependabot, Sonar, arkitektur
 
-Dato: 2026-05-07
+Dato: 2026-05-08
 Status:
-- Dependabot: 52 opne alerts (2 critical, 23 high, 19 medium, 8 low) — uendra
-- SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein
+- Dependabot: 52 opne alerts på `main`. **Etter merge av `spfx-1.22-upgrade`-branch + Swiper 12 → forventa ~3 alerts** (49 av 52 er gulp-stack transitives som forsvinn med heft).
+- SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein.
+- SPFx-versjon: 1.21.1 på main, 1.22.2 på `spfx-1.22-upgrade`-branch (klar til merge etter tenant-workbench-test).
 
-## Action 0 — gjort 2026-05-07 (SonarQube cleanup)
+## Action 0 — gjort 2026-05-07/08
 
-Sett opp Sonar-prosjekt `pol-rss` på http://192.168.1.133:9100 og rydda alle funn:
-
+### Sonar cleanup (07.05)
 - `4b966e1` — herda to ReDoS-merka regex i `rssUtils.ts` (cleanDescription truncation, findImage binary-URL match).
-- `ed5367c` — 6 code smells (cacheService.cache som readonly, BannerCarousel React-key frå index til item.link/title, konsoliderte sp-component-base-import, String.raw + RegExp.exec i rssUtils).
-- `0458840` — gitignore lib/ (build output) og tests/**/.auth/ (Playwright SharePoint-cookies, **må aldri commitast**), avregistrerte 63 build-artefaktar.
+- `ed5367c` — 6 code smells (readonly, React-keys, imports, String.raw, RegExp.exec).
+- `0458840` — gitignore lib/ + tests/**/.auth/ (SharePoint-cookies må aldri commitast). 63 build-artefaktar avregistrerte.
+
+### A11y, ytelse, polish (07.05)
+- `9667aca` — batch 1 (img loading=lazy, decoding=async, autoplay pause-on-hover, ikkje-reaktiv property pane, aria-live på error/empty, carousel landmarks).
+- `be0f8e8` — batch 2 (React.lazy BannerCarousel, cacheService in-flight dedup, abort fetch on unmount, shared layout-helpers, theme via CSS custom props).
+- `8d5f9cd` — DOMPurify-sanitering av RSS-description (XSS).
+- `bbb571f` — scheme allow-list på item.link (XSS).
+- `446d72c` — banner caption forced-colors (HC-mode).
+- `c3e8856` — friendly localized error messages.
+- `4b42d42` — polish (SR-only "opens in new window", invalid-date guard, banner CLS hints, interval slider default).
+
+### Dep-bumps (07.05)
+- `3fb7b40` — Swiper 11 → 12.1.4 (lukkar critical GHSA-hmx5-qpq5-p643 prototype pollution).
+- DOMPurify 3.4.2 ny direkte dep (sanitering).
+
+### SPFx 1.22 upgrade (07–08.05)
+- Branch `spfx-1.22-upgrade`, commit `6489e6f`. Gulp → heft, 7 sp-* pakkar til 1.22.2, TypeScript 5.8, css-loader 7. Verifisert end-to-end: `heft test --clean --production && heft package-solution --production` passerer. `.sppkg` genererast.
+- npm audit-vulns: 135 → 58.
+- Står att: tenant-workbench-røyktest før merge til main.
 
 Re-scan: `sonar-scanner` i prosjektrot. Token i `~/Docker/.env` som `SONAR_TOKEN_POL_RSS`. Dashboard: http://192.168.1.133:9100/dashboard?id=pol-rss.
 
@@ -82,6 +100,58 @@ Dei fleste låste vulns over er i SPFx 1.21.1 sin gamle gulp-stack. SPFx 1.22 br
 
 Estimat: ~1 dagsverk per repo med PnP CLI sin `m365 spfx project upgrade`.
 
+## Action 5 — RSS-proxy / Metapol-tjeneste (open vurdering)
+
+### Bakgrunn
+
+Webdelen fetchar RSS direkte frå klient (SharePoint origin → feed-URL). Kjende problem:
+- **CORS** slår inn på dei fleste offentlege feeds (få har `Access-Control-Allow-Origin: *`).
+- **Defekte/trege endepunkt** synast direkte i UI utan buffer.
+- **Duplisert arbeid** — 1000 brukarar lastar same feed 1000× kvar dag. Ingen sentral cache.
+- **Sanitering på klient** kan omgåast om html-react-parser har CVE.
+- **Auth-keys** for premium feeds må ligge sentralt, ikkje i klient.
+
+### Arkitekturval
+
+| | Cloudflare Worker | Azure Function per kunde | Metapol-hosta proxy |
+|---|---|---|---|
+| Sovereignty (norsk offentleg) | svak (US/global) | sterk (kunde eig) | sterk (norsk drift) |
+| Driftslast for Metapol | minimal | låg per kunde, høg ved skalering (10× ops) | medium (du eig SPOF) |
+| Kostnad | $5/mnd flat | gratis per kunde, time-fee for setup | €5–10/mnd VPS, dekkjer 10+ kundar |
+| Skalerer til 10 kundar | ja | tungt | ja |
+| GDPR/anskaffelse-friksjon | DPA-diskusjon kvar gong | minimal (kunden eig) | éin DPA per kunde |
+
+### Anbefaling
+
+**Metapol-hosta multi-tenant proxy, norsk drift** — Hetzner Helsinki CX22 (€4,51/mnd) eller eksisterande Metapol-VPS. Argument "drive i Norge, GDPR-rein, EHF-faktura" slår teknisk-overlegen edge i denne marknaden.
+
+### Smart trekk: RSS → JSON-normalisering på edge
+
+Webdelen har ~150 LOC i `cleanDescription`, `findImage`, `resolveImageUrl` for å handtere RSS/Atom/RDF/iTunes-kaos. Flytt denne logikken til proxy:
+- DOMPurify, image-extraction, dedup → éin stad
+- Webdelen blir tynn visningskomponent
+- Bug-fix éin stad, alle kundar får det
+
+### Pris-utkast (offentleg sektor, "utan å vere for grisk")
+
+| Tier | Pris/mnd | Inkludert |
+|---|---|---|
+| Setup | 1500 kr eingong | API-key, første feed-konfigurasjon |
+| Standard | 250 kr | Inntil 5 feeds, 5-min cache, sanitering |
+| Pluss | 500 kr | Ubegrensa feeds, 1-min cache, custom transform |
+
+6 kundar = 1500–3000 kr/mnd. Dekkjer VPS, monitoring, og time-løn for vedlikehald.
+
+### Compute-budsjett — Ålesund-skala (~1000 brukarar/dag, intranett-frontside)
+
+Sjå utgreiing under tasklist. Kort versjon: trivielt for ein €5/mnd VPS. Bandbreidd ~150 MB/dag ut til klientar, ~10 MB/dag inn frå feed-kjelder. Hetzner Helsinki har 20 TB/mnd inkludert — 1000× hovudrom. Bottleneck er drift, ikkje compute.
+
+### Første steg (lågrisiko)
+
+Legg til `proxyUrl` + `apiKey` i `IRssFeedWebPartProps` og property pane. Viss `proxyUrl` er sett: send dit. Elles direkte fetch som fallback. ~30 min arbeid. Webdelen blir klar **før** proxy er bygd.
+
 ## Notat
 
-- 35 ucommitterte lokale commits blei pusha av cleanup-subagentane på fleire pol-* / Lye / ask-llm / Synoptik / Tonsofrock repo. Ingenting gått tapt — pusha vidareført. Sjekk `git log origin/main..main` om du har vidare ukommitert eller ulastet arbeid.
+- `spfx-1.22-upgrade` branch klar på origin. Merge etter tenant-workbench-test.
+- Codex (background subagent) hangande på SPFx-upgrade-oppgåva ein time inn — eg plukka opp og fullførte manuelt. Læring: codex er bra på avgrensa kodefiksar, mindre på multi-step iterativ pipeline-debugging.
+- 35 ucommitterte lokale commits blei pusha av cleanup-subagentane på fleire pol-* / Lye / ask-llm / Synoptik / Tonsofrock repo. Ingenting gått tapt — pusha vidareført.
