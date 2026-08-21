@@ -1,8 +1,10 @@
 # Sikkerheits-tasklist (Dependabot + Sonar)
 
-Dato: 2026-05-07
+Dato: 2026-08-21
 Status:
-- Dependabot: 52 opne alerts (2 critical, 23 high, 19 medium, 8 low) — uendra
+- Produksjonsavhengigheiter: `npm audit --omit=dev` = 0 funn
+- Utviklingsverktøy: 114 advisories i SPFx 1.21/Gulp-kjeda — spora i issue #18
+- Repo-scan: `scan-repo` = 0 funn på security-baseline-branchen
 - SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein
 
 ## Action 0 — gjort 2026-05-07 (SonarQube cleanup)
@@ -81,6 +83,31 @@ Desse pakkene er pinned inni Microsoft/PnP-tooling og kan ikkje oppgraderast uta
 Dei fleste låste vulns over er i SPFx 1.21.1 sin gamle gulp-stack. SPFx 1.22 brukar heft (ikkje gulp) og har mindre overflate. Oppgradering vil ikkje gi 0 alerts (Microsoft har framleis transitive vulns), men reduserer omfanget. Sjå pol-embeddbutikk og pol-geoapi sin SPFx 1.22-upgrade i `/Volumes/Documents/GitHub/docs/superpowers/plans/2026-05-07-dependabot-spfx-cleanup.md`.
 
 Estimat: ~1 dagsverk per repo med PnP CLI sin `m365 spfx project upgrade`.
+
+## Action 6 — gjort 2026-08-21 (issue #17, sikkerheitsbaseline)
+
+- Triagerte 44 historiske Gitleaks-funn utan å eksponere verdiar. Dei kollapsar til tre
+  distinkte verdiar: to finst berre i genererte bundle/prompt-kopiar, og éin er ein
+  deterministisk test-fixture. TruffleHog verifiserte null credentials; rotasjon var ikkje
+  nødvendig.
+- Fjerna `ppllm.prompt.txt`, SharePoint debug-output og `.sppkg` frå indeksen. Eksakte
+  `.gitignore`-reglar hindrar at dei kjem tilbake.
+- `.gitleaksignore` inneheld berre dei 44 eksakte commit/path/rule/line-fingerprintane. Ein
+  regresjonstest avviser breie path- eller regelunntak.
+- La til least-privilege GitHub Actions med SHA-pinna actions, full-history checkout,
+  differensiell Gitleaks, låst install, sikkerheitskontrakt, produksjonsaudit, lint og build.
+- Fjerna den ubrukte `@microsoft/sp-adaptive-card-extension-base`-avhengigheita og dermed den
+  sårbare Swiper 8-kjeda. Oppdaterte DOMPurify og støtta transitive versjonar. Både
+  `scan-repo` og produksjonsaudit er reine.
+- Offentleg historikk blei ikkje omskriven. Dei eksakte false-positive fingerprintane bevarer
+  sporbarheit og gjer at nye lekkasjar framleis stoppar CI.
+
+## Action 7 — open (issue #18, SPFx 1.22/Heft)
+
+Den gamle `spfx-1.22-upgrade`-branchen skal ikkje mergast blindt. Replay endringane på nyaste
+`main`, køyr Heft-kontrakten på Node 22, og triager resten av dev-only audit-gjelda utan
+`npm audit fix --force`. Ingen SharePoint-deploy inngår; live rollout krev eiga supervisert
+øving.
 
 ## Notat
 
