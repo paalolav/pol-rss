@@ -5,5 +5,8 @@ lib
 dist
 release
 temp
+ppllm.prompt.txt
+sharepoint/solution/debug/
+sharepoint/solution/*.sppkg
 tests/**/.auth/
 .claude/settings.local.json
