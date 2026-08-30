@@ -9,9 +9,11 @@ dist
 release
 temp
 jest-output
-sharepoint/solution/debug
+sharepoint/solution/debug/
+sharepoint/solution/*.sppkg
 **/*.sppkg
 **/.DS_Store
+ppllm.prompt.txt
 tests/**/.auth/
 .claude/settings.local.json
 .playwright-mcp

@@ -1,14 +1,16 @@
 # Tasklist — Dependabot, Sonar, arkitektur
 
-Dato: 2026-05-08
+Dato: 2026-08-30
 Status:
 - Tryggleiksoppdatering 2026-08-30: branch `chore/security-hardening-spfx-1.23`
   oppgraderer til SPFx 1.23.2, fjernar ubrukt Adaptive Card-avhengnad og gir 0
   produksjonsråd i `npm audit --omit=dev`. Heft bygg, test og pakking passerer lokalt
   på Node 22. Tenant-workbench-røyktest står framleis att før merge/deploy.
-- Dependabot: 52 opne alerts på `main`. **Etter merge av `spfx-1.22-upgrade`-branch + Swiper 12 → forventa ~3 alerts** (49 av 52 er gulp-stack transitives som forsvinn med heft).
+- Security-baseline frå `main` (issue #17) er fletta inn: pinna CI-actions,
+  gitleaks-regresjonstest, artefaktopprydding og produksjonsaudit er vidareførte.
+- Dependabot på `main` blir reindeksert først etter at 1.23.2-branchen er merga.
 - SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein.
-- SPFx-versjon: 1.21.1 på main, 1.22.2 på `spfx-1.22-upgrade`-branch (klar til merge etter tenant-workbench-test).
+- SPFx-versjon: 1.21.1 på `main`; 1.23.2/Heft på kampanjebranchen.
 
 ## Action 0 — gjort 2026-05-07/08
 
@@ -195,7 +197,30 @@ Sjå utgreiing under tasklist. Kort versjon: trivielt for ein €5/mnd VPS. Band
 **Pricing-utkast**: sjå Action 5 over.
 
 
+## Action 6 — gjort 2026-08-21 (issue #17, sikkerheitsbaseline)
 
+- Triagerte 44 historiske Gitleaks-funn utan å eksponere verdiar. Dei kollapsar til tre
+  distinkte verdiar: to finst berre i genererte bundle/prompt-kopiar, og éin er ein
+  deterministisk test-fixture. TruffleHog verifiserte null credentials; rotasjon var ikkje
+  nødvendig.
+- Fjerna `ppllm.prompt.txt`, SharePoint debug-output og `.sppkg` frå indeksen. Eksakte
+  `.gitignore`-reglar hindrar at dei kjem tilbake.
+- `.gitleaksignore` inneheld berre dei 44 eksakte commit/path/rule/line-fingerprintane. Ein
+  regresjonstest avviser breie path- eller regelunntak.
+- La til least-privilege GitHub Actions med SHA-pinna actions, full-history checkout,
+  differensiell Gitleaks, låst install, sikkerheitskontrakt, produksjonsaudit, lint og build.
+- Fjerna den ubrukte `@microsoft/sp-adaptive-card-extension-base`-avhengigheita og dermed den
+  sårbare Swiper 8-kjeda. Oppdaterte DOMPurify og støtta transitive versjonar. Både
+  `scan-repo` og produksjonsaudit er reine.
+- Offentleg historikk blei ikkje omskriven. Dei eksakte false-positive fingerprintane bevarer
+  sporbarheit og gjer at nye lekkasjar framleis stoppar CI.
+
+## Action 7 — open (issue #18, SPFx 1.22/Heft)
+
+Den gamle `spfx-1.22-upgrade`-branchen skal ikkje mergast blindt. Replay endringane på nyaste
+`main`, køyr Heft-kontrakten på Node 22, og triager resten av dev-only audit-gjelda utan
+`npm audit fix --force`. Ingen SharePoint-deploy inngår; live rollout krev eiga supervisert
+øving.
 ## Notat
 
 - `spfx-1.22-upgrade` branch klar på origin. Merge etter tenant-workbench-test.
