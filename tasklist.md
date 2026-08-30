@@ -3,9 +3,10 @@
 Dato: 2026-08-30
 Status:
 - Tryggleiksoppdatering 2026-08-30: branch `chore/security-hardening-spfx-1.23`
-  oppgraderer til SPFx 1.23.2, fjernar ubrukt Adaptive Card-avhengnad og gir 0
-  produksjonsråd i `npm audit --omit=dev`. Heft bygg, test og pakking passerer lokalt
-  på Node 22. Tenant-workbench-røyktest står framleis att før merge/deploy.
+  oppgraderer til SPFx 1.23.2, fjernar ubrukt parser/Adaptive Card-avhengnad og gir 0
+  produksjonssårbarheiter i `npm audit --omit=dev`. Fem applikasjonstestar, tre
+  repository-tryggleikstestar, lint, Heft-bygg og pakking passerer på Node 22 og i
+  GitHub Actions. PR #20 leverer endringa; tenant-røyktest står att før deploy.
 - Security-baseline frå `main` (issue #17) er fletta inn: pinna CI-actions,
   gitleaks-regresjonstest, artefaktopprydding og produksjonsaudit er vidareførte.
 - Dependabot på `main` blir reindeksert først etter at 1.23.2-branchen er merga.
@@ -39,13 +40,18 @@ Status:
 
 Re-scan: `sonar-scanner` i prosjektrot. Token i `~/Docker/.env` som `SONAR_TOKEN_POL_RSS`. Dashboard: http://192.168.1.133:9100/dashboard?id=pol-rss.
 
-## Bakgrunn
+## Historisk bakgrunn — ikkje operativ sjekkliste
+
+Avsnitta Action 1–4 under dokumenterer utgangspunktet før SPFx 1.23.2-kampanjen.
+Pakke-, advisory- og audit-tala er historiske og skal ikkje brukast som noverande
+arbeidsinstruks. Ikkje køyr `npm audit fix` eller `--force`; bruk låst, vurdert
+oppgradering og produksjonsaudit-kontrakten frå PR #20.
 
 Etter `chore(deps): bump fast-xml-parser` (PR #1) blei `fast-xml-parser` promotert frå transitiv til top-level dep. Det utløyste full Dependabot-reindeksering av lockfila, og 51 alerts som tidlegare ikkje var rapportert dukka opp. Tala speglar reell tilstand i `package-lock.json` — ikkje ei forverring etter bumpen.
 
 Mange av alertene er klassiske SPFx-tooling-lockings (gulp/heft/api-extractor) der pakker er pinned i `@microsoft/sp-*`, `@rushstack/*` eller `@pnp/*` og ikkje kan oppgraderast utan å forlate SPFx 1.21.1 (eller vente på upstream-patch frå Microsoft). Andre er fixable med direkte bump.
 
-## Action 1 — Bumpe direkte/aksesserbare pakker
+## Historisk Action 1 — direkte/aksesserbare pakker
 
 | Pakke | Sev | Patched | Notat |
 |---|---|---|---|
@@ -58,17 +64,13 @@ Kommando for å sjå alle alerts i detalj:
 gh api /repos/paalolav/pol-rss/dependabot/alerts?state=open --jq '.[] | {pkg: .dependency.package.name, sev: .security_advisory.severity, summary: .security_advisory.summary, patched: .security_vulnerability.first_patched_version.identifier, manifest: .dependency.manifest_path, html_url}' | jq -s '.'
 ```
 
-## Action 2 — Sjekkbare via `npm audit fix` (transitive)
+## Historisk Action 2 — transitive funn
 
-Køyr:
-```bash
-npm audit fix
-git diff package-lock.json
-```
+Den gamle planen vurderte automatisk `npm audit fix`. Dette er erstatta av eksplisitte
+direkte oppgraderingar, fjerning av ubrukt kode, kontrollert låsefil og manuell
+rekkeviddeanalyse. Produksjonsaudit er no 0; ikkje køyr automatisk eller tvungen rewrite.
 
-Forventa fixar: nokre av webpack 5.104.x, qs 6.14.x, postcss 8.4.31, body-parser 1.20.3, express 4.20.0, send 0.19.0, serve-static 1.16.0, cookie 0.7.0, tmp 0.2.4 — om foreldrepakkane tillèt det.
-
-## Action 3 — SPFx-ecosystem-låste (vent på Microsoft)
+## Historisk Action 3 — SPFx-ecosystem-låste funn
 
 Desse pakkene er pinned inni Microsoft/PnP-tooling og kan ikkje oppgraderast utan å forlate SPFx 1.21.1. Ingen actionable fix tilgjengeleg lokalt — vent på upstream-patch.
 
@@ -100,7 +102,7 @@ Desse pakkene er pinned inni Microsoft/PnP-tooling og kan ikkje oppgraderast uta
 | `yargs-parser` | 1 | med | gulp-cli |
 | `cookie`, `express`, `send`, `serve-static`, `tmp` | 5 | low | gulp dev-server |
 
-## Action 4 — Vurder SPFx 1.22-oppgradering
+## Historisk Action 4 — SPFx 1.22-vurdering
 
 Dei fleste låste vulns over er i SPFx 1.21.1 sin gamle gulp-stack. SPFx 1.22 brukar heft (ikkje gulp) og har mindre overflate. Oppgradering vil ikkje gi 0 alerts (Microsoft har framleis transitive vulns), men reduserer omfanget. Sjå pol-embeddbutikk og pol-geoapi sin SPFx 1.22-upgrade i `/Volumes/Documents/GitHub/docs/superpowers/plans/2026-05-07-dependabot-spfx-cleanup.md`.
 
@@ -156,27 +158,23 @@ Sjå utgreiing under tasklist. Kort versjon: trivielt for ein €5/mnd VPS. Band
 
 ## Open tasks
 
-### Task #1 — `proxyUrl` + `apiKey`-felt i webdelen
+### Task #1 — proxy-design (separat produktavgjerd)
 
-**Mål**: Opne døra for proxy-modus utan å bygge proxyen ennå. Eksisterande direkte-fetch held fram som fallback. Når proxy-tjenesta kjem, treng kundar berre fylle inn URL + nøkkel — ingen ny webdel-deploy.
+**Mål**: Avklar om kunden treng ein autentisert, allowlista RSS-proxy for CORS,
+sentral cache og normalisering. Dette er ikkje del av tryggleikskampanjen.
 
-**Endringar**:
-- `IRssFeedWebPartProps` (i `RssFeedWebPart.ts`): `proxyUrl?: string`, `proxyApiKey?: string`.
-- Property pane: ny seksjon "Proxy (valfritt)" med to `PropertyPaneTextField`. `proxyApiKey` med `type='password'` om mogleg.
-- `RssFeed.tsx` `fetchFeed`: viss `props.proxyUrl` er sett, bygg request mot `${proxyUrl}?url=${encodeURIComponent(props.feedUrl)}` med header `X-Api-Key: ${props.proxyApiKey}`. Elles same direkte-fetch som i dag.
-- Friendly error-mappinga held fram å fungere (HTTP-statusar mappar likt anten kjelde er proxy eller direkte).
-- `ErrorFeedNotFound`/`ErrorFeedServer` dekker proxy-feil naturleg.
-- Localized strings: legg til `ProxyUrlFieldLabel`, `ProxyApiKeyFieldLabel`, `ProxyGroupName` i en-us + nb-no + .d.ts.
+Ein API-nøkkel må ikkje lagrast i SPFx-eigenskapar eller anna klientkode; `password`-felt
+gjer berre verdien visuelt skjult. Bruk Entra-basert brukar-/appautorisasjon eller ein
+annan serverkontrollert modell. Proxyen må ha per-kunde feed-allowlist, SSRF-vern,
+respons-/tidsgrenser, logging utan credentials og fail-closed autorisasjon.
 
 **Definisjon av "ferdig"**:
-- [ ] tsc clean, lint clean
-- [ ] `npm run build` passerer
-- [ ] Sonar 0/0/0/0
-- [ ] Manuell røyktest i tenant workbench: utan `proxyUrl` → fungerer som før. Med `proxyUrl` peika mot ein test-endpoint (echo-server e.l.) → request går dit med rett header.
+- [ ] arkitektur, driftseigar, databehandlaransvar og autentiseringsmodell er godkjende;
+- [ ] SSRF-, CORS-, cache-, rate-limit- og feed-allowlist-testar passerer;
+- [ ] webdelen inneheld ingen hemmelegheit og fungerer uendra utan proxy;
+- [ ] tenanttest med normal og avgrensa brukar passerer.
 
-**Estimat**: ~30–45 min, éin commit.
-
-**Avhengigheiter**: Bør gjerast ETTER `spfx-1.22-upgrade` er merga til main, så ein slepp å konflikthandtere.
+**Avhengigheiter**: SPFx 1.23.2-baseline frå PR #20. Krev produkt- og kundebeslutning.
 
 ---
 
@@ -215,14 +213,13 @@ Sjå utgreiing under tasklist. Kort versjon: trivielt for ein €5/mnd VPS. Band
 - Offentleg historikk blei ikkje omskriven. Dei eksakte false-positive fingerprintane bevarer
   sporbarheit og gjer at nye lekkasjar framleis stoppar CI.
 
-## Action 7 — open (issue #18, SPFx 1.22/Heft)
+## Action 7 — ferdig og erstatta av SPFx 1.23.2
 
-Den gamle `spfx-1.22-upgrade`-branchen skal ikkje mergast blindt. Replay endringane på nyaste
-`main`, køyr Heft-kontrakten på Node 22, og triager resten av dev-only audit-gjelda utan
-`npm audit fix --force`. Ingen SharePoint-deploy inngår; live rollout krev eiga supervisert
-øving.
+Den gamle 1.22-branchen blei ikkje merga blindt. Nyaste `main` og tryggleiksbaseline er
+samla i PR #20 på SPFx 1.23.2/Heft. Produksjonsaudit er 0, testane og pakken er grøne,
+og berre kunde-/tenantkvalifisering står att før deploy.
 ## Notat
 
-- `spfx-1.22-upgrade` branch klar på origin. Merge etter tenant-workbench-test.
+- `spfx-1.22-upgrade` er historisk og skal ikkje mergast; PR #20 erstattar han.
 - Codex (background subagent) hangande på SPFx-upgrade-oppgåva ein time inn — eg plukka opp og fullførte manuelt. Læring: codex er bra på avgrensa kodefiksar, mindre på multi-step iterativ pipeline-debugging.
 - 35 ucommitterte lokale commits blei pusha av cleanup-subagentane på fleire pol-* / Lye / ask-llm / Synoptik / Tonsofrock repo. Ingenting gått tapt — pusha vidareført.
