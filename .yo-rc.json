@@ -7,7 +7,7 @@
       "@microsoft/microsoft-graph-client": "3.0.2",
       "@microsoft/teams-js": "2.24.0"
     },
-    "version": "1.22.2",
+    "version": "1.23.2",
     "useGulp": false,
     "libraryName": "pol-rss-gallery",
     "libraryId": "d9f57c70-7933-4f2b-bd0b-2705e500feb8",

@@ -2,6 +2,10 @@
 
 Dato: 2026-05-08
 Status:
+- Tryggleiksoppdatering 2026-08-30: branch `chore/security-hardening-spfx-1.23`
+  oppgraderer til SPFx 1.23.2, fjernar ubrukt Adaptive Card-avhengnad og gir 0
+  produksjonsråd i `npm audit --omit=dev`. Heft bygg, test og pakking passerer lokalt
+  på Node 22. Tenant-workbench-røyktest står framleis att før merge/deploy.
 - Dependabot: 52 opne alerts på `main`. **Etter merge av `spfx-1.22-upgrade`-branch + Swiper 12 → forventa ~3 alerts** (49 av 52 er gulp-stack transitives som forsvinn med heft).
 - SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein.
 - SPFx-versjon: 1.21.1 på main, 1.22.2 på `spfx-1.22-upgrade`-branch (klar til merge etter tenant-workbench-test).

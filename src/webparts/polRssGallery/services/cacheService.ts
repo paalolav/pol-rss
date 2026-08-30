@@ -52,7 +52,7 @@ export class CacheService {
 
       // If data is stale but not expired, trigger background refresh and return stale data
       if (age < this.config.maxAge) {
-        this.backgroundRefresh(key, fetchFn, staleAfter);
+        void this.backgroundRefresh(key, fetchFn, staleAfter);
         return cached.data as T;
       }
     }
