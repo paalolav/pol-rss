@@ -83,7 +83,7 @@ export default class RssFeedWebPart extends BaseClientSideWebPart<IRssFeedWebPar
     super.onDispose();
   }
 
-  protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: any, newValue: any): void {
+  protected onPropertyPaneFieldChanged(propertyPath: string, oldValue: unknown, newValue: unknown): void {
     if (propertyPath === 'layout' && oldValue !== newValue) {
       this.context.propertyPane.refresh();
     }

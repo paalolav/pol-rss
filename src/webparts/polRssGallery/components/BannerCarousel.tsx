@@ -68,7 +68,7 @@ const BannerCarousel: React.FC<IBannerCarouselProps> = ({ items, autoscroll, int
               />
             ) : (
               <div className={styles.bannerImagePlaceholder} role="img" aria-label={item.title}>
-                <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true"></i>
+                <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true" />
               </div>
             )}
             <div className={styles.bannerCaption}>

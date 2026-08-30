@@ -40,7 +40,7 @@ const ListLayout: React.FC<IListLayoutProps> = ({
           />
         ) : (
           <div className={styles.cardImagePlaceholder}>
-            <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true"></i>
+            <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true" />
           </div>
         )}
         <div className={styles.content}>

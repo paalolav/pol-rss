@@ -23,7 +23,6 @@
     "@microsoft/sp-property-pane": "1.23.2",
     "@microsoft/sp-webpart-base": "1.23.2",
     "dompurify": "^3.4.14",
-    "fast-xml-parser": "^5.7.0",
     "html-react-parser": "^5.2.3",
     "react": "17.0.1",
     "react-dom": "17.0.1",

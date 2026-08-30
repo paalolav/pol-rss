@@ -12,8 +12,8 @@ interface CacheConfig {
 
 export class CacheService {
   private static instance: CacheService;
-  private readonly cache: Map<string, CacheItem<any>>;
-  private readonly inFlight: Map<string, Promise<any>>;
+  private readonly cache: Map<string, CacheItem<unknown>>;
+  private readonly inFlight: Map<string, Promise<unknown>>;
   private config: CacheConfig;
 
   private constructor() {
@@ -52,7 +52,7 @@ export class CacheService {
 
       // If data is stale but not expired, trigger background refresh and return stale data
       if (age < this.config.maxAge) {
-        void this.backgroundRefresh(key, fetchFn, staleAfter);
+        this.backgroundRefresh(key, fetchFn, staleAfter);
         return cached.data as T;
       }
     }
@@ -61,16 +61,14 @@ export class CacheService {
     return this.fetchAndCache(key, fetchFn, staleAfter);
   }
 
-  private async backgroundRefresh<T>(
+  private backgroundRefresh<T>(
     key: string,
     fetchFn: () => Promise<T>,
     staleAfter: number
-  ): Promise<void> {
-    try {
-      await this.fetchAndCache(key, fetchFn, staleAfter);
-    } catch (error) {
+  ): void {
+    this.fetchAndCache(key, fetchFn, staleAfter).catch(error => {
       console.error(`Background refresh failed for key ${key}:`, error);
-    }
+    });
   }
 
   private async fetchAndCache<T>(
