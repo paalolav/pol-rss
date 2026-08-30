@@ -2,16 +2,17 @@
 
 Dato: 2026-08-30
 Status:
-- Tryggleiksoppdatering 2026-08-30: branch `chore/security-hardening-spfx-1.23`
-  oppgraderer til SPFx 1.23.2, fjernar ubrukt parser/Adaptive Card-avhengnad og gir 0
+- Tryggleiksoppdatering 2026-08-30: PR #20 er squash-merga til `main` (`4b884b5`).
+  Endringa oppgraderer til SPFx 1.23.2, fjernar ubrukt parser/Adaptive Card-avhengnad og gir 0
   produksjonssårbarheiter i `npm audit --omit=dev`. Fem applikasjonstestar, tre
   repository-tryggleikstestar, lint, Heft-bygg og pakking passerer på Node 22 og i
-  GitHub Actions. PR #20 leverer endringa; tenant-røyktest står att før deploy.
+  GitHub Actions. Tenant-røyktest står att før deploy.
 - Security-baseline frå `main` (issue #17) er fletta inn: pinna CI-actions,
   gitleaks-regresjonstest, artefaktopprydding og produksjonsaudit er vidareførte.
-- Dependabot på `main` blir reindeksert først etter at 1.23.2-branchen er merga.
+- Dependabot har reindeksert `main`; gamle bot-PR-ar er lukka som erstatta. Dei to
+  opne varsla er moderate og berre i utviklingsverktøy-kjeda.
 - SonarQube: 0 bugs, 0 vulnerabilities, 0 hotspots, 0 code smells — rein.
-- SPFx-versjon: 1.21.1 på `main`; 1.23.2/Heft på kampanjebranchen.
+- SPFx-versjon: 1.23.2/Heft på `main`.
 
 ## Action 0 — gjort 2026-05-07/08
 
@@ -215,9 +216,9 @@ respons-/tidsgrenser, logging utan credentials og fail-closed autorisasjon.
 
 ## Action 7 — ferdig og erstatta av SPFx 1.23.2
 
-Den gamle 1.22-branchen blei ikkje merga blindt. Nyaste `main` og tryggleiksbaseline er
-samla i PR #20 på SPFx 1.23.2/Heft. Produksjonsaudit er 0, testane og pakken er grøne,
-og berre kunde-/tenantkvalifisering står att før deploy.
+Den gamle 1.22-branchen blei ikkje merga blindt. Nyaste tryggleiksbaseline er
+squash-merga via PR #20 på SPFx 1.23.2/Heft. Produksjonsaudit er 0, testane og pakken
+er grøne, og berre kunde-/tenantkvalifisering står att før deploy.
 ## Notat
 
 - `spfx-1.22-upgrade` er historisk og skal ikkje mergast; PR #20 erstattar han.
