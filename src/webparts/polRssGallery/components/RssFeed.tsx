@@ -136,11 +136,11 @@ const RssFeed: React.FC<IRssFeedProps> = (props) => {
   React.useEffect(() => {
     let intervalId: ReturnType<typeof setInterval> | undefined;
 
-    loadFeed();
+    loadFeed().catch(() => undefined);
 
     if (props.autoRefresh && props.refreshInterval > 0) {
       intervalId = setInterval(() => {
-        loadFeed(true);
+        loadFeed(true).catch(() => undefined);
       }, props.refreshInterval * 60 * 1000);
     }
 

@@ -4,8 +4,8 @@ import * as strings from 'RssFeedWebPartStrings';
 
 interface IErrorState {
   hasError: boolean;
-  errorMessage: string | null;
-  errorStack: string | null;
+  errorMessage: string | undefined;
+  errorStack: string | undefined;
 }
 
 interface IErrorBoundaryProps {
@@ -16,15 +16,15 @@ interface IErrorBoundaryProps {
 export class RssErrorBoundary extends React.Component<IErrorBoundaryProps, IErrorState> {
   public state: IErrorState = {
     hasError: false,
-    errorMessage: null,
-    errorStack: null
+    errorMessage: undefined,
+    errorStack: undefined
   };
 
   public static getDerivedStateFromError(error: Error): IErrorState {
     return {
       hasError: true,
       errorMessage: error.message,
-      errorStack: error.stack || null
+      errorStack: error.stack
     };
   }
 

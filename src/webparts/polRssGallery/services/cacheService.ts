@@ -12,8 +12,8 @@ interface CacheConfig {
 
 export class CacheService {
   private static instance: CacheService;
-  private readonly cache: Map<string, CacheItem<any>>;
-  private readonly inFlight: Map<string, Promise<any>>;
+  private readonly cache: Map<string, CacheItem<unknown>>;
+  private readonly inFlight: Map<string, Promise<unknown>>;
   private config: CacheConfig;
 
   private constructor() {
@@ -61,16 +61,14 @@ export class CacheService {
     return this.fetchAndCache(key, fetchFn, staleAfter);
   }
 
-  private async backgroundRefresh<T>(
+  private backgroundRefresh<T>(
     key: string,
     fetchFn: () => Promise<T>,
     staleAfter: number
-  ): Promise<void> {
-    try {
-      await this.fetchAndCache(key, fetchFn, staleAfter);
-    } catch (error) {
-      console.error(`Background refresh failed for key ${key}:`, error);
-    }
+  ): void {
+    this.fetchAndCache(key, fetchFn, staleAfter).catch(() => {
+      console.error('[pol-rss:cache] background refresh failed');
+    });
   }
 
   private async fetchAndCache<T>(
@@ -106,7 +104,7 @@ export class CacheService {
     const now = Date.now();
     
     // Remove expired items
-    for (const [key, item] of this.cache.entries()) {
+    for (const [key, item] of Array.from(this.cache.entries())) {
       if (now - item.timestamp > this.config.maxAge) {
         this.cache.delete(key);
       }

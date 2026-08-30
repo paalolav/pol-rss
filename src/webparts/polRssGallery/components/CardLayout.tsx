@@ -33,7 +33,7 @@ const CardLayout: React.FC<ICardLayoutProps> = ({ items, fallbackImageUrl, force
           />
         ) : (
           <div className={styles.cardImagePlaceholder}>
-            <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true"></i>
+            <i className="ms-Icon ms-Icon--Photo2" aria-hidden="true" />
           </div>
         )}
         <div className={styles.cardBody}>
