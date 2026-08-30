@@ -34,6 +34,7 @@ describe('RSS content security controls', () => {
   test('removes executable description markup and attributes', () => {
     const scriptScheme = ['java', 'script:'].join('');
     const result = cleanDescription(
+      // nosemgrep: javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag -- intentional sanitizer regression payload
       `<p>Safe <a href="${scriptScheme}alert(1)" onclick="alert(1)">link</a></p>` +
         '<script>alert(1)</script><iframe src="https://attacker.example"></iframe>'
     );

@@ -66,8 +66,8 @@ export class CacheService {
     fetchFn: () => Promise<T>,
     staleAfter: number
   ): void {
-    this.fetchAndCache(key, fetchFn, staleAfter).catch(error => {
-      console.error(`Background refresh failed for key ${key}:`, error);
+    this.fetchAndCache(key, fetchFn, staleAfter).catch(() => {
+      console.error('[pol-rss:cache] background refresh failed');
     });
   }
 
