@@ -48,33 +48,35 @@ export function cleanDescription(raw: string, max = 380): string {
   return DOMPurify.sanitize(desc, SAFE_HTML_CONFIG);
 }
 
-export function safeHref(rawUrl?: string): string | undefined {
+function parseHttpUrl(rawUrl?: string): URL | undefined {
   if (!rawUrl) return undefined;
+
   try {
-    const u = new URL(rawUrl);
-    return (u.protocol === 'http:' || u.protocol === 'https:') ? u.toString() : undefined;
+    const url = new URL(rawUrl);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url : undefined;
   } catch {
     return undefined;
   }
 }
 
+export function safeHref(rawUrl?: string): string | undefined {
+  return parseHttpUrl(rawUrl)?.toString();
+}
+
 export function resolveImageUrl(rawUrl?: string): string | undefined {
-  if (!rawUrl?.startsWith('http')) return undefined;
+  const urlObj = parseHttpUrl(rawUrl);
+  if (!urlObj) return undefined;
 
-  try {
-    const urlObj = new URL(rawUrl);
-
-    const inner = urlObj.searchParams.get('url');
-    if (inner?.startsWith('http')) return decodeURIComponent(inner);
-
-    ['utm_source', 'utm_medium', 'utm_campaign'].forEach(p =>
-      urlObj.searchParams.delete(p)
-    );
-
-    return urlObj.toString();
-  } catch {
-    return undefined;
+  const inner = urlObj.searchParams.get('url');
+  if (inner !== null) {
+    return parseHttpUrl(inner)?.toString();
   }
+
+  ['utm_source', 'utm_medium', 'utm_campaign'].forEach(p =>
+    urlObj.searchParams.delete(p)
+  );
+
+  return urlObj.toString();
 }
 export function findImage(item: Element): string | undefined {
   for (const el of Array.from(item.querySelectorAll('*'))) {

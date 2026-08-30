@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/webparts/polRssGallery/components/rssUtils.ts"
+        ],
+        "createdAt": "2026-08-30T10:33:16.375Z",
+        "reason": "False positive: this file parses img tags from RSS markup; React components conditionally render only non-empty image sources."
+      }
+    ]
+  }
+}
