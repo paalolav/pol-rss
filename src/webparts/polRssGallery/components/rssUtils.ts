@@ -7,14 +7,14 @@ const SAFE_HTML_CONFIG: DOMPurify.Config = {
 };
 
 export function getImageSrc(imageUrl?: string, fallbackImageUrl?: string, forceFallback?: boolean): string {
-  return forceFallback || !imageUrl ? fallbackImageUrl || '' : imageUrl;
+  return safeImageSource(forceFallback || !imageUrl ? fallbackImageUrl : imageUrl);
 }
 
 export function imgError(e: React.SyntheticEvent<HTMLImageElement>, fallbackImageUrl?: string): void {
   const el = e.currentTarget;
   if (!el.dataset.failed) {
     el.dataset.failed = '1';
-    el.src = fallbackImageUrl || '';
+    el.src = safeImageSource(fallbackImageUrl);
   }
 }
 
@@ -78,6 +78,13 @@ export function resolveImageUrl(rawUrl?: string): string | undefined {
 
   return urlObj.toString();
 }
+
+function safeImageSource(rawUrl?: string): string {
+  if (!rawUrl) return '';
+  if (/^\/(?!\/)/.test(rawUrl)) return rawUrl;
+  return resolveImageUrl(rawUrl) || '';
+}
+
 export function findImage(item: Element): string | undefined {
   for (const el of Array.from(item.querySelectorAll('*'))) {
     const tag = el.tagName.toLowerCase();

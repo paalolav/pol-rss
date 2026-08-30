@@ -1,4 +1,4 @@
-import { cleanDescription, resolveImageUrl, safeHref } from '../rssUtils';
+import { cleanDescription, getImageSrc, resolveImageUrl, safeHref } from '../rssUtils';
 
 describe('RSS content security controls', () => {
   test('allows only HTTP and HTTPS article links', () => {
@@ -29,6 +29,15 @@ describe('RSS content security controls', () => {
         'https://proxy.example/image?url=httpx%3A%2F%2Fattacker.example%2Ftracker'
       )
     ).toBeUndefined();
+  });
+
+  test('validates configured fallback image sources', () => {
+    expect(getImageSrc(undefined, '/SiteAssets/fallback.jpg')).toBe('/SiteAssets/fallback.jpg');
+    expect(getImageSrc(undefined, 'https://images.example/fallback.jpg')).toBe(
+      'https://images.example/fallback.jpg'
+    );
+    expect(getImageSrc(undefined, '//attacker.example/tracker.gif')).toBe('');
+    expect(getImageSrc(undefined, 'data:text/html,payload')).toBe('');
   });
 
   test('removes executable description markup and attributes', () => {
